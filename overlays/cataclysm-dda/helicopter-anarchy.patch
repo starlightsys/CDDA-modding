@@ -1,0 +1,256 @@
+diff --git a/data/json/proficiencies/misc.json b/data/json/proficiencies/misc.json
+index a2bbc4e..1887cfe 100644
+--- a/data/json/proficiencies/misc.json
++++ b/data/json/proficiencies/misc.json
+@@ -130,14 +130,6 @@
+     "description": "Before the Cataclysm, you were a helicopter pilot.  Now, you just hope you can fly again.",
+     "can_learn": false
+   },
+-  {
+-    "type": "proficiency",
+-    "id": "prof_aircraft_mechanic",
+-    "category": "prof_mechanic",
+-    "name": { "str": "Airframe and Powerplant Mechanic" },
+-    "description": "You've been trained and certified to repair aircraft.  You're not really sure how that could help you survive now.",
+-    "can_learn": false
+-  },
+   {
+     "type": "proficiency",
+     "id": "prof_gem_setting",
+diff --git a/doc/PROFICIENCY_LIST.md b/doc/PROFICIENCY_LIST.md
+index 3dc42c7..533a4a7 100644
+--- a/doc/PROFICIENCY_LIST.md
++++ b/doc/PROFICIENCY_LIST.md
+@@ -88,7 +88,6 @@
+ | prof_bow_master | Master Archer's Form | You have drawn and fired a bow so many times, you probably have a bit of a twist in your spine from it.  You've developed what would once have been a world class understanding of the pose and motion of effective archery. | prof_bow_expert
+ | |
+ | prof_helicopter_pilot | Helicopter Piloting | Before the cataclysm, you were a helicopter pilot.  Now, you just hope you can fly again. | None
+-| prof_aircraft_mechanic | Airframe and Powerplant Mechanic | You've been trained and certified to repair aircraft.  You're not really sure how that could help you survive now. | None
+ | |
+ | prof_elec_soldering | Electronics Soldering | An understanding of the skills and tools needed to create durable, effective soldered electrical connections. | None
+ | prof_electromagnetics | Electromagnetics | A practical working knowledge of electromagnetic fields and their creation and application. | None
+diff --git a/src/activity_item_handling.cpp b/src/activity_item_handling.cpp
+index 22d7f64..1f6f869 100644
+--- a/src/activity_item_handling.cpp
++++ b/src/activity_item_handling.cpp
+@@ -1142,11 +1142,6 @@ static activity_reason_info can_do_activity_there( const activity_id &act, Chara
+                 if( vpindex == -1 || !veh->can_unmount( vpindex ) ) {
+                     continue;
+                 }
+-                // If removing this part would make the vehicle non-flyable, avoid it
+-                if( veh->would_removal_prevent_flyable( *part_elem,
+-                                                        player_character ) ) {
+-                    return activity_reason_info::fail( do_activity_reason::WOULD_PREVENT_VEH_FLYING );
+-                }
+                 // this is the same part that somebody else wants to work on, or already is.
+                 if( std::find( already_working_indexes.begin(), already_working_indexes.end(),
+                                vpindex ) != already_working_indexes.end() ) {
+@@ -1188,10 +1183,6 @@ static activity_reason_info can_do_activity_there( const activity_id &act, Chara
+                 if( !part_elem->is_repairable() ) {
+                     continue;
+                 }
+-                // If repairing this part would make the vehicle non-flyable, avoid it
+-                if( veh->would_repair_prevent_flyable( *part_elem, player_character ) ) {
+-                    return activity_reason_info::fail( do_activity_reason::WOULD_PREVENT_VEH_FLYING );
+-                }
+                 if( std::find( already_working_indexes.begin(), already_working_indexes.end(),
+                                vpindex ) != already_working_indexes.end() ) {
+                     continue;
+diff --git a/src/veh_interact.cpp b/src/veh_interact.cpp
+index 2acafcc..4cd5111 100644
+--- a/src/veh_interact.cpp
++++ b/src/veh_interact.cpp
+@@ -83,8 +83,6 @@ static const itype_id fuel_type_battery( "battery" );
+ static const itype_id itype_battery( "battery" );
+ static const itype_id itype_plut_cell( "plut_cell" );
+ 
+-static const proficiency_id proficiency_prof_aircraft_mechanic( "prof_aircraft_mechanic" );
+-
+ static const quality_id qual_HOSE( "HOSE" );
+ static const quality_id qual_JACK( "JACK" );
+ static const quality_id qual_LIFT( "LIFT" );
+@@ -970,7 +968,6 @@ void veh_interact::do_install()
+ 
+     int &pos = install_info->pos = 0;
+     size_t &tab = install_info->tab = 0;
+-    avatar &player_character = get_avatar();
+ 
+     std::vector<const vpart_info *> &tab_vparts = install_info->tab_vparts;
+ 
+@@ -1015,18 +1012,6 @@ void veh_interact::do_install()
+                 default:
+                     break;
+             }
+-            // Modifying a vehicle with rotors will make in not flightworthy
+-            // (until we've got a better model)
+-            // It can only be the player doing this - an npc won't work well with query_yn
+-            if( veh->would_install_prevent_flyable( *sel_vpart_info, player_character ) ) {
+-                if( query_yn(
+-                        _( "Installing this part will mean that this vehicle is no longer "
+-                           "flightworthy.  Continue?" ) ) ) {
+-                    veh->set_flyable( false );
+-                } else {
+-                    return;
+-                }
+-            }
+             if( veh->is_foldable() && !sel_vpart_info->folded_volume &&
+                 !query_yn( _( "Installing this part will make the vehicle unfoldable. "
+                               " Continue?" ) ) ) {
+@@ -1265,13 +1250,6 @@ void veh_interact::do_repair()
+             }
+         }
+ 
+-        bool would_prevent_flying = veh->would_repair_prevent_flyable( pt, player_character );
+-        if( would_prevent_flying &&
+-            !player_character.has_proficiency( proficiency_prof_aircraft_mechanic ) ) {
+-            nmsg += string_format(
+-                        _( "\n<color_yellow>You require the \"%s\" proficiency to repair this part safely!</color>\n\n" ),
+-                        proficiency_prof_aircraft_mechanic->name() );
+-        }
+ 
+         const nc_color desc_color = pt.is_broken() ? c_dark_gray : c_light_gray;
+         vp.format_description( nmsg, desc_color, getmaxx( w_msg ) - 4 );
+@@ -1285,18 +1263,6 @@ void veh_interact::do_repair()
+         const std::string action = main_context.handle_input();
+         msg.reset();
+         if( ( action == "REPAIR" || action == "CONFIRM" ) && ok ) {
+-            // Modifying a vehicle with rotors will make in not flightworthy (until we've got a better model)
+-            if( would_prevent_flying ) {
+-                // It can only be the player doing this - an npc won't work well with query_yn
+-                if( query_yn(
+-                        _( "Repairing this part will mean that this vehicle is no longer flightworthy.  Continue?" ) ) ) {
+-                    veh->set_flyable( false );
+-                } else {
+-                    nmsg += colorize( _( "You chose not to install this part to keep the vehicle flyable.\n" ),
+-                                      c_light_red );
+-                    ok = false;
+-                }
+-            }
+             if( ok ) {
+                 reason = cant_do( 'r' );
+                 if( !can_repair() ) {
+@@ -1931,16 +1897,6 @@ void veh_interact::do_remove()
+                     break;
+             }
+ 
+-            // Modifying a vehicle with rotors will make in not flightworthy (until we've got a better model)
+-            // It can only be the player doing this - an npc won't work well with query_yn
+-            if( veh->would_removal_prevent_flyable( veh->part( part ), player_character ) ) {
+-                if( query_yn(
+-                        _( "Removing this part will mean that this vehicle is no longer flightworthy.  Continue?" ) ) ) {
+-                    veh->set_flyable( false );
+-                } else {
+-                    return;
+-                }
+-            }
+             const std::vector<npc *> helpers = player_character.get_crafting_helpers();
+             for( const npc *np : helpers ) {
+                 add_msg( m_info, _( "%s helps with this task…" ), np->get_name() );
+diff --git a/src/veh_utils.cpp b/src/veh_utils.cpp
+index faae9f1..78a4735 100644
+--- a/src/veh_utils.cpp
++++ b/src/veh_utils.cpp
+@@ -71,10 +71,6 @@ vehicle_part &most_repairable_part( vehicle &veh, Character &who, bool only_repa
+             continue;
+         }
+ 
+-        if( veh.would_repair_prevent_flyable( vp, who ) ) {
+-            continue;
+-        }
+-
+         if( vp.is_broken() ) {
+             if( who.meets_skill_requirements( info.install_skills ) &&
+                 info.install_requirements().can_make_with_inventory( inv, is_crafting_component ) ) {
+diff --git a/src/vehicle.cpp b/src/vehicle.cpp
+index 67a96fa..575bf04 100644
+--- a/src/vehicle.cpp
++++ b/src/vehicle.cpp
+@@ -114,8 +114,6 @@ static const itype_id itype_water( "water" );
+ static const itype_id itype_water_clean( "water_clean" );
+ static const itype_id itype_water_faucet( "water_faucet" );
+ 
+-static const proficiency_id proficiency_prof_aircraft_mechanic( "prof_aircraft_mechanic" );
+-
+ static const vproto_id vehicle_prototype_none( "none" );
+ 
+ static const zone_type_id zone_type_VEHICLE_PATROL( "VEHICLE_PATROL" );
+@@ -4212,51 +4210,11 @@ bool vehicle::is_flyable() const
+     return flyable;
+ }
+ 
+-void vehicle::set_flyable( bool val )
+-{
+-    flyable = val;
+-}
+-
+ int vehicle::get_z_change() const
+ {
+     return requested_z_change;
+ }
+ 
+-bool vehicle::would_install_prevent_flyable( const vpart_info &vpinfo, const Character &pc ) const
+-{
+-    if( flyable && !rotors.empty() && !( vpinfo.has_flag( "SIMPLE_PART" ) ||
+-                                         vpinfo.has_flag( "AIRCRAFT_REPAIRABLE_NOPROF" ) ) ) {
+-        return !pc.has_proficiency( proficiency_prof_aircraft_mechanic );
+-    } else {
+-        return false;
+-    }
+-}
+-
+-bool vehicle::would_repair_prevent_flyable( const vehicle_part &vp, const Character &pc ) const
+-{
+-    if( flyable && !rotors.empty() ) {
+-        if( vp.info().has_flag( "SIMPLE_PART" ) ||
+-            vp.info().has_flag( "AIRCRAFT_REPAIRABLE_NOPROF" ) ) {
+-            vpart_position vppos = vpart_position( const_cast<vehicle &>( *this ),
+-                                                   index_of_part( const_cast<vehicle_part *>( &vp ) ) );
+-            return !vppos.is_inside();
+-        } else {
+-            return !pc.has_proficiency( proficiency_prof_aircraft_mechanic );
+-        }
+-    } else {
+-        return false;
+-    }
+-}
+-
+-bool vehicle::would_removal_prevent_flyable( const vehicle_part &vp, const Character &pc ) const
+-{
+-    if( flyable && !rotors.empty() && !vp.info().has_flag( "SIMPLE_PART" ) ) {
+-        return !pc.has_proficiency( proficiency_prof_aircraft_mechanic );
+-    } else {
+-        return false;
+-    }
+-}
+-
+ bool vehicle::is_flying_in_air() const
+ {
+     return is_flying;
+@@ -7062,11 +7020,6 @@ int vehicle::damage_direct( map &here, int p, int dmg, damage_type type )
+     dmg -= std::min<int>( dmg, part_info( p ).damage_reduction[ static_cast<int>( type ) ] );
+     int dres = dmg - parts[p].hp();
+     if( mod_hp( parts[ p ], 0 - dmg, type ) ) {
+-        if( is_flyable() && !rotors.empty() && !parts[p].has_flag( VPFLAG_SIMPLE_PART ) ) {
+-            // If we break a part, we can no longer fly the vehicle.
+-            set_flyable( false );
+-        }
+-
+         insides_dirty = true;
+         pivot_dirty = true;
+ 
+diff --git a/src/vehicle.h b/src/vehicle.h
+index 9fd774a..a75aa36 100644
+--- a/src/vehicle.h
++++ b/src/vehicle.h
+@@ -1510,11 +1510,6 @@ class vehicle
+         // Can the vehicle safely fly? E.g. there haven't been any player modifications
+         // of non-simple parts
+         bool is_flyable() const;
+-        void set_flyable( bool val );
+-        // Would interacting with this part prevent the vehicle from being flyable?
+-        bool would_install_prevent_flyable( const vpart_info &vpinfo, const Character &pc ) const;
+-        bool would_removal_prevent_flyable( const vehicle_part &vp, const Character &pc ) const;
+-        bool would_repair_prevent_flyable( const vehicle_part &vp, const Character &pc ) const;
+         /**
+          * Traction coefficient of the vehicle.
+          * 1.0 on road. Outside roads, depends on mass divided by wheel area
