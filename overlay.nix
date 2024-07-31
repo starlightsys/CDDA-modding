@@ -1,3 +1,1 @@
-final: prev: {
-  cataclysm-dda = prev.callPackage ./overlays/cataclysm-dda {};
-}
+final: prev: { cataclysm-dda = prev.callPackage ./overlays/cataclysm-dda { }; }
