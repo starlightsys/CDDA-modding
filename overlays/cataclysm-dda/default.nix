@@ -20,8 +20,8 @@ let
         src = pkgs.fetchFromGitHub {
           owner = "starlightsys";
           repo = "No_Roaches";
-          rev = "f743c6b5891313a50f06b58ec393edc099f22fc0";
-          hash = "sha256-6yNBWlDuuLLJZDnHDp2DkNydl/oCMVKKkcerXAzGFaM=";
+          rev = "fbf221408e8267950d6c4971af7d69c638a3ed66";
+          hash = "sha256-MJqlfrYmzVQcK9Mf5+jZXNbaqszKsB376imaZAs6IzY=";
         };
       };
     };
