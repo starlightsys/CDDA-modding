@@ -1,5 +1,7 @@
 Example overlay for cataclysm-dda that patches the game, adds the one predefined mod and adds a custom mod.
 
+Working as of [nixpkgs rev 693bc46](https://github.com/NixOS/nixpkgs/tree/693bc46d169f5af9c992095736e82c3488bf7dbb).
+
 ## Test build
 
 `./build.sh`
