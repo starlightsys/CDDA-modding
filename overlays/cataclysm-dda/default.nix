@@ -6,9 +6,9 @@
 }:
 let
   patchedCDDA = (cataclysmDDA.git.tiles.override {
-    version = "2024-08-12-2352";
-    rev = "12bb7dae9bf15c6526ead63009569378086dedba";
-    sha256 = "sha256-wc2f62fCoDw+tz43HzmwnmgAjh2T6ggp5r1WGX8luIo=";
+    version = "5006d0de94";
+    rev = "5006d0de948c77dd73fcc46c4cb655f8a70b0b33";
+    sha256 = "sha256-gPqYom8keEzKbQmpV3Qcxmxd1SJ4b5a6fkOcash3phs=";
   }).overrideAttrs (oldAttrs: {
     patches = [
       ./locale-path.patch
