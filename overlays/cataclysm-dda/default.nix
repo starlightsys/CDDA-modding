@@ -11,8 +11,8 @@ let
     sha256 = "sha256-gPqYom8keEzKbQmpV3Qcxmxd1SJ4b5a6fkOcash3phs=";
   }).overrideAttrs (oldAttrs: {
     patches = [
-      ./locale-path.patch
-      ./no-whining.patch
+      ./patches/locale-path.patch
+      ./patches/no-whining.patch
     ];
   });
   customMods =
