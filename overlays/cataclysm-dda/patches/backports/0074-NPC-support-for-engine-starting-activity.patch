@@ -1,0 +1,204 @@
+From 0f81252d3a30856da629210c2b4959f0305a9f72 Mon Sep 17 00:00:00 2001
+From: RenechCDDA <84619419+RenechCDDA@users.noreply.github.com>
+Date: Mon, 5 Aug 2024 11:16:00 -0400
+Subject: [PATCH 074/125] NPC support for engine starting activity
+
+---
+ src/activity_handlers.cpp             | 23 ++++++++++++++---------
+ src/game.cpp                          |  2 +-
+ src/iuse.cpp                          |  2 +-
+ src/vehicle.cpp                       |  6 ++++--
+ src/vehicle.h                         |  4 ++--
+ src/vehicle_move.cpp                  |  1 -
+ src/vehicle_use.cpp                   | 20 +++++++++-----------
+ tests/mapgen_remove_vehicles_test.cpp |  2 +-
+ 8 files changed, 32 insertions(+), 28 deletions(-)
+
+diff --git a/src/activity_handlers.cpp b/src/activity_handlers.cpp
+index 0a1e8904d7..d36eae2fcc 100644
+--- a/src/activity_handlers.cpp
++++ b/src/activity_handlers.cpp
+@@ -2273,30 +2273,35 @@ void activity_handlers::start_engines_finish( player_activity *act, Character *y
+     sfx::do_vehicle_engine_sfx();
+ 
+     if( attempted == 0 ) {
+-        add_msg( m_info, _( "The %s doesn't have an engine!" ), veh->name );
++        you->add_msg_if_player( m_info, _( "The %s doesn't have an engine!" ), veh->name );
+     } else if( non_muscle_attempted > 0 ) {
+         //Some non-muscle engines tried to start
+         if( non_muscle_attempted == non_muscle_started ) {
+             //All of the non-muscle engines started
+-            add_msg( n_gettext( "The %s's engine starts up.",
+-                                "The %s's engines start up.", non_muscle_started ), veh->name );
++            add_msg_if_player_sees( you->pos_bub(), n_gettext( "The %s's engine starts up.",
++                                    "The %s's engines start up.", non_muscle_started ), veh->name );
+         } else if( non_muscle_started > 0 ) {
+             //Only some of the non-muscle engines started
+-            add_msg( n_gettext( "One of the %s's engines start up.",
+-                                "Some of the %s's engines start up.", non_muscle_started ), veh->name );
++            add_msg_if_player_sees( you->pos_bub(), n_gettext( "One of the %s's engines start up.",
++                                    "Some of the %s's engines start up.", non_muscle_started ), veh->name );
+         } else if( non_combustion_started > 0 ) {
+             //Non-combustions "engines" started
+-            add_msg( _( "The %s is ready for movement." ), veh->name );
++            you->add_msg_if_player( _( "The %s is ready for movement." ), veh->name );
+         } else {
+             //All of the non-muscle engines failed
+-            add_msg( m_bad, n_gettext( "The %s's engine fails to start.",
+-                                       "The %s's engines fail to start.", non_muscle_attempted ), veh->name );
++            if( you->is_avatar() ) {
++                add_msg( m_bad, n_gettext( "The %s's engine fails to start.",
++                                           "The %s's engines fail to start.", non_muscle_attempted ), veh->name );
++            } else {
++                add_msg_if_player_sees( you->pos_bub(), n_gettext( "The %s's engine fails to start.",
++                                        "The %s's engines fail to start.", non_muscle_attempted ), veh->name );
++            }
+         }
+     }
+ 
+     if( take_control && !veh->engine_on && !veh->velocity ) {
+         you->controlling_vehicle = false;
+-        add_msg( _( "You let go of the controls." ) );
++        you->add_msg_if_player( _( "You let go of the controls." ) );
+     }
+ }
+ 
+diff --git a/src/game.cpp b/src/game.cpp
+index ff4bd46732..840a546f29 100644
+--- a/src/game.cpp
++++ b/src/game.cpp
+@@ -5530,7 +5530,7 @@ void game::control_vehicle()
+                 u.controlling_vehicle = true;
+                 add_msg( _( "You take control of the %s." ), veh->name );
+             } else {
+-                veh->start_engines( true );
++                veh->start_engines( &u, true );
+             }
+         }
+     }
+diff --git a/src/iuse.cpp b/src/iuse.cpp
+index 4fe9316861..2b46b71f0c 100644
+--- a/src/iuse.cpp
++++ b/src/iuse.cpp
+@@ -7358,7 +7358,7 @@ std::optional<int> iuse::remoteveh( Character *p, item *it, const tripoint &pos
+             g->setremoteveh( veh );
+             p->add_msg_if_player( m_good, _( "You take control of the vehicle." ) );
+             if( !veh->engine_on ) {
+-                veh->start_engines();
++                veh->start_engines( p );
+             }
+         }
+     } else if( choice == 1 ) {
+diff --git a/src/vehicle.cpp b/src/vehicle.cpp
+index e22ecc7cb2..67312d982c 100644
+--- a/src/vehicle.cpp
++++ b/src/vehicle.cpp
+@@ -273,9 +273,8 @@ bool vehicle::player_in_control( const Character &p ) const
+ 
+ bool vehicle::player_is_driving_this_veh() const
+ {
+-    Character *driver = get_driver();
+     // Early out, nobody's driving
+-    if( !driver ) {
++    if( !get_driver() ) {
+         return false;
+     }
+     Character &player_character = get_player_character();
+@@ -3605,6 +3604,9 @@ int64_t vehicle::fuel_left( const itype_id &ftype,
+     //muscle engines have infinite fuel
+     if( ftype == fuel_type_muscle ) {
+         Character *driver = get_driver();
++        if( !driver ) {
++            return fl;
++        }
+         const optional_vpart_position vp = get_map().veh_at( driver->pos_bub() );
+ 
+         //if the engine in the tile is a muscle engine, and someone is ready to control this vehicle
+diff --git a/src/vehicle.h b/src/vehicle.h
+index dfd5b55f36..19e3223829 100644
+--- a/src/vehicle.h
++++ b/src/vehicle.h
+@@ -1017,7 +1017,8 @@ class vehicle
+         // stop all engines
+         void stop_engines();
+         // Attempt to start the vehicle's active engines
+-        void start_engines( bool take_control = false, bool autodrive = false );
++        void start_engines( Character *driver = nullptr, bool take_control = false,
++                            bool autodrive = false );
+ 
+         // Engine backfire, making a loud noise
+         void backfire( const vehicle_part &vp ) const;
+@@ -1398,7 +1399,6 @@ class vehicle
+         Character *get_passenger( int you ) const;
+         bool has_driver() const;
+         // get character that is currently controlling the vehicle's motion
+-        // TODO: Currently always returns player!
+         Character *get_driver() const;
+         // get monster on a boardable part at p
+         monster *get_monster( int p ) const;
+diff --git a/src/vehicle_move.cpp b/src/vehicle_move.cpp
+index c79d16e433..762c7d5043 100644
+--- a/src/vehicle_move.cpp
++++ b/src/vehicle_move.cpp
+@@ -301,7 +301,6 @@ void vehicle::smart_controller_handle_turn( const std::optional<float> &k_tracti
+ 
+     // turn on/off combustion engines when necessary
+     if( !has_electric_engine ) {
+-        Character &player_character = get_player_character();
+         if( !discharge_forbidden_soft && is_stationary && engine_on && !autopilot_on &&
+             !player_is_driving_this_veh() ) {
+             stop_engines();
+diff --git a/src/vehicle_use.cpp b/src/vehicle_use.cpp
+index c4655d0f65..1cb679692e 100644
+--- a/src/vehicle_use.cpp
++++ b/src/vehicle_use.cpp
+@@ -776,7 +776,7 @@ void vehicle::stop_engines()
+     refresh();
+ }
+ 
+-void vehicle::start_engines( const bool take_control, const bool autodrive )
++void vehicle::start_engines( Character *driver, const bool take_control, const bool autodrive )
+ {
+     bool has_engine = std::any_of( engines.begin(), engines.end(), [&]( int idx ) {
+         return parts[ idx ].enabled && !parts[ idx ].is_broken();
+@@ -814,16 +814,14 @@ void vehicle::start_engines( const bool take_control, const bool autodrive )
+         return;
+     }
+ 
+-    Character &player_character = get_player_character();
+-    if( take_control && !player_character.controlling_vehicle ) {
+-        player_character.controlling_vehicle = true;
+-        add_msg( _( "You take control of the %s." ), name );
+-    }
+-    if( !autodrive ) {
+-        player_character.assign_activity( ACT_START_ENGINES, to_moves<int>( start_time ) );
+-        player_character.activity.relative_placement =
+-            starting_engine_position - player_character.pos_bub();
+-        player_character.activity.values.push_back( take_control );
++    if( take_control && driver && !driver->controlling_vehicle ) {
++        driver->controlling_vehicle = true;
++        driver->add_msg_if_player( _( "You take control of the %s." ), name );
++    }
++    if( !autodrive && driver ) {
++        driver->assign_activity( ACT_START_ENGINES, to_moves<int>( start_time ) );
++        driver->activity.relative_placement = starting_engine_position - driver->pos_bub();
++        driver->activity.values.push_back( take_control );
+     }
+     refresh();
+ }
+diff --git a/tests/mapgen_remove_vehicles_test.cpp b/tests/mapgen_remove_vehicles_test.cpp
+index 789668a1d9..1508c19161 100644
+--- a/tests/mapgen_remove_vehicles_test.cpp
++++ b/tests/mapgen_remove_vehicles_test.cpp
+@@ -99,7 +99,7 @@ TEST_CASE( "mapgen_remove_vehicles" )
+     veh->set_owner( get_avatar() );
+     REQUIRE( here.get_vehicles().size() == 1 );
+     here.board_vehicle( start_loc, &get_avatar() );
+-    veh->start_engines( true );
++    veh->start_engines( &get_avatar(), true );
+ 
+     tripoint const test_loc = get_avatar().pos();
+     check_vehicle_still_works( *veh );
+-- 
+2.45.2
+

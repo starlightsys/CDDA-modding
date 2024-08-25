@@ -1,0 +1,27 @@
+From 6935d94a607bb689ec10eca9787b92add6e46607 Mon Sep 17 00:00:00 2001
+From: osuphobia <78858975+osuphobia@users.noreply.github.com>
+Date: Mon, 19 Aug 2024 06:32:53 +0800
+Subject: [PATCH 065/125] fix wont_hit_friend (#75760)
+
+---
+ src/npcmove.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/npcmove.cpp b/src/npcmove.cpp
+index a1ac030171..6bcbd7f430 100644
+--- a/src/npcmove.cpp
++++ b/src/npcmove.cpp
+@@ -2712,6 +2712,10 @@ int npc::confident_throw_range( const item &thrown, Creature *target ) const
+ // Index defaults to -1, i.e., wielded weapon
+ bool npc::wont_hit_friend( const tripoint &tar, const item &it, bool throwing ) const
+ {
++    if( !throwing && it.is_gun() && it.empty() ) {
++        return true;    // Prevent calling nullptr ammo_data
++    }
++
+     if( throwing && rl_dist( pos(), tar ) == 1 ) {
+         return true;    // If we're *really* sure that our aim is dead-on
+     }
+-- 
+2.45.2
+

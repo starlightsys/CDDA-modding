@@ -1,0 +1,233 @@
+From 9ae290774bd97b8e91dbc8c40b4461e170da2b87 Mon Sep 17 00:00:00 2001
+From: klorpa <30924131+klorpa@users.noreply.github.com>
+Date: Wed, 14 Aug 2024 19:14:35 -0500
+Subject: [PATCH 021/125] DictionaryTypos
+
+---
+ data/json/npcs/classes.json             |  2 +-
+ data/json/recipes/practice/melee.json   |  2 +-
+ doc/MARTIALART_JSON.md                  |  4 ++--
+ doc/MUTATIONS.md                        |  4 ++--
+ doc/NPCs.md                             | 14 +++++++-------
+ doc/PORTAL_STORM_BALANCE_AND_DESIGN.md  |  2 +-
+ doc/USER_INTERFACE_AND_ACCESSIBILITY.md |  2 +-
+ doc/WIDGETS.md                          |  6 +++---
+ tools/spell_checker/dictionary.txt      |  7 +++++--
+ 9 files changed, 23 insertions(+), 20 deletions(-)
+
+diff --git a/data/json/npcs/classes.json b/data/json/npcs/classes.json
+index 8148ad7712..88874f5d4b 100644
+--- a/data/json/npcs/classes.json
++++ b/data/json/npcs/classes.json
+@@ -127,7 +127,7 @@
+     "type": "npc_class",
+     "id": "NC_VETERINARIAN",
+     "name": { "str": "Veterinarian" },
+-    "//": "Reasonably, this class should recieve animal-specific medical proficiencies if they're ever added.",
++    "//": "Reasonably, this class should receive animal-specific medical proficiencies if they're ever added.",
+     "job_description": "I'm looking for wounded to help.",
+     "traits": [
+       { "group": "BG_survival_story_STUCK_IN_TOWN" },
+diff --git a/data/json/recipes/practice/melee.json b/data/json/recipes/practice/melee.json
+index df027a8279..f842c21816 100644
+--- a/data/json/recipes/practice/melee.json
++++ b/data/json/recipes/practice/melee.json
+@@ -618,7 +618,7 @@
+     "category": "CC_*",
+     "subcategory": "CSC_*_NESTED",
+     "name": "spears (intermediate)",
+-    "description": "Practice advanced spear moves and accurate thrusts against a training dummy.  It's not glamorous, but spears were the workhorses of armed combat for millenia with good reason.",
++    "description": "Practice advanced spear moves and accurate thrusts against a training dummy.  It's not glamorous, but spears were the workhorses of armed combat for millennia with good reason.",
+     "skill_used": "stabbing",
+     "skills_required": [ [ "melee", 1 ] ],
+     "time": "1 h",
+diff --git a/doc/MARTIALART_JSON.md b/doc/MARTIALART_JSON.md
+index 5fede45d49..d541656421 100644
+--- a/doc/MARTIALART_JSON.md
++++ b/doc/MARTIALART_JSON.md
+@@ -121,7 +121,7 @@
+ 
+ ### Attack vectors
+ 
+-Attack vectors define which (sub)bodypart is used for the attack in question, allow filtering of eligable bodyparts and apply the relevant worn armor's unarmed damage to the attack. Note for the (sub)part to apply its unarmed damage it needs unrestricted natural attacks.
++Attack vectors define which (sub)bodypart is used for the attack in question, allow filtering of eligible bodyparts and apply the relevant worn armor's unarmed damage to the attack. Note for the (sub)part to apply its unarmed damage it needs unrestricted natural attacks.
+ 
+ ```JSON
+ [ 
+@@ -132,7 +132,7 @@ Attack vectors define which (sub)bodypart is used for the attack in question, al
+     "contact_area": [ "hand_fingers_l", "hand_fingers_r" ],  // List of subbodyparts that can be used as a strike surface in the attack using the sbp's armor or intrinsic unarmed damage
+     "strict_limb_definition": false,  // Bool, default false. When true *only* the bodyparts defined above are used for the vector, otherwise similar bodyparts can be used as long as both the contact area and the defined limb are similar, see JSON_INFO.md/Bodyparts for bodypart similarity
+     "armor_bonus": true,              // Bool, default true, defines if the vector takes the unarmed damage bonus of the armor worn on the contact area into account
+-    "required_limb_flags": [ "foo", "bar" ],  // List of character flags required for the bodypart to be eligable for this vector
++    "required_limb_flags": [ "foo", "bar" ],  // List of character flags required for the bodypart to be eligible for this vector
+     "forbidden_limb_flags": [ "foo", "bar" ], // List of character flags that disqualify a limb from being usable by this vector
+     "encumbrance_limit": 15,          // Int, default 100, encumbrance of the limb above this will disqualify it from this vector
+     "bp_hp_limit": 75 ,                // Int, default 10, percent of bodypart limb HP necessary for the limbs to qualify for this vector. For minor (non-main) bodyparts the corresponding main part HP is taken into account.
+diff --git a/doc/MUTATIONS.md b/doc/MUTATIONS.md
+index 47ba81a088..22fc7a1754 100644
+--- a/doc/MUTATIONS.md
++++ b/doc/MUTATIONS.md
+@@ -10,7 +10,7 @@ Traits and mutations are the same thing in DDA's code. The terms are used interc
+ 
+ There are two substances required to mutate: mutagen and primer. All mutagen and primers are handled as vitamins in the code.
+ 
+-Mutagen is the core nutrient, and it's what is required to initate and maintain mutation. Thematically, this is the stuff that stimulates the character's infection and gets them mutating. It comes in a ingestable liquid form (which is toxic and generally a bad idea to drink without further refinement) and an injectable catalyst form (which is much safer and much more powerful).
++Mutagen is the core nutrient, and it's what is required to initiate and maintain mutation. Thematically, this is the stuff that stimulates the character's infection and gets them mutating. It comes in a ingestable liquid form (which is toxic and generally a bad idea to drink without further refinement) and an injectable catalyst form (which is much safer and much more powerful).
+ 
+ Primers do not cause mutations to happen on their own, but instead influence what mutations the player gains. Think of mutagen as a car that can only drive on roads, and each type of primer as a possible road for the car to drive on. Every type of mutation category has an associated primer vitamin, and when mutating, the game will mutate down the category that has the most respective primer present. The car can't drive without any roads, but at the same time, the roads will do nothing without the car. Both nutrients are needed to cause mutation.
+ 
+@@ -44,7 +44,7 @@ The mutation system works in several steps. All time references are in game time
+   * Otherwise, the game chooses a random mutation in that category. This is the target mutation.
+   * If the character has an existing trait that conflicts with the target mutation, the conflicting trait will be removed or downgraded, and nothing else will happen. Otherwise, the player will gain that mutation.
+   * Each mutation attempt can take only one "step". For instance, if the game attempts to mutate towards the Beautiful trait while the character has no beauty-related traits, it would simply give them the Pretty trait, because Pretty is a prerequisite of Beautiful. However, if the character had the Ugly trait, then that trait would be removed and nothing else would happen.
+-  * On a successful mutation, primer of that mutation's category is removed from the character's body. This defaults to 100, but can be overriden on a by-trait basis.
++  * On a successful mutation, primer of that mutation's category is removed from the character's body. This defaults to 100, but can be overridden on a by-trait basis.
+   * Finally, Instability equal to the primer cost is added to the player. Instability is explained in the next section.
+ 5. When the player mutates towards a trait, if they have at least 2200 of the primer tied to that trait's category, attempt to cross the threshold. The game rolls a chance to pass the threshold, which is heavily influenced by how mutated into that category the player is. If the check succeeds, the player gains the threshold mutation and receives a unique message - they have "crossed the threshold".
+ 6. Repeat from step 3 until the character no longer has enough mutagen in their body to continue mutating. The `Changing` trait will be then removed, and the game will begin repeating step 1 once more until the character takes enough mutagen to begin mutating again.
+diff --git a/doc/NPCs.md b/doc/NPCs.md
+index 3521b80653..b5d50383f3 100644
+--- a/doc/NPCs.md
++++ b/doc/NPCs.md
+@@ -73,7 +73,7 @@ Format:
+   ],
+   "shopkeeper_blacklist": "test_blacklist",
+   "restock_interval": "6 days",
+-  "proficiencies": [ "prof_gunsmithing_basic", "prof_spotting" ],         // Optional. Note that prereqs do not need to be defined. NPCs of this class will learn this proficiency *and all pre-requesite proficiencies*.
++  "proficiencies": [ "prof_gunsmithing_basic", "prof_spotting" ],         // Optional. Note that prereqs do not need to be defined. NPCs of this class will learn this proficiency *and all pre-requisite proficiencies*.
+   "traits": [ { "group": "BG_survival_story_EVACUEE" }, { "group": "NPC_starting_traits" }, { "group": "Appearance_demographics" } ]     // Optional
+ }
+ ```
+@@ -1276,7 +1276,7 @@ Examples:
+     { "math": [ "result", "=", "x + y" ] },
+     "//2": "u_z is the variable z on the alpha talker (avatar)",
+     { "math": [ "result", "=", "( x + y ) * u_z" ] },
+-    "//3": "n_crazyness is the variable crazyness on the beta talker (npc)",
++    "//3": "n_crazyness is the variable craziness on the beta talker (npc)",
+     { "math": [ "n_crazyness * 2", ">=", "( x + y ) * u_z" ] },
+ ```
+ 
+@@ -1341,9 +1341,9 @@ _some functions support array arguments or kwargs, denoted with square brackets
+ | energy(`s`/`v`)    |  ✅   |   ❌  | u, n  | Return a numeric value (in millijoules) for an energy string (see [Units](JSON_INFO.md#units)).<br/><br/>Example:<br/>`{ "math": [ "u_val('power')", "-=", "energy('25 kJ')" ] }`|
+ | faction_like(`s`/`v`)<br/>faction_respect(`s`/`v`)<br/>faction_trust(`s`/`v`)    |   ✅   |   ❌  | N/A<br/>(global)  | Return the like/respect/trust value a faction has for the avatar.<br/>Argument is faction ID.<br/><br/>Example:<br/>`"condition": { "math": [ "faction_like('hells_raiders') < -60" ] }`|
+ | field_strength(`s`/`v`)    |   ✅   |   ❌  | u, n, global  | Return the strength of a field on the tile.<br/>Argument is field ID.<br/><br/>Optional kwargs:<br/> `location`: `v` - center search on this location<br/><br/>The `location` kwarg is mandatory in the global scope.<br/><br/>Examples:<br/>`"condition": { "math": [ "u_field_strength('fd_blood')", ">", "5" ] }`<br/><br/>`"condition": { "math": [ "field_strength('fd_blood_insect', 'location': u_search_loc)", ">", "5" ] }`|
+-| has_flag(`s`/`v`) | ✅ | ❌ | u, n | Check whether the actor has a flag. Meant to be used as condition for ternaries. Arguemnt is trait ID.<br/><br/> Example:<br/>`"condition": { "math": [ "u_blorg", "=", "u_has_flag('MUTATION_TRESHOLD') ? 100 : 15" ] }`|
+-| has_trait(`s`/`v`)    |  ✅   |   ❌  | u, n  | Check whether the actor has a trait. Meant to be used as condition for ternaries. Arguemnt is trait ID.<br/><br/> Example:<br/>`"condition": { "math": [ "u_blorg", "=", "u_has_trait('FEEBLE') ? 100 : 15" ] }`|
+-| has_proficiency(`s`/`v`)    |  ✅   |   ❌  | u, n  | Check whether the actor has a proficiency. Meant to be used as condition for ternaries. Arguemnt is proficiency ID.<br/><br/> Example:<br/>`"condition": { "math": [ "u_blorg", "=", "u_has_proficiency('prof_intro_biology') ? 100 : 15" ] }`|
++| has_flag(`s`/`v`) | ✅ | ❌ | u, n | Check whether the actor has a flag. Meant to be used as condition for ternaries. Argument is trait ID.<br/><br/> Example:<br/>`"condition": { "math": [ "u_blorg", "=", "u_has_flag('MUTATION_TRESHOLD') ? 100 : 15" ] }`|
++| has_trait(`s`/`v`)    |  ✅   |   ❌  | u, n  | Check whether the actor has a trait. Meant to be used as condition for ternaries. Argument is trait ID.<br/><br/> Example:<br/>`"condition": { "math": [ "u_blorg", "=", "u_has_trait('FEEBLE') ? 100 : 15" ] }`|
++| has_proficiency(`s`/`v`)    |  ✅   |   ❌  | u, n  | Check whether the actor has a proficiency. Meant to be used as condition for ternaries. Argument is proficiency ID.<br/><br/> Example:<br/>`"condition": { "math": [ "u_blorg", "=", "u_has_proficiency('prof_intro_biology') ? 100 : 15" ] }`|
+ | has_var(`v`)    |  ✅   |   ❌  | g  | Check whether the variable is defined. Meant to be used as condition for ternaries.<br/><br/> Example:<br/>`"condition": { "math": [ "u_blorg", "=", "has_var(fancy_var) ? fancy_var : 15" ] }`|
+ | hp(`s`/`v`)    |  ✅   |   ✅  | u, n  | Return or set the characters hp. Argument is bodypart ID. For special values `ALL`, `ALL_MAJOR`, `ALL_MINOR`, get hp sum of all/major/minor bodyparts or set hp of all/major/minor bodyparts.<br/><br/>For items, returns current amount of damage required to destroy item.<br/><br/>Example:<br/>`"condition": { "math": [ "hp('torso')", ">", "100"] }`|
+ | hp_max(`s`/`v`)    |  ✅   |   ❌  | u, n  | Return the characters max amount of hp on a body part.<br/>Argument is bodypart ID.<br/> For items, returns max amount of damage required to destroy item.<br/><br/>Example:<br/>`"condition": { "math": [ "u_hp_max('torso')", ">=", "100"] }`|
+@@ -1414,7 +1414,7 @@ These can be read or written to with `val()`.
+ | `mana` | ✅ | Current mana. |
+ | `mana_max` | ❌ | Max mana. |
+ | `mana_percentage` | ❌ | Current mana as percent. |
+-| `morale` | ✅* | The current morale. Assigment only works for monsters. |
++| `morale` | ✅* | The current morale. Assignment only works for monsters. |
+ | `npc_anger` | ✅ | Current anger level towards the avatar |
+ | `npc_fear` | ✅ | Current fear towards the avatar |
+ | `npc_trust` | ✅ | Current trust the npc places in the avatar |
+@@ -1431,7 +1431,7 @@ These can be read or written to with `val()`.
+ | `sold` | ✅ | Amount of money the avatar has sold the Character |
+ | `stamina` | ✅ | Current stamina level. |
+ | `stim` | ✅ | Current stim level. |
+-| `strength`<br/>`dexterity`<br/>`intelligence`<br/>`pereception` | ✅ | Current attributes |
++| `strength`<br/>`dexterity`<br/>`intelligence`<br/>`perception` | ✅ | Current attributes |
+ | `strength_base`<br/>`dexterity_base`<br/>`intelligence_base`<br/>`perception_base` | ✅ | Base attributes |
+ | `strength_bonus`<br/>`dexterity_bonus`<br/>`intelligence_bonus`<br/>`pereception_bonus` | ✅ | Bonus attributes |
+ | `thirst` | ✅ | Current thirst. |
+diff --git a/doc/PORTAL_STORM_BALANCE_AND_DESIGN.md b/doc/PORTAL_STORM_BALANCE_AND_DESIGN.md
+index aaba263400..6b82d4312b 100644
+--- a/doc/PORTAL_STORM_BALANCE_AND_DESIGN.md
++++ b/doc/PORTAL_STORM_BALANCE_AND_DESIGN.md
+@@ -43,7 +43,7 @@ Passive examples include stuff like:
+ * Giant appendages, similarly creatures with no senses, however these ones are much more dangerous if you do get into melee with them.
+ 
+ ### `Active`
+-These events represent goal 2 in the entry above. This is where the designs can get more awful. These entities should be actively trying to sabotage, disrupt, and destroy the player. This doesn't mean they should be strong combatants but it does mean they should be able to percieve, track and follow the player.  These effects should *only* happen if you have built up `ire` and should cost `ire` to generate.
++These events represent goal 2 in the entry above. This is where the designs can get more awful. These entities should be actively trying to sabotage, disrupt, and destroy the player. This doesn't mean they should be strong combatants but it does mean they should be able to perceive, track and follow the player.  These effects should *only* happen if you have built up `ire` and should cost `ire` to generate.
+ 
+ Active examples include stuff like:
+ * The Person, a clairvoyant entity that attempts to follow you into buildings and on touching you causes nightmares and hallucinations
+diff --git a/doc/USER_INTERFACE_AND_ACCESSIBILITY.md b/doc/USER_INTERFACE_AND_ACCESSIBILITY.md
+index 683491de84..b621e717ec 100644
+--- a/doc/USER_INTERFACE_AND_ACCESSIBILITY.md
++++ b/doc/USER_INTERFACE_AND_ACCESSIBILITY.md
+@@ -23,7 +23,7 @@ creating the ImGui window itself, but any widgets (i.e. text boxes, tables, inpu
+ fields) must be created using the correct function under the `ImGui` namespace.
+ Examples of creating any ImGui widget can be found in `src/third-party/imgui_demo.cpp`
+ 
+-Good examples of implementating an ImGui-based UI in cataclysm:
++Good examples of implementing an ImGui-based UI in cataclysm:
+ 
+ - `demo_ui` a minimal example (about 80 lines) in `main_menu.cpp` added in
+ [PR#72171](https://github.com/CleverRaven/Cataclysm-DDA/pull/72171)
+diff --git a/doc/WIDGETS.md b/doc/WIDGETS.md
+index 3048ef6e6f..29d65b7017 100644
+--- a/doc/WIDGETS.md
++++ b/doc/WIDGETS.md
+@@ -601,9 +601,9 @@ If you have a `text` style widget that has no other options for what to display,
+ 
+ ## fill
+ 
+-For "graph" widgets with more than two sybols, different ways of filling up the graph become
++For "graph" widgets with more than two symbols, different ways of filling up the graph become
+ possible.  The method is specified with the "fill" field. By default the "bucket" fill method is
+-used, but there is also a "pool" method described helow.
++used, but there is also a "pool" method described below.
+ 
+ With "bucket" fill, positions are filled like a row of buckets, using all symbols in the first
+ position before beginning to fill the next position.  This is like the classic 5-bar HP meter.
+@@ -969,7 +969,7 @@ In the example above, the widget would print out the following text:
+ # Variable ranges
+ 
+ Widgets using a numeric "var" (those without a `_text` suffix) have a predetermined absolute range
+-(minimum and maximum), as well as a predermined normal value or range.  These limits are not
++(minimum and maximum), as well as a predetermined normal value or range.  These limits are not
+ customizable in widget JSON, but knowing about them will make it easier to understand how "graph"
+ widgets are drawn, and how the "colors" list is mapped to the variable's numeric range.
+ 
+diff --git a/tools/spell_checker/dictionary.txt b/tools/spell_checker/dictionary.txt
+index 6d24de5b40..6e49c8a34b 100644
+--- a/tools/spell_checker/dictionary.txt
++++ b/tools/spell_checker/dictionary.txt
+@@ -455,7 +455,8 @@ Bahá
+ Baha'i
+ Bahá'í
+ Baha'is
+-Bahamanain
++Bahamanian
++Bahamian
+ Baha'u'llah
+ Bahá'u'lláh
+ Bahman
+@@ -1178,6 +1179,7 @@ coipo
+ coipos
+ Col
+ colada
++Colombian
+ Colrain
+ Columbia
+ Columbian
+@@ -3861,7 +3863,7 @@ Milinda
+ milkfat
+ Milkor
+ Millbury
+-millenia
++millennia
+ Millie
+ Millis
+ Millville
+@@ -5030,6 +5032,7 @@ Remington
+ remodulator
+ Remy
+ rended
++René
+ renfaire
+ renfaires
+ renfield
+-- 
+2.45.2
+

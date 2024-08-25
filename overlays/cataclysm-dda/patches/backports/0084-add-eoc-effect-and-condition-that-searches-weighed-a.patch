@@ -1,0 +1,384 @@
+From 4bd95a264de95d71c44dcb3fbe6bef47cb49e9c8 Mon Sep 17 00:00:00 2001
+From: Anton Simakov <67688115+GuardianDll@users.noreply.github.com>
+Date: Tue, 20 Aug 2024 20:37:42 +0200
+Subject: [PATCH 084/125] add eoc effect and condition, that searches weighed
+ amount of items in your inventory (#75631)
+
+* add eoc effect and condition, that searches weighed amount of items in your inventory
+
+* Update src/condition.cpp
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+* satisfy clang
+
+---------
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+---
+ .../npcs/tacoma_ranch/NPC_ranch_foreman.json  |  24 ++-
+ doc/EFFECT_ON_CONDITION.md                    | 146 ++++++++++++++++++
+ src/condition.cpp                             |  40 +++++
+ src/npctalk.cpp                               |  73 +++++++++
+ 4 files changed, 280 insertions(+), 3 deletions(-)
+
+diff --git a/data/json/npcs/tacoma_ranch/NPC_ranch_foreman.json b/data/json/npcs/tacoma_ranch/NPC_ranch_foreman.json
+index eb969be449..e5b69d85f6 100644
+--- a/data/json/npcs/tacoma_ranch/NPC_ranch_foreman.json
++++ b/data/json/npcs/tacoma_ranch/NPC_ranch_foreman.json
+@@ -204,11 +204,18 @@
+     "id": "MISSION_RANCH_FOREMAN_2",
+     "type": "mission_definition",
+     "name": { "str": "Find 25 Blankets" },
+-    "goal": "MGOAL_FIND_ITEM",
++    "goal": "MGOAL_CONDITION",
++    "goal_condition": {
++      "u_has_items_sum": [
++        { "item": "blanket", "amount": 25 },
++        { "item": "fur_blanket", "amount": 25 },
++        { "item": "down_blanket", "amount": 25 },
++        { "item": "blanket_weighted", "amount": 25 },
++        { "item": "electric_blanket", "amount": 25 }
++      ]
++    },
+     "difficulty": 5,
+     "value": 50000,
+-    "item": "blanket",
+-    "count": 25,
+     "origins": [ "ORIGIN_SECONDARY" ],
+     "followup": "MISSION_RANCH_FOREMAN_3",
+     "dialogue": {
+@@ -261,6 +268,17 @@
+           ],
+           "place_npcs": [ { "class": "ranch_construction_2", "x": 19, "y": 8 } ]
+         }
++      ],
++      "effect": [
++        {
++          "u_consume_item_sum": [
++            { "item": "blanket", "amount": 25 },
++            { "item": "fur_blanket", "amount": 25 },
++            { "item": "down_blanket", "amount": 25 },
++            { "item": "blanket_weighted", "amount": 25 },
++            { "item": "electric_blanket", "amount": 25 }
++          ]
++        }
+       ]
+     }
+   },
+diff --git a/doc/EFFECT_ON_CONDITION.md b/doc/EFFECT_ON_CONDITION.md
+index 2707366100..3c04494e4c 100644
+--- a/doc/EFFECT_ON_CONDITION.md
++++ b/doc/EFFECT_ON_CONDITION.md
+@@ -642,6 +642,73 @@ check do you have 3 manuals in inventory
+ { "u_has_item_category": "manuals", "count": 3 }
+ ```
+ 
++
++
++### `u_has_items_sum`, `npc_has_items_sum`
++- type: array of pairs, pair is string or [variable object](##variable-object) and int or [variable object](##variable-object)
++- return true if alpha or beta talker has enough items from the list
++- `item` is an item that should be checked;
++- `amount` is amount of items that should be found
++- may be used in pair with `_consume_item_sum`
++
++#### Valid talkers:
++
++| Avatar | Character | NPC | Monster |  Furniture | Item |
++| ------ | --------- | --------- | ---- | ------- | --- | 
++| ✔️ | ✔️ | ✔️ | ❌ | ❌ | ❌ |
++
++#### Examples
++check do you have 10 blankets of any type in the list
++```json
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TEST",
++    "condition": {
++      "u_has_items_sum": [
++        { "item": "blanket", "amount": 10 },
++        { "item": "blanket_fur", "amount": 10 },
++        { "item": "electric_blanket", "amount": 10 }
++      ]
++    },
++    "effect": [ { "u_message": "true" } ],
++    "false_effect": [ { "u_message": "false" } ]
++  },
++```
++
++Check do you have enough blankets to cover required amount (for example, it return true if you have 5 `blanket` and 10 `electric_blanket` (each contribute 50% to the desired amount))
++```json
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TEST",
++    "condition": {
++      "u_has_items_sum": [
++        { "item": "blanket", "amount": 10 },
++        { "item": "blanket_fur", "amount": 15 },
++        { "item": "electric_blanket", "amount": 20 }
++      ]
++    },
++    "effect": [ { "u_message": "true" } ],
++    "false_effect": [ { "u_message": "false" } ]
++  },
++```
++
++Variables are also supported
++```json
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TEST",
++    "condition": {
++      "u_has_items_sum": [
++        { "item": { "global_val": "foo" }, "amount": { "math": "20 + 2" } },
++        { "item": "blanket_fur", "amount": 15 },
++        { "item": "electric_blanket", "amount": 20 }
++      ]
++    },
++    "effect": [ { "u_message": "true" } ],
++    "false_effect": [ { "u_message": "false" } ]
++  },
++```
++
+ ### `u_has_bionics`, `npc_has_bionics`
+ - type: string or [variable object](##variable-object)
+ - return true if alpha or beta talker has specific bionic; `ANY` can be used to return true if any bionic is presented
+@@ -3419,6 +3486,85 @@ removes morale type, delivered by `morale_id`
+ ```
+ 
+ 
++
++#### `u_consume_item_sum`, `npc_consume_item_sum`
++Consumes all items you have in your inventory, treating count as weight
++Effect does not validate do player actually has enough items to consume, use `_has_items_sum`
++See examples for more info
++
++| Syntax | Optionality | Value  | Info |
++| ------ | ----------- | ------ | ---- | 
++| "u_unset_flag" / "npc_unset_flag" | **mandatory** | array of pairs, in pair is string or [variable object](##variable-object) | runs the effect |
++| "item"  | **mandatory** | string or [variable object](##variable-object) | id of item that should be removed |
++| "amount"  | **mandatory** | int or [variable object](##variable-object) | amount of items or charges that should be removed |
++
++##### Valid talkers:
++
++| Avatar | Character | NPC | Monster |  Furniture | Item |
++| ------ | --------- | --------- | ---- | ------- | --- | 
++| ✔️ | ✔️ | ✔️ | ❌ | ❌ | ❌ |
++
++##### Examples
++Consume 10 blankets. Effect allows to be consumed any item, so in this case player may have 3 `blanket`, 2 `blanket_fur`, and 5 `electric_blanket`, and effect would consume all of it
++```json
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TEST",
++    "effect": [
++      {
++        "u_consume_item_sum": [
++          { "item": "blanket", "amount": 10 },
++          { "item": "blanket_fur", "amount": 10 },
++          { "item": "electric_blanket", "amount": 10 }
++        ]
++      }
++    ]
++  },
++```
++Effect is order dependant, meaning first entry in json would be consumed first, then second and so on.  Having 5 `blanket`, 10 `blanket_fur` and 5 `electric_blanket` would result in 5 `blanket` and 5 `blanket_fur` being consumed
++
++
++Variable `amount` is also supported. In this case amount would be also treated as the weight;  In the next example, having 10 `blanket`, 10 `blanket_fur` and 10 `electric_blanket` would be treated as covering 100% of requirement, 10 `blanket` delivering 40%, 10 `blanket_fur` delivering another 40%, and 10 `electric_blanket` delivering the last 20%
++```json
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TEST",
++    "effect": [
++      {
++        "u_consume_item_sum": [
++          { "item": "blanket", "amount": 25 },
++          { "item": "blanket_fur", "amount": 25 },
++          { "item": "electric_blanket", "amount": 50 }
++        ]
++      }
++    ]
++  },
++```
++Because of how variable amount is calculated, it is recommended to put the values with the smallest `amount` on the top;  It would prevent code overshooting, as:
++```c++
++ // example: we have 99 blankets and 1 blanket_fur
++ // json below would result in 99 blankets and 1 blanket_fur consumed
++{ "item": "blanket", "amount": 100 }, { "item": "blanket_fur", "amount": 2 }
++
++// this json, however, would result in 1 blanket_fur and 50 blanket consumed
++{ "item": "blanket_fur", "amount": 2 }, { "item": "blanket", "amount": 100 }
++```
++
++Variables are also supported
++```json
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TEST",
++    "effect": [
++      {
++        "u_consume_item_sum": [
++          { "item": { "global_val": "foo" }, "amount": { "math": "20 + 2" } }
++        ]
++      }
++    ]
++  },
++```
++
+ #### `u_add_faction_trust`
+  Your character gains trust with the speaking NPC's faction, which affects which items become available for trading from shopkeepers of that faction. Can be used only in `talk_topic`, as the code relies on the NPC you talk with to obtain info about it's faction
+ 
+diff --git a/src/condition.cpp b/src/condition.cpp
+index bb9fd9d45a..65ac523556 100644
+--- a/src/condition.cpp
++++ b/src/condition.cpp
+@@ -867,6 +867,45 @@ conditional_t::func f_has_items( const JsonObject &jo, const std::string_view me
+     }
+ }
+ 
++conditional_t::func f_has_items_sum( const JsonObject &jo, const std::string_view member,
++                                     bool is_npc )
++{
++    std::vector<std::pair<str_or_var, dbl_or_var>> item_and_amount;
++
++    for( const JsonObject jsobj : jo.get_array( member ) ) {
++        const str_or_var item = get_str_or_var( jsobj.get_member( "item" ), "item", true );
++        const dbl_or_var amount = get_dbl_or_var( jsobj, "amount", true, 1 );
++        item_and_amount.emplace_back( item, amount );
++    }
++    return [item_and_amount, is_npc]( dialogue & d ) {
++        add_msg_debug( debugmode::DF_TALKER, "using _has_items_sum:" );
++
++        itype_id item_to_find;
++        double percent = 0.0f;
++        double count_desired;
++        double count_present;
++        double charges_present;
++        double total_present;
++        for( const auto &pair : item_and_amount ) {
++            item_to_find = itype_id( pair.first.evaluate( d ) );
++            count_desired = pair.second.evaluate( d );
++            count_present = d.actor( is_npc )->get_amount( item_to_find );
++            charges_present = d.actor( is_npc )->charges_of( item_to_find );
++            total_present = std::max( count_present, charges_present );
++            percent += total_present / count_desired;
++
++            add_msg_debug( debugmode::DF_TALKER,
++                           "item: %s, count_desired: %f, count_present: %f, charges_present: %f, total_present: %f, percent: %f",
++                           item_to_find.str(), count_desired, count_present, charges_present, total_present, percent );
++
++            if( percent >= 1 ) {
++                return true;
++            }
++        }
++        return false;
++    };
++}
++
+ conditional_t::func f_has_item_with_flag( const JsonObject &jo, std::string_view member,
+         bool is_npc )
+ {
+@@ -2454,6 +2493,7 @@ parsers = {
+     {"u_has_item", "npc_has_item", jarg::member, &conditional_fun::f_has_item },
+     {"u_has_item_with_flag", "npc_has_item_with_flag", jarg::member, &conditional_fun::f_has_item_with_flag },
+     {"u_has_items", "npc_has_items", jarg::member, &conditional_fun::f_has_items },
++    {"u_has_items_sum", "npc_has_items_sum", jarg::array, &conditional_fun::f_has_items_sum },
+     {"u_has_item_category", "npc_has_item_category", jarg::member, &conditional_fun::f_has_item_category },
+     {"u_has_bionics", "npc_has_bionics", jarg::member, &conditional_fun::f_has_bionics },
+     {"u_has_any_effect", "npc_has_any_effect", jarg::array, &conditional_fun::f_has_any_effect },
+diff --git a/src/npctalk.cpp b/src/npctalk.cpp
+index 018be822b3..dc332b8da1 100644
+--- a/src/npctalk.cpp
++++ b/src/npctalk.cpp
+@@ -3439,6 +3439,78 @@ talk_effect_fun_t::func f_consume_item( const JsonObject &jo, std::string_view m
+     };
+ }
+ 
++talk_effect_fun_t::func f_consume_item_sum( const JsonObject &jo, std::string_view member,
++        const std::string_view, bool is_npc )
++{
++    // Only after i implemented it, i realised it is a bad way to make it
++    // What it should be is an expansion of f_run_inv_eocs
++    // that allow to pick multiple ids and limit it to some amount of it
++
++    std::vector<std::pair<str_or_var, dbl_or_var>> item_and_amount;
++
++    for( const JsonObject jsobj : jo.get_array( member ) ) {
++        const str_or_var item = get_str_or_var( jsobj.get_member( "item" ), "item", true );
++        const dbl_or_var amount = get_dbl_or_var( jsobj, "amount", true, 1 );
++        item_and_amount.emplace_back( item, amount );
++    }
++
++    return [item_and_amount, is_npc]( dialogue & d ) {
++        add_msg_debug( debugmode::DF_TALKER, "using _consume_item_sum:" );
++
++        itype_id item_to_remove;
++        double percent = 0.0f;
++        double count_desired;
++        double count_present;
++        double charges_present;
++
++        for( const auto &pair : item_and_amount ) {
++            item_to_remove = itype_id( pair.first.evaluate( d ) );
++            count_desired = pair.second.evaluate( d );
++            count_present = d.actor( is_npc )->get_amount( item_to_remove );
++            charges_present = d.actor( is_npc )->charges_of( item_to_remove );
++            if( charges_present > count_present ) {
++                percent += charges_present / count_desired;
++                // if percent is equal or less than 1, it is safe to remove all charges_present
++                // otherwise loop to remove charges one by one
++                if( percent <= 1 ) {
++                    d.actor( is_npc )->use_charges( item_to_remove, charges_present, true );
++
++                    add_msg_debug( debugmode::DF_TALKER,
++                                   "removing item: %s, count_desired: %f, charges_present: %f, percent: %f, removing all",
++                                   item_to_remove.c_str(), count_desired, charges_present, percent );
++                } else {
++                    percent -= charges_present / count_desired;
++                    while( percent < 1.0f ) {
++                        percent += 1 / count_desired;
++                        d.actor( is_npc )->use_charges( item_to_remove, 1, true );
++                        add_msg_debug( debugmode::DF_TALKER,
++                                       "removing item: %s, count_desired: %f, charges_present: %f, percent: %f, removing one by one",
++                                       item_to_remove.c_str(), count_desired, charges_present, percent );
++                    }
++                }
++            } else {
++                percent += count_present / count_desired;
++                if( percent <= 1 ) {
++                    d.actor( is_npc )->use_amount( item_to_remove, count_present );
++                    add_msg_debug( debugmode::DF_TALKER,
++                                   "removing item: %s, count_desired: %f, count_present: %f, percent: %f, removing all",
++                                   item_to_remove.c_str(), count_desired, count_present, percent );
++                } else {
++                    percent -= count_present / count_desired;
++                    while( percent < 1.0f ) {
++                        percent += 1 / count_desired;
++                        d.actor( is_npc )->use_amount( item_to_remove, 1 );
++
++                        add_msg_debug( debugmode::DF_TALKER,
++                                       "removing item: %s, count_desired: %f, count_present: %f, percent: %f, removing one by one",
++                                       item_to_remove.c_str(), count_desired, count_present, percent );
++                    }
++                }
++            }
++        }
++    };
++}
++
+ talk_effect_fun_t::func f_remove_item_with( const JsonObject &jo, std::string_view member,
+         const std::string_view, bool is_npc )
+ {
+@@ -6641,6 +6713,7 @@ parsers = {
+     { "u_unset_flag", "npc_unset_flag", jarg::member, &talk_effect_fun::f_unset_flag },
+     { "u_activate", "npc_activate", jarg::member, &talk_effect_fun::f_activate },
+     { "u_consume_item", "npc_consume_item", jarg::member, &talk_effect_fun::f_consume_item },
++    { "u_consume_item_sum", "npc_consume_item_sum", jarg::array, &talk_effect_fun::f_consume_item_sum },
+     { "u_remove_item_with", "npc_remove_item_with", jarg::member, &talk_effect_fun::f_remove_item_with },
+     { "u_bulk_trade_accept", "npc_bulk_trade_accept", jarg::member, &talk_effect_fun::f_bulk_trade_accept },
+     { "u_bulk_donate", "npc_bulk_donate", jarg::member, &talk_effect_fun::f_bulk_trade_accept },
+-- 
+2.45.2
+

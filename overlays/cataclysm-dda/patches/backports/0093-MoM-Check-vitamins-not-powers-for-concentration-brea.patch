@@ -1,0 +1,228 @@
+From 636c54a6fb4666e5448d279efd40a946d93d6cbc Mon Sep 17 00:00:00 2001
+From: Standing-Storm <120433252+Standing-Storm@users.noreply.github.com>
+Date: Wed, 21 Aug 2024 22:35:38 -0500
+Subject: [PATCH 093/125] [MoM] Check vitamins not powers for concentration
+ breakers  (#75795)
+
+* Check vitamins not powers
+
+* Update data/mods/MindOverMatter/effectoncondition/eoc_misc.json
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+* Update data/mods/MindOverMatter/effectoncondition/eoc_misc.json
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+* Also account for trait bonuses when checking for concentration breaking when channeling
+
+* Add jmath
+
+---------
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+---
+ .../effectoncondition/eoc_misc.json           | 75 +------------------
+ .../eoc_on_power_use_events.json              | 39 ++--------
+ data/mods/MindOverMatter/jmath.json           |  6 ++
+ 3 files changed, 15 insertions(+), 105 deletions(-)
+
+diff --git a/data/mods/MindOverMatter/effectoncondition/eoc_misc.json b/data/mods/MindOverMatter/effectoncondition/eoc_misc.json
+index 61164935d5..7a3978aa81 100644
+--- a/data/mods/MindOverMatter/effectoncondition/eoc_misc.json
++++ b/data/mods/MindOverMatter/effectoncondition/eoc_misc.json
+@@ -106,30 +106,7 @@
+             { "compare_string": [ "psi_stunned", { "context_val": "effect" } ] }
+           ]
+         },
+-        {
+-          "or": [
+-            { "u_has_effect": "effect_biokin_overcome_pain" },
+-            { "u_has_effect": "effect_biokin_climate_control" },
+-            { "u_has_effect": "effect_biokin_hammerhand" },
+-            { "u_has_effect": "effect_biokin_enhance_mobility" },
+-            { "u_has_effect": "effect_clair_night_eyes" },
+-            { "u_has_effect": "effect_clair_speed_reader" },
+-            { "u_has_effect": "effect_electrokin_hacking_interface" },
+-            { "u_has_effect": "effect_electrokin_personal_battery" },
+-            { "u_has_effect": "effect_photokin_light_local" },
+-            { "u_has_effect": "effect_photokin_light_barrier" },
+-            { "u_has_effect": "effect_photokinetic_radio" },
+-            { "u_has_effect": "effect_pyrokinetic_fire_tool" },
+-            { "u_has_effect": "effect_pyrokinetic_torch_weld" },
+-            { "u_has_effect": "effect_pyrokinetic_cloak" },
+-            { "u_has_effect": "effect_telekinetic_strength" },
+-            { "u_has_effect": "effect_telekinetic_vehicle_lift" },
+-            { "u_has_effect": "effect_telekinetic_levitation" },
+-            { "u_has_effect": "effect_telepathic_learning_bonus" },
+-            { "u_has_effect": "effect_telepathic_morale" },
+-            { "u_has_effect": "effect_vita_health" }
+-          ]
+-        }
++        { "math": [ "u_vitamin('vitamin_maintained_powers')", ">=", "1" ] }
+       ]
+     },
+     "effect": [
+@@ -152,30 +129,7 @@
+             { "compare_string": [ "downed", { "context_val": "effect" } ] }
+           ]
+         },
+-        {
+-          "or": [
+-            { "u_has_effect": "effect_biokin_overcome_pain" },
+-            { "u_has_effect": "effect_biokin_climate_control" },
+-            { "u_has_effect": "effect_biokin_hammerhand" },
+-            { "u_has_effect": "effect_biokin_enhance_mobility" },
+-            { "u_has_effect": "effect_clair_night_eyes" },
+-            { "u_has_effect": "effect_clair_speed_reader" },
+-            { "u_has_effect": "effect_electrokin_hacking_interface" },
+-            { "u_has_effect": "effect_electrokin_personal_battery" },
+-            { "u_has_effect": "effect_photokin_light_local" },
+-            { "u_has_effect": "effect_photokin_light_barrier" },
+-            { "u_has_effect": "effect_photokinetic_radio" },
+-            { "u_has_effect": "effect_pyrokinetic_fire_tool" },
+-            { "u_has_effect": "effect_pyrokinetic_torch_weld" },
+-            { "u_has_effect": "effect_pyrokinetic_cloak" },
+-            { "u_has_effect": "effect_telekinetic_strength" },
+-            { "u_has_effect": "effect_telekinetic_vehicle_lift" },
+-            { "u_has_effect": "effect_telekinetic_levitation" },
+-            { "u_has_effect": "effect_telepathic_learning_bonus" },
+-            { "u_has_effect": "effect_telepathic_morale" },
+-            { "u_has_effect": "effect_vita_health" }
+-          ]
+-        }
++        { "math": [ "u_vitamin('vitamin_maintained_powers')", ">=", "1" ] }
+       ]
+     },
+     "effect": [
+@@ -265,30 +219,7 @@
+             { "compare_string": [ "effect_psi_null_unbound", { "context_val": "effect" } ] }
+           ]
+         },
+-        {
+-          "or": [
+-            { "u_has_effect": "effect_biokin_overcome_pain" },
+-            { "u_has_effect": "effect_biokin_climate_control" },
+-            { "u_has_effect": "effect_biokin_hammerhand" },
+-            { "u_has_effect": "effect_biokin_enhance_mobility" },
+-            { "u_has_effect": "effect_clair_night_eyes" },
+-            { "u_has_effect": "effect_clair_speed_reader" },
+-            { "u_has_effect": "effect_electrokin_hacking_interface" },
+-            { "u_has_effect": "effect_electrokin_personal_battery" },
+-            { "u_has_effect": "effect_photokin_light_local" },
+-            { "u_has_effect": "effect_photokin_light_barrier" },
+-            { "u_has_effect": "effect_photokinetic_radio" },
+-            { "u_has_effect": "effect_pyrokinetic_fire_tool" },
+-            { "u_has_effect": "effect_pyrokinetic_torch_weld" },
+-            { "u_has_effect": "effect_pyrokinetic_cloak" },
+-            { "u_has_effect": "effect_telekinetic_strength" },
+-            { "u_has_effect": "effect_telekinetic_vehicle_lift" },
+-            { "u_has_effect": "effect_telekinetic_levitation" },
+-            { "u_has_effect": "effect_telepathic_learning_bonus" },
+-            { "u_has_effect": "effect_telepathic_morale" },
+-            { "u_has_effect": "effect_vita_health" }
+-          ]
+-        }
++        { "math": [ "u_vitamin('vitamin_maintained_powers')", ">=", "1" ] }
+       ]
+     },
+     "effect": [ { "run_eocs": [ "EOC_POWER_MAINTENANCE_CONCENTRATION_CHECK" ] } ]
+diff --git a/data/mods/MindOverMatter/effectoncondition/eoc_on_power_use_events.json b/data/mods/MindOverMatter/effectoncondition/eoc_on_power_use_events.json
+index c00f563a26..d33bad9a50 100644
+--- a/data/mods/MindOverMatter/effectoncondition/eoc_on_power_use_events.json
++++ b/data/mods/MindOverMatter/effectoncondition/eoc_on_power_use_events.json
+@@ -541,13 +541,7 @@
+   {
+     "type": "effect_on_condition",
+     "id": "EOC_POWER_MAINTENANCE_PLUS_ONE",
+-    "condition": {
+-      "math": [
+-        "u_vitamin('vitamin_maintained_powers')",
+-        ">=",
+-        "( u_val('intelligence') / 4) + (u_bonus_concentration_powers) + (concentration_trait_bonuses())"
+-      ]
+-    },
++    "condition": { "math": [ "u_vitamin('vitamin_maintained_powers')", ">=", "concentration_calculations()" ] },
+     "effect": [
+       {
+         "u_message": "It's taking you a lot of concentration to maintain your powers.  You're not sure you'll be able to do it for very long.",
+@@ -561,13 +555,7 @@
+   {
+     "type": "effect_on_condition",
+     "id": "EOC_POWER_MAINTENANCE_MINUS_ONE",
+-    "condition": {
+-      "math": [
+-        "u_vitamin('vitamin_maintained_powers')",
+-        "==",
+-        "( u_val('intelligence') / 4) + (u_bonus_concentration_powers) + (concentration_trait_bonuses()) + 1"
+-      ]
+-    },
++    "condition": { "math": [ "u_vitamin('vitamin_maintained_powers')", "==", "concentration_calculations() + 1" ] },
+     "effect": [
+       { "u_message": "As you stop concentrating, your mind clears a bit.  It's easier to think now.", "type": "good" },
+       { "u_lose_effect": "effect_psi_intense_concentration" },
+@@ -580,22 +568,9 @@
+     "id": "EOC_POWER_MAINTENANCE_CONCENTRATION_CHECK",
+     "condition": {
+       "and": [
++        { "math": [ "u_vitamin('vitamin_maintained_powers')", ">", "concentration_calculations()" ] },
+         {
+-          "math": [
+-            "u_vitamin('vitamin_maintained_powers')",
+-            ">",
+-            "( u_val('intelligence') / 4) + (u_bonus_concentration_powers) + (concentration_trait_bonuses())"
+-          ]
+-        },
+-        {
+-          "x_in_y_chance": {
+-            "x": {
+-              "math": [
+-                "((u_vitamin('vitamin_maintained_powers')) / (( u_val('intelligence') / 4) + (u_bonus_concentration_powers) + (concentration_trait_bonuses()))) * 5"
+-              ]
+-            },
+-            "y": 100
+-          }
++          "x_in_y_chance": { "x": { "math": [ "(u_vitamin('vitamin_maintained_powers') / max(concentration_calculations(),1)) * 5" ] }, "y": 100 }
+         }
+       ]
+     },
+@@ -606,7 +581,7 @@
+         "math": [
+           "u_vitamin('vitamin_psionic_drain')",
+           "+=",
+-          "rng( 3,8 ) * (u_vitamin('vitamin_maintained_powers')) / (( u_val('intelligence') / 4) + (u_bonus_concentration_powers) + (concentration_trait_bonuses()))"
++          "rng( 3,8 ) * (u_vitamin('vitamin_maintained_powers')) / concentration_calculations()"
+         ]
+       },
+       {
+@@ -691,9 +666,7 @@
+     "condition": {
+       "and": [
+         { "test_eoc": "EOC_CONDITION_SPELLCASTING_FINISH_TRAIT_AND_SCHOOL_LIST" },
+-        {
+-          "math": [ "u_vitamin('vitamin_maintained_powers')", ">=", "( u_val('intelligence') / 4) + (u_bonus_concentration_powers)" ]
+-        }
++        { "math": [ "u_vitamin('vitamin_maintained_powers')", ">=", "concentration_calculations()" ] }
+       ]
+     },
+     "effect": [ { "run_eocs": "EOC_POWER_MAINTENANCE_CONCENTRATION_CHECK" } ]
+diff --git a/data/mods/MindOverMatter/jmath.json b/data/mods/MindOverMatter/jmath.json
+index 0861b955c3..64e1392356 100644
+--- a/data/mods/MindOverMatter/jmath.json
++++ b/data/mods/MindOverMatter/jmath.json
+@@ -53,6 +53,12 @@
+     "num_args": 0,
+     "return": "(u_has_trait('CONCENTRATION_GOOD')) + (u_has_trait('CONCENTRATION_BAD') ? -1 : 0) + (u_has_trait('INT_ALPHA')) + (u_has_trait('NOMAD2') ? -1 : 0) + (u_has_trait('NOMAD3') ? -1 : 0) + (u_has_trait('CONCENTRATION_DEBUG') ? 50 : 0) + (u_has_proficiency('prof_concentration_basic')) + (u_has_proficiency('prof_concentration_intermediate')) + (u_has_proficiency('prof_concentration_master')) + (u_effect_intensity('hallu') > 0 ? -1 : 0) + (u_effect_intensity('winded') > 0 ? -2 : 0) + (u_effect_intensity('nausea') > 0 ? -1 : 0) + (u_effect_intensity('nausea') > 3 ? -1 : 0) +  (u_effect_intensity('cold') > 1 ? -1 : 0) + (u_effect_intensity('hot') > 1 ? -1 : 0) + (u_effect_intensity('asthma') > 0 ? -3 : 0) + (u_effect_intensity('datura') > 0 ? -3 : 0)"
+   },
++  {
++    "type": "jmath_function",
++    "id": "concentration_calculations",
++    "num_args": 0,
++    "return": "(u_val('intelligence') / 4) + u_bonus_concentration_powers + concentration_trait_bonuses()"
++  },
+   {
+     "type": "jmath_function",
+     "id": "contemplation_factor",
+-- 
+2.45.2
+

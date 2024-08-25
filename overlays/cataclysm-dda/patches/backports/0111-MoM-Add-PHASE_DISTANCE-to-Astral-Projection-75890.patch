@@ -1,0 +1,132 @@
+From d86500f2cdd02e05d663fc35fa1561baf98dff1c Mon Sep 17 00:00:00 2001
+From: Standing-Storm <120433252+Standing-Storm@users.noreply.github.com>
+Date: Fri, 23 Aug 2024 12:40:38 -0500
+Subject: [PATCH 111/125] [MoM] Add PHASE_DISTANCE to Astral Projection
+ (#75890)
+
+* Add PHASE_DISTANCE to Astral Projection
+
+* Remove custom wall-passing power
+---
+ .../effects/effects_psionic.json              | 10 ++++++-
+ data/mods/MindOverMatter/obsolete/powers.json | 29 +++++++++++++++++++
+ .../MindOverMatter/powers/clairsentience.json | 29 -------------------
+ .../powers/clairsentience_eoc.json            |  1 -
+ 4 files changed, 38 insertions(+), 31 deletions(-)
+
+diff --git a/data/mods/MindOverMatter/effects/effects_psionic.json b/data/mods/MindOverMatter/effects/effects_psionic.json
+index a0977f076f..f51efc54be 100644
+--- a/data/mods/MindOverMatter/effects/effects_psionic.json
++++ b/data/mods/MindOverMatter/effects/effects_psionic.json
+@@ -860,7 +860,15 @@
+         "values": [
+           { "value": "MOVE_COST", "multiply": -0.96 },
+           { "value": "EVASION", "add": 1 },
+-          { "value": "REGEN_STAMINA", "multiply": -1 }
++          { "value": "REGEN_STAMINA", "multiply": -1 },
++          {
++            "value": "PHASE_DISTANCE",
++            "add": {
++              "math": [
++                "( 1 + ( u_spell_level('clair_astral_projection') * 0.15 ) * (scaling_factor(u_val('intelligence') ) ) ) * u_nether_attunement_power_scaling"
++              ]
++            }
++          }
+         ]
+       }
+     ],
+diff --git a/data/mods/MindOverMatter/obsolete/powers.json b/data/mods/MindOverMatter/obsolete/powers.json
+index bf6d89ddd4..07eb3f167b 100644
+--- a/data/mods/MindOverMatter/obsolete/powers.json
++++ b/data/mods/MindOverMatter/obsolete/powers.json
+@@ -26,6 +26,35 @@
+       ]
+     }
+   },
++  {
++    "id": "clair_astral_projection_passwall",
++    "type": "SPELL",
++    "name": "[Ψ]Pass Through Wall",
++    "description": "Walls are no barrier to a body of pure spirit.",
++    "message": "",
++    "teachable": false,
++    "valid_targets": [ "ground" ],
++    "spell_class": "CLAIRSENTIENT",
++    "skill": "metaphysics",
++    "flags": [
++      "PSIONIC",
++      "NO_FAIL",
++      "NON_MAGICAL",
++      "SILENT",
++      "NO_HANDS",
++      "TARGET_TELEPORT",
++      "IGNORE_WALLS",
++      "NO_PROJECTILE",
++      "NO_LEGS",
++      "NO_EXPLOSION_SFX"
++    ],
++    "effect": "short_range_teleport",
++    "shape": "blast",
++    "min_range": 2,
++    "max_range": 2,
++    "energy_source": "STAMINA",
++    "base_energy_cost": 100
++  },
+   {
+     "id": "telepathic_fear_extra",
+     "type": "SPELL",
+diff --git a/data/mods/MindOverMatter/powers/clairsentience.json b/data/mods/MindOverMatter/powers/clairsentience.json
+index 9b172c345b..7ac86bbff7 100644
+--- a/data/mods/MindOverMatter/powers/clairsentience.json
++++ b/data/mods/MindOverMatter/powers/clairsentience.json
+@@ -539,35 +539,6 @@
+     "energy_increment": -125,
+     "base_casting_time": 6000
+   },
+-  {
+-    "id": "clair_astral_projection_passwall",
+-    "type": "SPELL",
+-    "name": "[Ψ]Pass Through Wall",
+-    "description": "Walls are no barrier to a body of pure spirit.",
+-    "message": "",
+-    "teachable": false,
+-    "valid_targets": [ "ground" ],
+-    "spell_class": "CLAIRSENTIENT",
+-    "skill": "metaphysics",
+-    "flags": [
+-      "PSIONIC",
+-      "NO_FAIL",
+-      "NON_MAGICAL",
+-      "SILENT",
+-      "NO_HANDS",
+-      "TARGET_TELEPORT",
+-      "IGNORE_WALLS",
+-      "NO_PROJECTILE",
+-      "NO_LEGS",
+-      "NO_EXPLOSION_SFX"
+-    ],
+-    "effect": "short_range_teleport",
+-    "shape": "blast",
+-    "min_range": 2,
+-    "max_range": 2,
+-    "energy_source": "STAMINA",
+-    "base_energy_cost": 100
+-  },
+   {
+     "id": "clair_astral_projection_return",
+     "type": "SPELL",
+diff --git a/data/mods/MindOverMatter/powers/clairsentience_eoc.json b/data/mods/MindOverMatter/powers/clairsentience_eoc.json
+index a7e48d0ecc..d77b33efa4 100644
+--- a/data/mods/MindOverMatter/powers/clairsentience_eoc.json
++++ b/data/mods/MindOverMatter/powers/clairsentience_eoc.json
+@@ -148,7 +148,6 @@
+       { "u_message": "As you meditate, you feel your spirit slipping free from your body.", "type": "good" },
+       { "u_spawn_item": "body_astral_projection", "suppress_message": true },
+       { "u_spawn_item": "item_clair_astral_projection_cord", "suppress_message": true, "force_equip": true },
+-      { "math": [ "u_spell_level('clair_astral_projection_passwall')", "=", "0" ] },
+       { "math": [ "u_spell_level('clair_astral_projection_return')", "=", "0" ] }
+     ]
+   },
+-- 
+2.45.2
+

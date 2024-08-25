@@ -1,0 +1,26 @@
+From 4270474d345220edcd1b29752189d035a9429ece Mon Sep 17 00:00:00 2001
+From: NetSysFire <59517351+NetSysFire@users.noreply.github.com>
+Date: Thu, 15 Aug 2024 23:59:04 +0200
+Subject: [PATCH 032/125] fix desert region mod
+
+---
+ data/mods/desert_region/overmap/desert_overmap_terrain.json | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/data/mods/desert_region/overmap/desert_overmap_terrain.json b/data/mods/desert_region/overmap/desert_overmap_terrain.json
+index 01cce82f0f..875d278323 100644
+--- a/data/mods/desert_region/overmap/desert_overmap_terrain.json
++++ b/data/mods/desert_region/overmap/desert_overmap_terrain.json
+@@ -123,7 +123,8 @@
+     ],
+     "name": "canyon",
+     "sym": "V",
+-    "color": "light_gray"
++    "color": "light_gray",
++    "see_cost": "full_high"
+   },
+   {
+     "type": "overmap_terrain",
+-- 
+2.45.2
+

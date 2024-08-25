@@ -1,0 +1,62 @@
+From 59e20aee1b9226b61524e6164243b4e436bdfe4d Mon Sep 17 00:00:00 2001
+From: OromisElf <oromis.der.lehrer.eragons@freenet.de>
+Date: Mon, 19 Aug 2024 00:34:46 +0200
+Subject: [PATCH 066/125] Homullus alchemy (#75714)
+
+* Illuminated Alchemy Perk uses
+
+creates one of the recipes you should be able to learn from that Perk
+
+* added mirror to item description
+---
+ data/mods/Xedra_Evolved/items/alchemy.json   |  2 +-
+ data/mods/Xedra_Evolved/recipes/alchemy.json | 21 ++++++++++++++++++++
+ 2 files changed, 22 insertions(+), 1 deletion(-)
+
+diff --git a/data/mods/Xedra_Evolved/items/alchemy.json b/data/mods/Xedra_Evolved/items/alchemy.json
+index 201f0950b3..dbb5ab227d 100644
+--- a/data/mods/Xedra_Evolved/items/alchemy.json
++++ b/data/mods/Xedra_Evolved/items/alchemy.json
+@@ -482,7 +482,7 @@
+     "type": "COMESTIBLE",
+     "comestible_type": "MED",
+     "name": { "str_sp": "Imbuement of Parchment" },
+-    "description": ".",
++    "description": "While looking in a mirror Faewild and Dreamdross were ground to dust.  With the remains of the fair, and united with a dollop of fae, and human blood.  The resulting mixture will eventually dissolve into what almost looks like liquid porcelain.",
+     "weight": "50 g",
+     "volume": "2 ml",
+     "price": "150 cent",
+diff --git a/data/mods/Xedra_Evolved/recipes/alchemy.json b/data/mods/Xedra_Evolved/recipes/alchemy.json
+index 28d08d9016..a3254a75b2 100644
+--- a/data/mods/Xedra_Evolved/recipes/alchemy.json
++++ b/data/mods/Xedra_Evolved/recipes/alchemy.json
+@@ -424,5 +424,26 @@
+       [ [ "batrachian_sample", 1 ], [ "rabbit_sample", 1 ] ],
+       [ [ "water", 2 ] ]
+     ]
++  },
++  {
++    "type": "recipe",
++    "activity_level": "LIGHT_EXERCISE",
++    "result": "doll_imbuement",
++    "category": "CC_XEDRA",
++    "subcategory": "CSC_XEDRA_ALCHEMY",
++    "skill_used": "deduction",
++    "skills_required": [ [ "deduction", 5 ], [ "spellcraft", 5 ] ],
++    "difficulty": 3,
++    "time": "55 m",
++    "flags": [ "SECRET" ],
++    "tools": [ [ [ "mirror", -1 ] ], [ [ "mortar_pestle", -1 ] ] ],
++    "components": [
++      [ [ "blood", 1 ] ],
++      [ [ "fae_blood", 1 ] ],
++      [ [ "life_extension_potion", 1 ] ],
++      [ [ "homullus_sample", 5 ] ],
++      [ [ "faewild", 55 ] ],
++      [ [ "scrap_dreamdross", 55 ] ]
++    ]
+   }
+ ]
+-- 
+2.45.2
+

@@ -1,0 +1,280 @@
+From 99bff80369ab9b0c6162bc5f3f4001f74495d0a0 Mon Sep 17 00:00:00 2001
+From: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+Date: Mon, 19 Aug 2024 00:32:33 +0200
+Subject: [PATCH 064/125] Remove flu shots from bathrooms and kitchen tongs
+ from hardware stores (#75723)
+
+* vaccines in bathrooms
+
+* tongs in hardware stores
+
+* Update data/json/itemgroups/Drugs_Tobacco_Alcohol/drugs.json
+
+* lint the linty
+
+* Update mansion.json
+
+---------
+
+Co-authored-by: Maleclypse <54345792+Maleclypse@users.noreply.github.com>
+---
+ data/json/itemgroups/Drugs_Tobacco_Alcohol/drugs.json  | 8 ++++++--
+ data/json/itemgroups/Locations_MapExtras/mansion.json  | 4 ++--
+ data/json/itemgroups/collections_domestic.json         | 2 +-
+ data/json/itemgroups/tools.json                        | 1 -
+ data/json/mapgen_palettes/basement.json                | 8 ++++----
+ data/json/mapgen_palettes/cabin.json                   | 2 +-
+ data/json/mapgen_palettes/house_general_abandoned.json | 4 ++--
+ data/json/mapgen_palettes/house_general_palette.json   | 8 ++++----
+ data/json/mapgen_palettes/house_w_palette.json         | 2 +-
+ data/json/mapgen_palettes/lodge_palette.json           | 2 +-
+ data/json/mapgen_palettes/lumberyard.json              | 2 +-
+ data/json/mapgen_palettes/nuclear_plant_palette.json   | 2 +-
+ 12 files changed, 24 insertions(+), 21 deletions(-)
+
+diff --git a/data/json/itemgroups/Drugs_Tobacco_Alcohol/drugs.json b/data/json/itemgroups/Drugs_Tobacco_Alcohol/drugs.json
+index 1b02cdd1f2..1eeeadf17f 100644
+--- a/data/json/itemgroups/Drugs_Tobacco_Alcohol/drugs.json
++++ b/data/json/itemgroups/Drugs_Tobacco_Alcohol/drugs.json
+@@ -359,7 +359,7 @@
+   },
+   {
+     "type": "item_group",
+-    "id": "harddrugs",
++    "id": "harddrugs_residential",
+     "items": [
+       { "item": "inhaler", "prob": 14, "charges": [ 10, 100 ] },
+       { "prob": 15, "group": "codeine_bottle_plastic_pill_painkiller_1_10" },
+@@ -376,10 +376,14 @@
+       { "prob": 3, "group": "antiparasitic_bottle_plastic_pill_prescription_1_10" },
+       [ "survnote", 1 ],
+       { "prob": 4, "group": "diazepam_bottle_plastic_pill_prescription_1_10" },
+-      [ "flu_shot", 5 ],
+       [ "syringe", 8 ]
+     ]
+   },
++  {
++    "type": "item_group",
++    "id": "harddrugs",
++    "items": [ { "group": "harddrugs_residential", "prob": 133 }, { "item": "flu_shot", "prob": 5 } ]
++  },
+   {
+     "type": "item_group",
+     "id": "mobile_meth_lab",
+diff --git a/data/json/itemgroups/Locations_MapExtras/mansion.json b/data/json/itemgroups/Locations_MapExtras/mansion.json
+index 9fc7053dc2..3d30263705 100644
+--- a/data/json/itemgroups/Locations_MapExtras/mansion.json
++++ b/data/json/itemgroups/Locations_MapExtras/mansion.json
+@@ -313,7 +313,7 @@
+     "id": "dresser_shabby",
+     "type": "item_group",
+     "subtype": "collection",
+-    "groups": [ [ "harddrugs", 10 ], [ "clothing_shabby", 70 ], [ "clothing_shabby", 50 ], [ "clothing_shabby", 40 ] ]
++    "groups": [ [ "harddrugs_residential", 10 ], [ "clothing_shabby", 70 ], [ "clothing_shabby", 50 ], [ "clothing_shabby", 40 ] ]
+   },
+   {
+     "id": "dresser_fancy",
+@@ -1325,7 +1325,7 @@
+       { "item": "sewing_kit", "prob": 10, "charges": [ 0, -1 ] },
+       [ "mag_beauty", 10 ],
+       [ "mag_glam", 10 ],
+-      { "group": "harddrugs", "prob": 5 },
++      { "group": "harddrugs_residential", "prob": 5 },
+       [ "hairbrush", 30 ],
+       [ "comb_pocket", 15 ],
+       [ "curler_hair", 10 ],
+diff --git a/data/json/itemgroups/collections_domestic.json b/data/json/itemgroups/collections_domestic.json
+index 3bffda514b..b2da0ae2ce 100644
+--- a/data/json/itemgroups/collections_domestic.json
++++ b/data/json/itemgroups/collections_domestic.json
+@@ -282,7 +282,7 @@
+       { "prob": 5, "group": "antihistamine_bottle_plastic_pill_supplement_1_30" },
+       { "item": "nyquil", "prob": 5, "charges": [ 1, 5 ] },
+       { "group": "mansion_guns", "prob": 3 },
+-      { "group": "harddrugs", "prob": 1 },
++      { "group": "harddrugs_residential", "prob": 1 },
+       { "group": "wallets", "prob": 10 },
+       [ "ankle_wallet_pouch", 1 ],
+       [ "joint", 1 ],
+diff --git a/data/json/itemgroups/tools.json b/data/json/itemgroups/tools.json
+index 5567500a14..c97776ac16 100644
+--- a/data/json/itemgroups/tools.json
++++ b/data/json/itemgroups/tools.json
+@@ -195,7 +195,6 @@
+       [ "jerrycan_big", 10 ],
+       { "item": "char_smoker", "prob": 5, "charges": [ 0, 300 ] },
+       { "item": "dehydrator", "prob": 5 },
+-      [ "tongs", 1 ],
+       [ "tourist_table", 1 ],
+       [ "vac_mold", 10 ],
+       [ "polycarbonate_sheet", 50 ],
+diff --git a/data/json/mapgen_palettes/basement.json b/data/json/mapgen_palettes/basement.json
+index 4ce332e887..f4f6f13f6d 100644
+--- a/data/json/mapgen_palettes/basement.json
++++ b/data/json/mapgen_palettes/basement.json
+@@ -180,7 +180,7 @@
+       "t": { "item": "SUS_toilet", "chance": 10, "repeat": [ 1, 3 ] },
+       "v": [
+         { "item": "art", "chance": 5 },
+-        { "item": "harddrugs", "chance": 10, "repeat": [ 1, 2 ] },
++        { "item": "harddrugs_residential", "chance": 10, "repeat": [ 1, 2 ] },
+         { "item": "maps", "chance": 2 },
+         { "item": "guns_pistol_common", "chance": 50, "ammo": 90, "magazine": 100 },
+         { "item": "gemstones", "chance": 30, "repeat": [ 1, 2 ] }
+@@ -195,7 +195,7 @@
+         { "item": "SUS_hair_drawer", "chance": 50 },
+         { "item": "SUS_bathroom_cabinet", "chance": 50 },
+         { "item": "softdrugs", "chance": 20, "repeat": [ 1, 2 ] },
+-        { "item": "harddrugs", "chance": 2 }
++        { "item": "harddrugs_residential", "chance": 2 }
+       ],
+       "9": { "item": "shower", "chance": 30, "repeat": [ 1, 2 ] },
+       "Z": { "item": "laundry", "chance": 100 },
+@@ -257,7 +257,7 @@
+       "t": { "item": "SUS_toilet", "chance": 10, "repeat": [ 1, 3 ] },
+       "v": [
+         { "item": "art", "chance": 5 },
+-        { "item": "harddrugs", "chance": 10, "repeat": [ 1, 2 ] },
++        { "item": "harddrugs_residential", "chance": 10, "repeat": [ 1, 2 ] },
+         { "item": "maps", "chance": 2 },
+         { "item": "guns_pistol_common", "chance": 50, "ammo": 90, "magazine": 100 },
+         { "item": "gemstones", "chance": 30, "repeat": [ 1, 2 ] }
+@@ -272,7 +272,7 @@
+         { "item": "SUS_hair_drawer", "chance": 50 },
+         { "item": "SUS_bathroom_cabinet", "chance": 50 },
+         { "item": "softdrugs", "chance": 20, "repeat": [ 1, 2 ] },
+-        { "item": "harddrugs", "chance": 2 }
++        { "item": "harddrugs_residential", "chance": 2 }
+       ],
+       "9": { "item": "shower", "chance": 30, "repeat": [ 1, 2 ] },
+       "Z": { "item": "laundry", "chance": 100 },
+diff --git a/data/json/mapgen_palettes/cabin.json b/data/json/mapgen_palettes/cabin.json
+index 66fb3ebfe6..f15b932bc9 100644
+--- a/data/json/mapgen_palettes/cabin.json
++++ b/data/json/mapgen_palettes/cabin.json
+@@ -147,7 +147,7 @@
+         { "item": "SUS_hair_drawer", "chance": 30 },
+         { "item": "SUS_bathroom_cabinet", "chance": 30 },
+         { "item": "SUS_bathroom_medicine", "chance": 20 },
+-        { "item": "harddrugs", "chance": 2 }
++        { "item": "harddrugs_residential", "chance": 2 }
+       ],
+       "t": { "item": "dining", "chance": 30, "repeat": [ 1, 2 ] },
+       "U": { "item": "camping", "chance": 30, "repeat": [ 1, 4 ] },
+diff --git a/data/json/mapgen_palettes/house_general_abandoned.json b/data/json/mapgen_palettes/house_general_abandoned.json
+index f578567822..3e9aee3bef 100644
+--- a/data/json/mapgen_palettes/house_general_abandoned.json
++++ b/data/json/mapgen_palettes/house_general_abandoned.json
+@@ -192,7 +192,7 @@
+       "v": [
+         { "item": "art", "chance": 5 },
+         { "item": "home_display_case", "chance": 30 },
+-        { "item": "harddrugs", "chance": 10, "repeat": [ 1, 2 ] },
++        { "item": "harddrugs_residential", "chance": 10, "repeat": [ 1, 2 ] },
+         { "item": "maps", "chance": 2 },
+         { "item": "guns_pistol_common", "chance": 50, "ammo": 90, "magazine": 100 },
+         { "item": "gemstones", "chance": 30, "repeat": [ 1, 2 ] }
+@@ -205,7 +205,7 @@
+       "3": [ { "item": "SUS_utensils", "chance": 3 }, { "item": "SUS_knife_drawer", "chance": 3 } ],
+       "4": { "item": "SUS_junk_drawer", "chance": 6 },
+       "5": { "item": "SUS_kitchen_sink", "chance": 5 },
+-      "8": [ { "item": "SUS_bathroom_medicine", "chance": 1 }, { "item": "harddrugs", "chance": 5 } ],
++      "8": [ { "item": "SUS_bathroom_medicine", "chance": 1 }, { "item": "harddrugs_residential", "chance": 5 } ],
+       "@": { "item": "bed", "chance": 5 },
+       "Z": { "item": "laundry", "chance": 10 },
+       "W": { "item": "laundry", "chance": 10 }
+diff --git a/data/json/mapgen_palettes/house_general_palette.json b/data/json/mapgen_palettes/house_general_palette.json
+index 8549e60cc5..ead3c76bc1 100644
+--- a/data/json/mapgen_palettes/house_general_palette.json
++++ b/data/json/mapgen_palettes/house_general_palette.json
+@@ -250,7 +250,7 @@
+         { "item": "art", "chance": 5 },
+         { "item": "art_all", "chance": 10 },
+         { "item": "home_display_case", "chance": 30 },
+-        { "item": "harddrugs", "chance": 10, "repeat": [ 1, 2 ] },
++        { "item": "harddrugs_residential", "chance": 10, "repeat": [ 1, 2 ] },
+         { "item": "maps", "chance": 2 },
+         { "item": "guns_pistol_common", "chance": 25, "ammo": 90, "magazine": 100 },
+         { "item": "gemstones", "chance": 30, "repeat": [ 1, 2 ] }
+@@ -307,7 +307,7 @@
+         { "item": "SUS_hair_drawer", "chance": 30 },
+         { "item": "SUS_bathroom_cabinet", "chance": 30 },
+         { "item": "SUS_bathroom_medicine", "chance": 40 },
+-        { "item": "harddrugs", "chance": 2 }
++        { "item": "harddrugs_residential", "chance": 2 }
+       ],
+       "9": { "item": "shower", "chance": 30, "repeat": [ 1, 2 ] },
+       "@": { "item": "bed", "chance": 50 },
+@@ -627,7 +627,7 @@
+         { "item": "SUS_hair_drawer", "chance": 30 },
+         { "item": "SUS_bathroom_cabinet", "chance": 30 },
+         { "item": "SUS_bathroom_medicine", "chance": 40 },
+-        { "item": "harddrugs", "chance": 2 }
++        { "item": "harddrugs_residential", "chance": 2 }
+       ],
+       "9": { "item": "shower", "chance": 33, "repeat": [ 2, 4 ] },
+       "@": [ { "item": "bed", "chance": 50 }, { "item": "laundry", "chance": 20 } ],
+@@ -746,7 +746,7 @@
+         { "item": "SUS_hair_drawer", "chance": 30 },
+         { "item": "SUS_bathroom_cabinet", "chance": 30 },
+         { "item": "SUS_bathroom_medicine", "chance": 40 },
+-        { "item": "harddrugs", "chance": 2 }
++        { "item": "harddrugs_residential", "chance": 2 }
+       ],
+       "9": { "item": "shower", "chance": 33, "repeat": [ 2, 4 ] },
+       "@": [ { "item": "bed", "chance": 50 }, { "item": "laundry", "chance": 20 } ],
+diff --git a/data/json/mapgen_palettes/house_w_palette.json b/data/json/mapgen_palettes/house_w_palette.json
+index a26c16f399..90a824c32d 100644
+--- a/data/json/mapgen_palettes/house_w_palette.json
++++ b/data/json/mapgen_palettes/house_w_palette.json
+@@ -196,7 +196,7 @@
+       "j": [
+         { "item": "softdrugs", "chance": 45, "repeat": [ 1, 3 ] },
+         { "item": "cleaning", "chance": 30, "repeat": [ 1, 2 ] },
+-        { "item": "harddrugs", "chance": 5 }
++        { "item": "harddrugs_residential", "chance": 5 }
+       ],
+       "T": { "item": "shower", "chance": 30, "repeat": [ 1, 2 ] },
+       "n": { "item": "SUS_kitchen_sink", "chance": 10, "repeat": [ 1, 2 ] },
+diff --git a/data/json/mapgen_palettes/lodge_palette.json b/data/json/mapgen_palettes/lodge_palette.json
+index 56f170c98f..7030ee9485 100644
+--- a/data/json/mapgen_palettes/lodge_palette.json
++++ b/data/json/mapgen_palettes/lodge_palette.json
+@@ -131,7 +131,7 @@
+         { "item": "SUS_dresser_mens", "chance": 50, "repeat": [ 1, 4 ] },
+         { "item": "SUS_dresser_womens", "chance": 50, "repeat": [ 1, 4 ] }
+       ],
+-      "F": [ { "item": "SUS_fridge", "chance": 35 }, { "item": "harddrugs", "chance": 40, "repeat": [ 1, 3 ] } ],
++      "F": [ { "item": "SUS_fridge", "chance": 35 }, { "item": "harddrugs_residential", "chance": 40, "repeat": [ 1, 3 ] } ],
+       "h": { "item": "shower", "chance": 20 },
+       "O": { "item": "livingroom", "chance": 20 }
+     }
+diff --git a/data/json/mapgen_palettes/lumberyard.json b/data/json/mapgen_palettes/lumberyard.json
+index 34a1479b41..41cc80eed1 100644
+--- a/data/json/mapgen_palettes/lumberyard.json
++++ b/data/json/mapgen_palettes/lumberyard.json
+@@ -63,7 +63,7 @@
+       "l": { "item": "clothing_work_set", "chance": 40 },
+       "L": [ { "item": "hardware", "chance": 35 }, { "item": "mechanics", "chance": 15 } ],
+       "r": { "item": "tools_tree_cutting", "chance": 70, "repeat": [ 1, 3 ] },
+-      "m": [ { "item": "softdrugs", "chance": 40 }, { "item": "harddrugs", "chance": 40 } ]
++      "m": [ { "item": "softdrugs", "chance": 40 }, { "item": "harddrugs_residential", "chance": 40 } ]
+     },
+     "item": { "O": { "item": "2x4", "repeat": [ 2, 20 ] }, ",": { "item": "splinter", "chance": 10, "repeat": [ 1, 5 ] } },
+     "vendingmachines": { "D": { "item_group": "vending_drink", "lootable": true }, "F": { "item_group": "vending_food", "lootable": true } }
+diff --git a/data/json/mapgen_palettes/nuclear_plant_palette.json b/data/json/mapgen_palettes/nuclear_plant_palette.json
+index 5594db967a..a662f64d45 100644
+--- a/data/json/mapgen_palettes/nuclear_plant_palette.json
++++ b/data/json/mapgen_palettes/nuclear_plant_palette.json
+@@ -145,7 +145,7 @@
+         { "item": "rad_gear", "chance": 10, "repeat": [ 1, 2 ] },
+         { "item": "used_1st_aid", "chance": 5 },
+         { "item": "softdrugs", "chance": 3 },
+-        { "item": "harddrugs", "chance": 2 },
++        { "item": "harddrugs_residential", "chance": 2 },
+         { "item": "drugs_rare", "chance": 1 }
+       ],
+       "L": [
+-- 
+2.45.2
+

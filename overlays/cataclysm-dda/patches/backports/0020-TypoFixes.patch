@@ -1,0 +1,955 @@
+From 595fc82f100b841a4cdf309096cbfdada680eb63 Mon Sep 17 00:00:00 2001
+From: klorpa <30924131+klorpa@users.noreply.github.com>
+Date: Tue, 13 Aug 2024 22:52:10 -0500
+Subject: [PATCH 020/125] TypoFixes
+
+---
+ data/changelog.txt                            | 12 +--
+ .../mapgen_eocs/godco_mapgen_eocs.json        |  2 +-
+ data/json/itemgroups/Clothing_Gear/gear.json  |  2 +-
+ data/json/itemgroups/books.json               |  2 +-
+ data/json/items/armor/cloaks.json             |  4 +-
+ data/json/items/armor/coats.json              |  2 +-
+ data/json/items/armor/helmets.json            |  4 +-
+ data/json/items/armor/legs_armor.json         |  2 +-
+ data/json/items/armor/storage.json            |  6 +-
+ data/json/items/book/maps.json                |  2 +-
+ data/json/items/book/misc_philosophy.json     |  2 +-
+ data/json/items/book/misc_sports.json         |  2 +-
+ data/json/items/book/spiritual.json           |  2 +-
+ data/json/items/comestibles/raw_fruit.json    |  2 +-
+ data/json/items/gun/545x39.json               |  2 +-
+ data/json/items/gun/9mm.json                  |  2 +-
+ data/json/items/gun/shot.json                 |  4 +-
+ data/json/items/gun/ups.json                  |  2 +-
+ data/json/items/resources/misc.json           |  6 +-
+ data/json/items/tool/science.json             |  2 +-
+ data/json/items/toy.json                      |  4 +-
+ .../lab_modular/lab_2x2x2_RES_8_commons.json  |  4 +-
+ data/json/mapgen/nested/road_nested.json      |  4 +-
+ data/json/mapgen/road.json                    |  2 +-
+ data/json/monsters/bird.json                  | 85 -------------------
+ data/json/monsters/feral_humans.json          |  2 +-
+ data/json/monsters/mechsuits.json             |  2 +-
+ data/json/monsters/reptile_amphibian.json     |  4 +-
+ data/json/monsters/rodentkin.json             | 12 +--
+ data/json/monsters/zed_lab.json               |  2 +-
+ data/json/monsters/zed_misc.json              |  2 +-
+ data/json/npcs/Backgrounds/codger.json        |  2 +-
+ data/json/npcs/Backgrounds/evacuee_1.json     |  2 +-
+ data/json/snippets/home_pictures.json         |  4 +-
+ data/json/snippets/schizophrenia.json         |  2 +-
+ .../Aftershock/itemgroups/tool_groups.json    |  2 +-
+ .../itemgroups/weapons/energy_gun_groups.json |  2 +-
+ data/mods/Aftershock/items/tools.json         |  4 +-
+ data/mods/Aftershock/lore/cyberpunk_future.md |  2 +-
+ data/mods/Aftershock/lore/factions.md         |  2 +-
+ data/mods/Aftershock/npcs/factions.json       |  2 +-
+ .../CrazyCataclysm/crazy_monstergroups.json   |  2 +-
+ .../BombasticPerks/perks.json                 |  2 +-
+ .../Magiclysm/items/herbs_and_flowers.json    |  2 +-
+ doc/VITAMIN.md                                |  2 +-
+ 45 files changed, 67 insertions(+), 152 deletions(-)
+
+diff --git a/data/changelog.txt b/data/changelog.txt
+index 31277f9452..34e7852175 100644
+--- a/data/changelog.txt
++++ b/data/changelog.txt
+@@ -840,7 +840,7 @@ Transformed active mutations (extended claws etc) properly cause instability
+ Only count CONTAINER type pockets in the pickup inventory
+ Allow select-all when highlighted item is non-selectable
+ Eddie can talk about his father.
+-Fixes issue where ImGui popup doesnt wrap buttons to a new line when the overall length is too long
++Fixes issue where ImGui popup doesn't wrap buttons to a new line when the overall length is too long
+ Wet Towels No Longer Prompt to be Turned Off
+ Maybe prevent rare crater generation error
+ AIM: Now moving all items will not move favourite items, if other items are present.
+@@ -1000,7 +1000,7 @@ Adds VS Code Dev Containers & Workspace Config
+ Allow for cross-compiling from Linux to Windows in Devcontainer
+ Faster local VS builds
+ Fast Windows iteration with llvm-lib and lld-link
+-Cross compile object creator from linux to Windows using Devcontainer
++Cross compile object creator from Linux to Windows using Devcontainer
+ add object creator to releases
+ Add a launch and debug configuration to VS Code Dev Container
+ Enable tests for merge queue
+@@ -1014,7 +1014,7 @@ Update Flatpak manifest to use clang and include the default soundpack
+ stl_emulation span::count_ is not const anymore
+ No longer build object creator in CI nor include it in releases
+ Add PDCurses to Windows
+-Fixed linux experimental build automation issues caused by SDL dependencies
++Fixed Linux experimental build automation issues caused by SDL dependencies
+ 
+ 
+ ## I18N and A11Y:
+@@ -1134,7 +1134,7 @@ Hunted scenario adds a nemesis zombie chasing the PC
+ Practice recipes
+ Player can nickname monsters
+ All items can have cosmetic variants now
+-Tons of work on zones, such as personal zones, dissasembly zones and automop zones
++Tons of work on zones, such as personal zones, disassembly zones and automop zones
+ Allow non-debug change of gender, hair, facial hair, eye and skin color
+ Books can now be copied into a variety of condensing items: ebooks, book binders etc
+ PC can track their adventure in their diary
+@@ -1258,7 +1258,7 @@ Show properly-fitted clothing in the crafting screen
+ Progress update while heating food
+ Hides the old sidebars and replaces them with fancy json sidebars
+ Jsonified "Unexplored" OMT
+-Support fuzzy search with accented latin letters
++Support fuzzy search with accented Latin letters
+ Many new color themes
+ Possibility to turn distractions on and off
+ Show compatible guns in magazine descriptions
+@@ -1305,7 +1305,7 @@ Dinomod Apex predators don't appear randomly day one
+ Adds TropiCataclysm to the repository
+ craftable holiday sweaters for dinos
+ Hylian Adventurer Profession for Mythical Martial Arts
+-Many south american animals added to Tropicataclysm
++Many South American animals added to Tropicataclysm
+ Adds an innawood mod for wilderness survival.
+ Aftershock Exoplanet: Glacial tunnels, a new low-risk area and the fauna that inhabits them
+ TropiCataclysm Adds Termites and new content for Triffids
+diff --git a/data/json/effects_on_condition/mapgen_eocs/godco_mapgen_eocs.json b/data/json/effects_on_condition/mapgen_eocs/godco_mapgen_eocs.json
+index 54838655ab..09d5d3a4e5 100644
+--- a/data/json/effects_on_condition/mapgen_eocs/godco_mapgen_eocs.json
++++ b/data/json/effects_on_condition/mapgen_eocs/godco_mapgen_eocs.json
+@@ -18,7 +18,7 @@
+     "type": "effect_on_condition",
+     "id": "godco_place_wall_new",
+     "global": false,
+-    "//": "4 hours 20 minutes per wall (from regular ground to full palisade) * 373 walls = ~1,567 hours.  Divided into 8-hour work shifts, thats ~196 days, or six and a half months for one person.  Presuming we have ~11 people working in a single shift, each building 1 wall, that should be ~18 days to build.  Please correct me if I messed up the math.",
++    "//": "4 hours 20 minutes per wall (from regular ground to full palisade) * 373 walls = ~1,567 hours.  Divided into 8-hour work shifts, that's ~196 days, or six and a half months for one person.  Presuming we have ~11 people working in a single shift, each building 1 wall, that should be ~18 days to build.  Please correct me if I messed up the math.",
+     "effect": [
+       { "mapgen_update": "place_right_corner_wall", "om_terrain": "godco_1" },
+       { "mapgen_update": "place_gate_wall", "om_terrain": "godco_2" },
+diff --git a/data/json/itemgroups/Clothing_Gear/gear.json b/data/json/itemgroups/Clothing_Gear/gear.json
+index 20ed33ce6f..95644d1642 100644
+--- a/data/json/itemgroups/Clothing_Gear/gear.json
++++ b/data/json/itemgroups/Clothing_Gear/gear.json
+@@ -23,7 +23,7 @@
+   {
+     "id": "gasmask_inserts_in_use",
+     "type": "item_group",
+-    "//": "Accessories grouped together for use as pre-installed spawnes within gas masks.",
++    "//": "Accessories grouped together for use as pre-installed spawns within gas masks.",
+     "subtype": "distribution",
+     "items": [
+       {
+diff --git a/data/json/itemgroups/books.json b/data/json/itemgroups/books.json
+index c216656207..bd84822961 100644
+--- a/data/json/itemgroups/books.json
++++ b/data/json/itemgroups/books.json
+@@ -483,7 +483,7 @@
+     "//3": "While a rather high-level fabrication book, this could conceivably be something that a craft shop/design and technology class would use in its current form: Plastics and Polymers: Projects for the Classroom. Should it be expanded with variants to include books that aren’t so school-based, it should be removed.",
+     "//4": "While it has the potential to be a high-level tailoring book, its current form, Friendly, Humane Fashion, can be passed off as an educational library book. Should it be expanded with variants to include books that aren’t so school-based, it should be removed.",
+     "//5": "While a high-level speech book, Principles of Effective Communication, a public speaking book, isn’t unrealistic for a school library to possess. Should it be expanded with variants to include books that aren’t so school-based, it should be removed.",
+-    "//6": "Bit of a stretch, but The Wonderful World of Arthropodology could feasibly exist as a library encyclopaedia.",
++    "//6": "Bit of a stretch, but The Wonderful World of Arthropodology could feasibly exist as a library encyclopedia.",
+     "subtype": "distribution",
+     "entries": [
+       { "item": "manual_swimming", "prob": 5 },
+diff --git a/data/json/items/armor/cloaks.json b/data/json/items/armor/cloaks.json
+index a6a9f04db5..88c95761a1 100644
+--- a/data/json/items/armor/cloaks.json
++++ b/data/json/items/armor/cloaks.json
+@@ -233,7 +233,7 @@
+       },
+       {
+         "id": "bahamanian_flag",
+-        "name": { "str": "Bahamanain flag" },
++        "name": { "str": "Bahamanian flag" },
+         "description": "It has three stripes of light blue and yellow, with a black triangle on the far-left side.",
+         "weight": 10,
+         "append": true
+@@ -408,7 +408,7 @@
+       },
+       {
+         "id": "columbian_flag",
+-        "name": { "str": "Columbian flag" },
++        "name": { "str": "Colombian flag" },
+         "description": "It has a yellow, navy blue, and red stripe running horizontally.",
+         "weight": 10,
+         "append": true
+diff --git a/data/json/items/armor/coats.json b/data/json/items/armor/coats.json
+index 6429c3d8fe..f649f632b7 100644
+--- a/data/json/items/armor/coats.json
++++ b/data/json/items/armor/coats.json
+@@ -3731,7 +3731,7 @@
+       {
+         "id": "tacjacket_jungle",
+         "name": { "str": "jungle-camo tactical jacket" },
+-        "description": "Bright and dark green shades meet within the patterning of this tactical jacket, embellished by tones of earthen brown and other natural hues.  The trees of the Amazon will speak your native tongue as you stalk around, waging guerilla warfare against the undead, with this jacket on.  It's just a shame that the rainforest is quite a walk away.",
++        "description": "Bright and dark green shades meet within the patterning of this tactical jacket, embellished by tones of earthen brown and other natural hues.  The trees of the Amazon will speak your native tongue as you stalk around, waging guerrilla warfare against the undead, with this jacket on.  It's just a shame that the rainforest is quite a walk away.",
+         "color": "green",
+         "weight": 15,
+         "append": true
+diff --git a/data/json/items/armor/helmets.json b/data/json/items/armor/helmets.json
+index d1b5856a19..c6262345be 100644
+--- a/data/json/items/armor/helmets.json
++++ b/data/json/items/armor/helmets.json
+@@ -295,7 +295,7 @@
+       {
+         "id": "helmet_m1",
+         "name": { "str": "M1 helmet" },
+-        "description": "A M1 combat helmet, famously worn by American soldiers in the Second World War as well as the Korean and Vietnam wars.  Inferior to modern helmets, but it still remains popular among guerilla fighters, collectors and war re-enactors.",
++        "description": "A M1 combat helmet, famously worn by American soldiers in the Second World War as well as the Korean and Vietnam wars.  Inferior to modern helmets, but it still remains popular among guerrilla fighters, collectors and war re-enactors.",
+         "color": "green",
+         "weight": 10
+       },
+@@ -313,7 +313,7 @@
+     "id": "helmet_soviet_tanker",
+     "type": "ARMOR",
+     "category": "armor",
+-    "name": { "str": "soviet tanker helmet" },
++    "name": { "str": "Soviet tanker helmet" },
+     "description": "A Soviet era tanker helmet.  It's distinctive foam pads are meant to protect a tank driver from bumps against the cramped interior.",
+     "price": "100 USD",
+     "price_postapoc": "12 USD",
+diff --git a/data/json/items/armor/legs_armor.json b/data/json/items/armor/legs_armor.json
+index b2a542a6e6..cfbdda5ce1 100644
+--- a/data/json/items/armor/legs_armor.json
++++ b/data/json/items/armor/legs_armor.json
+@@ -348,7 +348,7 @@
+     "copy-from": "base_chainmail_legs",
+     "type": "ARMOR",
+     "name": { "str_sp": "base chainmail half-leggings" },
+-    "description": "Customized partial chainmail leggings only covering the front and sides of the legs.  The zigzaging lace at the back keeps everything in place, and the lack of toes and heels allows them to work perfectly well with footwear.",
++    "description": "Customized partial chainmail leggings only covering the front and sides of the legs.  The zigzagging lace at the back keeps everything in place, and the lack of toes and heels allows them to work perfectly well with footwear.",
+     "weight": "3159 g",
+     "volume": "1125 ml",
+     "longest_side": "10 cm",
+diff --git a/data/json/items/armor/storage.json b/data/json/items/armor/storage.json
+index 71fb1242ca..112a81f6cc 100644
+--- a/data/json/items/armor/storage.json
++++ b/data/json/items/armor/storage.json
+@@ -1898,7 +1898,7 @@
+   {
+     "id": "molle_pack",
+     "type": "ARMOR",
+-    "//": "Based upon own service and wikipedia: https://en.wikipedia.org/wiki/MOLLE",
++    "//": "Based upon own service and Wikipedia: https://en.wikipedia.org/wiki/MOLLE",
+     "name": { "str": "MOLLE assault pack" },
+     "description": "The Modular Lightweight Load-carrying Equipment is an advanced military backpack.  Covered with pockets and straps, it strikes a fine balance between storage space and encumbrance.  Can attach accessory pockets to the outside rigging.",
+     "weight": "1450 g",
+@@ -1989,7 +1989,7 @@
+   {
+     "id": "molle_medium_rucksack",
+     "type": "ARMOR",
+-    "//": "Based upon own service and wikipedia: https://en.wikipedia.org/wiki/MOLLE",
++    "//": "Based upon own service and Wikipedia: https://en.wikipedia.org/wiki/MOLLE",
+     "name": { "str": "MOLLE medium rucksack" },
+     "description": "The Modular Lightweight Load-carrying Equipment is an advanced military medium rucksack.  Covered with straps for modularity, it strikes a fine balance between storage space and encumbrance.  Can attach accessory pockets to the outside rigging.",
+     "weight": "1600 g",
+@@ -2080,7 +2080,7 @@
+   {
+     "id": "molle_large_rucksack",
+     "type": "ARMOR",
+-    "//": "Based upon own service and wikipedia: https://en.wikipedia.org/wiki/MOLLE",
++    "//": "Based upon own service and Wikipedia: https://en.wikipedia.org/wiki/MOLLE",
+     "name": { "str": "MOLLE large rucksack" },
+     "description": "The Modular Lightweight Load-carrying Equipment is an advanced military large rucksack.  Covered with straps for modularity, it strikes a fine balance between storage space and encumbrance.  Can attach accessory pockets to the outside rigging.",
+     "weight": "2200 g",
+diff --git a/data/json/items/book/maps.json b/data/json/items/book/maps.json
+index c35c937ea2..f2ac8f8c8f 100644
+--- a/data/json/items/book/maps.json
++++ b/data/json/items/book/maps.json
+@@ -2,7 +2,7 @@
+   {
+     "abstract": "abstractmap",
+     "//": "Match type options in iuse_actor.cpp",
+-    "//1": "Add maps/brochures/pamphlets as appopriate to itemgroups/books.json 's groups",
++    "//1": "Add maps/brochures/pamphlets as appropriate to itemgroups/books.json 's groups",
+     "type": "GENERIC",
+     "category": "maps",
+     "name": { "str": "abstract map" },
+diff --git a/data/json/items/book/misc_philosophy.json b/data/json/items/book/misc_philosophy.json
+index ad1ece7f93..fa67eef6df 100644
+--- a/data/json/items/book/misc_philosophy.json
++++ b/data/json/items/book/misc_philosophy.json
+@@ -86,7 +86,7 @@
+       { "id": "philosophy26", "text": "This is a copy of \"Allegory of the Cave\" by Plato." },
+       { "id": "philosophy27", "text": "This is a copy of \"Leviathan\" by Thomas Hobbes." },
+       { "id": "philosophy28", "text": "This is a copy of \"Critique Of Pure Reason\" by Immanuel Kant." },
+-      { "id": "philosophy29", "text": "This is a copy of \"Principles of Philosophy\" by Descartes." },
++      { "id": "philosophy29", "text": "This is a copy of \"Principles of Philosophy\" by René Descartes." },
+       {
+         "id": "philosophy30",
+         "text": "This is a copy of both \"On the Genealogy of Morality\" and \"The Gay Science\" by Friederich Nietzsche."
+diff --git a/data/json/items/book/misc_sports.json b/data/json/items/book/misc_sports.json
+index fe225cf061..ee27b8c849 100644
+--- a/data/json/items/book/misc_sports.json
++++ b/data/json/items/book/misc_sports.json
+@@ -131,7 +131,7 @@
+     "id": "book_nonf_hard_sports_bike",
+     "type": "BOOK",
+     "name": { "str": "Legendary Bike Rides", "str_pl": "copies of Legendary Bike Rides" },
+-    "description": "This unwieldy coffeetable book is titled \"LEGENDARY Bike Rides Around the WORLD.\"  It provides a wealth of detail about paved bike trails in every part of the globe except New England.  But if you make it to Patagonia on bike, you're all set.",
++    "description": "This unwieldy coffee table book is titled \"LEGENDARY Bike Rides Around the WORLD.\"  It provides a wealth of detail about paved bike trails in every part of the globe except New England.  But if you make it to Patagonia on bike, you're all set.",
+     "//isbn13": 9781760340834,
+     "weight": "1589 g",
+     "volume": "1660 ml",
+diff --git a/data/json/items/book/spiritual.json b/data/json/items/book/spiritual.json
+index 45f6c5aea5..bf88ed059f 100644
+--- a/data/json/items/book/spiritual.json
++++ b/data/json/items/book/spiritual.json
+@@ -415,7 +415,7 @@
+     "id": "holybook_mo",
+     "type": "BOOK",
+     "name": { "str": "Buluotuo", "str_pl": "copies of the Buluotuo" },
+-    "description": "This is very rare English translation of the Buluotuo, a sacred epic in Moism, the religion of most Zhuang people, the largest ethnic minority of China.  This book addresses the creation of the Universe and life as well as how to live a religiously meritorious life inside Moism.  This book also contains information on entities, deities, gods, godesses, prayers, practices and rituals of Moism.",
++    "description": "This is very rare English translation of the Buluotuo, a sacred epic in Moism, the religion of most Zhuang people, the largest ethnic minority of China.  This book addresses the creation of the Universe and life as well as how to live a religiously meritorious life inside Moism.  This book also contains information on entities, deities, gods, goddesses, prayers, practices and rituals of Moism.",
+     "weight": "370 g",
+     "volume": "1 L",
+     "copy-from": "holybook_abstract"
+diff --git a/data/json/items/comestibles/raw_fruit.json b/data/json/items/comestibles/raw_fruit.json
+index e7b85601bc..4d0994ebd0 100644
+--- a/data/json/items/comestibles/raw_fruit.json
++++ b/data/json/items/comestibles/raw_fruit.json
+@@ -210,7 +210,7 @@
+   },
+   {
+     "type": "COMESTIBLE",
+-    "//": "abbreviated latin name because the id would get too long otherwise",
++    "//": "abbreviated Latin name because the id would get too long otherwise",
+     "id": "m_stellatum_berries",
+     "name": { "str_sp": "starry false Solomon's seal berries" },
+     "weight": "9 g",
+diff --git a/data/json/items/gun/545x39.json b/data/json/items/gun/545x39.json
+index 6575ca1417..797300db84 100644
+--- a/data/json/items/gun/545x39.json
++++ b/data/json/items/gun/545x39.json
+@@ -16,7 +16,7 @@
+       {
+         "id": "ak74_folding",
+         "name": { "str": "Kalashnikov AKS-74", "str_pl": "Kalashnikov AKS-74 rifles" },
+-        "description": "An American copy of a Soviet assault rifle, a strange piece of ordinance using some weird proprietary Russian ammunition—all these terms and more can describe this rifle: a semi-automatic clone of the Kalashnikov AKS-74, the descendent of the iconic AKM.  Either a locally-built replica or produced from an imported, foreign parts kit, the firearm possesses a triangular, folding buttstock, a side-mounted optics rail, and a threaded barrel for attaching muzzle devices.  The weapon fires the Soviet 5.45x39mm cartridge—a unicorn even in the American gun wilderness—and feeds said unicorn ammunition from AK-74 magazines."
++        "description": "An American copy of a Soviet assault rifle, a strange piece of ordinance using some weird proprietary Russian ammunition—all these terms and more can describe this rifle: a semi-automatic clone of the Kalashnikov AKS-74, the descendant of the iconic AKM.  Either a locally-built replica or produced from an imported, foreign parts kit, the firearm possesses a triangular, folding buttstock, a side-mounted optics rail, and a threaded barrel for attaching muzzle devices.  The weapon fires the Soviet 5.45x39mm cartridge—a unicorn even in the American gun wilderness—and feeds said unicorn ammunition from AK-74 magazines."
+       }
+     ],
+     "weight": "3400 g",
+diff --git a/data/json/items/gun/9mm.json b/data/json/items/gun/9mm.json
+index b7e81c9139..3e0d181ca5 100644
+--- a/data/json/items/gun/9mm.json
++++ b/data/json/items/gun/9mm.json
+@@ -566,7 +566,7 @@
+     "looks_like": "glock_17",
+     "type": "GUN",
+     "name": { "str": "M9 combat pistol" },
+-    "description": "A rugged, iconic, and long-serving 9mm handgun, the M9 is a sleek pistol that has enjoyed fame in military, law enforcement, and civilian circles ever since its inception.  Adopted as the primary service sidearm across all United States armed branches from the early eighties until the late two thousand and tens, the weapon has seen a great deal of popular media coverage in both videogames and television alike.",
++    "description": "A rugged, iconic, and long-serving 9mm handgun, the M9 is a sleek pistol that has enjoyed fame in military, law enforcement, and civilian circles ever since its inception.  Adopted as the primary service sidearm across all United States armed branches from the early eighties until the late two thousand and tens, the weapon has seen a great deal of popular media coverage in both video games and television alike.",
+     "weight": "961 g",
+     "volume": "570 ml",
+     "longest_side": "249 mm",
+diff --git a/data/json/items/gun/shot.json b/data/json/items/gun/shot.json
+index 132e248020..f4072c9c3e 100644
+--- a/data/json/items/gun/shot.json
++++ b/data/json/items/gun/shot.json
+@@ -33,8 +33,8 @@
+     "copy-from": "shotgun_base",
+     "looks_like": "remington_870",
+     "type": "GUN",
+-    "name": { "str": "12-gauge gatling gun" },
+-    "description": "An electrically driven six barrel gatling shotgun, fed from handmade cloth belts.  Even properly mounted, this seems like an unwieldy beast, and the six separate barrels make for difficult zeroing.  The externally driven action means this is much less likely to jam.",
++    "name": { "str": "12-gauge Gatling gun" },
++    "description": "An electrically driven six barrel Gatling shotgun, fed from handmade cloth belts.  Even properly mounted, this seems like an unwieldy beast, and the six separate barrels make for difficult zeroing.  The externally driven action means this is much less likely to jam.",
+     "weight": "4980 g",
+     "volume": "4500 ml",
+     "longest_side": "110 cm",
+diff --git a/data/json/items/gun/ups.json b/data/json/items/gun/ups.json
+index e7711d7c63..da8e20ef4a 100644
+--- a/data/json/items/gun/ups.json
++++ b/data/json/items/gun/ups.json
+@@ -219,7 +219,7 @@
+     "looks_like": "m134",
+     "type": "GUN",
+     "name": { "str": "salvaged CMES laser cannon" },
+-    "description": "This gatling-laser has been stripped from its CMES mech-suit and is far too heavy to use on its own.  You will need to deploy it or mount it to a vehicle, but it could be devastating if you have deep battery reserves.",
++    "description": "This Gatling-laser has been stripped from its CMES mech-suit and is far too heavy to use on its own.  You will need to deploy it or mount it to a vehicle, but it could be devastating if you have deep battery reserves.",
+     "valid_mod_locations": [ [ "emitter", 1 ], [ "lens", 1 ], [ "sling", 1 ] ],
+     "extend": { "flags": [ "MOUNTED_GUN" ] },
+     "delete": { "flags": [ "UNBREAKABLE_MELEE", "NO_REPAIR", "NO_SALVAGE", "NO_UNWIELD" ] }
+diff --git a/data/json/items/resources/misc.json b/data/json/items/resources/misc.json
+index 7a0f79df92..14a83c9fcd 100644
+--- a/data/json/items/resources/misc.json
++++ b/data/json/items/resources/misc.json
+@@ -83,7 +83,7 @@
+     "symbol": "=",
+     "color": "dark_gray",
+     "count": 200,
+-    "ammo_type": [ "components" ],
++    "ammo_type": "components",
+     "effects": [ "COOKOFF" ]
+   },
+   {
+@@ -149,7 +149,7 @@
+     "symbol": ",",
+     "color": "dark_gray",
+     "count": 50,
+-    "ammo_type": [ "components" ],
++    "ammo_type": "components",
+     "effects": [ "COOKOFF" ]
+   },
+   {
+@@ -182,7 +182,7 @@
+     "material": [ "rubber" ],
+     "symbol": "=",
+     "color": "dark_gray",
+-    "ammo_type": [ "components" ]
++    "ammo_type": "components"
+   },
+   {
+     "id": "rubber_tire_chunk",
+diff --git a/data/json/items/tool/science.json b/data/json/items/tool/science.json
+index 1059beea37..fc6e822b1a 100644
+--- a/data/json/items/tool/science.json
++++ b/data/json/items/tool/science.json
+@@ -1423,7 +1423,7 @@
+     "category": "TOOL",
+     "name": { "str_sp": "weather glass" },
+     "description": "Also called storm glass or 'Goethe barometer', The weather glass barometer consists of a glass container with a sealed body, half filled with water.  A narrow spout connects to the body below the water level and rises above the water level.  The difference between the sealed water level in the body and the narrow open spout determines the atmospheric pressure.  Activate to get current atmospheric pressure.",
+-    "//": "this is based on wikipedia's page on barometers, in section 'water barometers'",
++    "//": "this is based on Wikipedia's page on barometers, in section 'water barometers'",
+     "material": [ "glass" ],
+     "weight": "6000 g",
+     "volume": "4 L",
+diff --git a/data/json/items/toy.json b/data/json/items/toy.json
+index d2775ab7ae..2ff4d7dbdd 100644
+--- a/data/json/items/toy.json
++++ b/data/json/items/toy.json
+@@ -773,7 +773,7 @@
+         "id": "toy_figure_caiman",
+         "name": { "str": "lizardman figurine" },
+         "description": "An expensive figurine of a buff man in streetwear with a lizard head, holding a pair of knives in his hands.",
+-        "//": "yes this is a dorohedoro reference"
++        "//": "yes this is a Dorohedoro reference"
+       },
+       {
+         "id": "toy_figure_anime",
+@@ -783,7 +783,7 @@
+       {
+         "id": "toy_figure_heavyweapons",
+         "name": { "str": "video game figurine" },
+-        "description": "A large figurine of a videogame character, holding a massive gatling gun in his giant arms."
++        "description": "A large figurine of a video game character, holding a massive Gatling gun in his giant arms."
+       },
+       {
+         "id": "toy_figurine_smoker",
+diff --git a/data/json/mapgen/lab/lab_modular/lab_2x2x2_RES_8_commons.json b/data/json/mapgen/lab/lab_modular/lab_2x2x2_RES_8_commons.json
+index 278f284cad..ce599cec24 100644
+--- a/data/json/mapgen/lab/lab_modular/lab_2x2x2_RES_8_commons.json
++++ b/data/json/mapgen/lab/lab_modular/lab_2x2x2_RES_8_commons.json
+@@ -111,7 +111,7 @@
+   {
+     "type": "mapgen",
+     "method": "json",
+-    "//": "combines 2 5x5 mexican restaurant areas and a 6x6 kitchen.",
++    "//": "combines 2 5x5 Mexican restaurant areas and a 6x6 kitchen.",
+     "nested_mapgen_id": "lab_17x17_shop",
+     "object": {
+       "mapgensize": [ 17, 17 ],
+@@ -125,7 +125,7 @@
+   {
+     "type": "mapgen",
+     "method": "json",
+-    "//": "combines 2 5x5 mexican restaurant areas and a 6x6 kitchen.",
++    "//": "combines 2 5x5 Mexican restaurant areas and a 6x6 kitchen.",
+     "nested_mapgen_id": "lab_17x17_shop_2",
+     "object": {
+       "mapgensize": [ 17, 17 ],
+diff --git a/data/json/mapgen/nested/road_nested.json b/data/json/mapgen/nested/road_nested.json
+index 24795094e4..86732c8cee 100644
+--- a/data/json/mapgen/nested/road_nested.json
++++ b/data/json/mapgen/nested/road_nested.json
+@@ -105,7 +105,7 @@
+     "nested_mapgen_id": "24x24_marked_crosswalks",
+     "object": {
+       "mapgensize": [ 24, 24 ],
+-      "//": "Could merge with traffic lights so they're not independant.",
++      "//": "Could merge with traffic lights so they're not independent.",
+       "place_nested": [
+         {
+           "chunks": [ "16x16_marked_crosswalk_h", "null" ],
+@@ -144,7 +144,7 @@
+     "nested_mapgen_id": "24x24_traffic_lights",
+     "object": {
+       "mapgensize": [ 24, 24 ],
+-      "//": "Could merge with crosswalks so they're not independant, places traffic light on right of joining roads",
++      "//": "Could merge with crosswalks so they're not independent, places traffic light on right of joining roads",
+       "place_nested": [
+         {
+           "chunks": [ "1x1_traffic_light" ],
+diff --git a/data/json/mapgen/road.json b/data/json/mapgen/road.json
+index 0085ffa4d9..c033f6619d 100644
+--- a/data/json/mapgen/road.json
++++ b/data/json/mapgen/road.json
+@@ -742,7 +742,7 @@
+     "weight": { "global_val": "vanilla_road_weight", "default": 1000 },
+     "object": {
+       "fallback_predecessor_mapgen": "field",
+-      "//": "Only have a chance for a rotary when no orthoganally adjacent curved",
++      "//": "Only have a chance for a rotary when no orthogonally adjacent curved",
+       "place_nested": [
+         {
+           "chunks": [ [ "24x24_road_four_way_crossroad", 39 ], [ "24x24_road_four_way_rotary", 1 ] ],
+diff --git a/data/json/monsters/bird.json b/data/json/monsters/bird.json
+index 46e725ba18..611f9717db 100644
+--- a/data/json/monsters/bird.json
++++ b/data/json/monsters/bird.json
+@@ -111,24 +111,9 @@
+   {
+     "id": "mon_crow",
+     "type": "MONSTER",
+-<<<<<<< HEAD
+     "name": { "str": "American crow" },
+     "description": "A fairly large, elegant black bird, famous for its distinctive call.  An intelligent bird, there is a glitter of mischief behind its eyes.",
+     "copy-from": "mon_bird_flying_base",
+-=======
+-    "name": { "str": "crow" },
+-    "description": "A small, elegant black bird, famous for its distinctive call.  An intelligent bird, there is a glitter of mischief behind its eyes.",
+-    "bodytype": "bird",
+-    "default_faction": "small_animal",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "1000 ml",
+-    "weight": "450 g",
+-    "hp": 4,
+-    "speed": 140,
+-    "material": [ "flesh" ],
+-    "symbol": "v",
+->>>>>>> c72880f1b7 (Volume Adjusting)
+     "color": "dark_gray",
+     "stomach_size": 30,
+     "special_attacks": [ [ "EAT_CARRION", 40 ], [ "EAT_FOOD", 120 ] ],
+@@ -144,76 +129,19 @@
+     "volume": "1960 ml",
+     "weight": "1470 g",
+     "color": "dark_gray",
+-<<<<<<< HEAD
+     "stomach_size": 50,
+     "special_attacks": [ [ "EAT_CARRION", 40 ], [ "EAT_FOOD", 120 ] ],
+     "reproduction": { "baby_egg": "egg_raven", "baby_count": 5, "baby_timer": 18 },
+     "extend": { "flags": [ "EATS" ] }
+-=======
+-    "aggression": -99,
+-    "morale": 10,
+-    "melee_dice": 1,
+-    "melee_dice_sides": 1,
+-    "melee_cut": 0,
+-    "dodge": 4,
+-    "harvest": "bird_tiny",
+-    "fear_triggers": [ "SOUND", "PLAYER_CLOSE", "FRIEND_ATTACKED", "FRIEND_DIED", "FIRE", "HURT" ],
+-    "reproduction": { "baby_egg": "egg_raven", "baby_count": 3, "baby_timer": 8 },
+-    "baby_flags": [ "SPRING" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 8 },
+-    "flags": [ "SEES", "HEARS", "SMELLS", "ANIMAL", "PATH_AVOID_DANGER_1", "WARM", "FLIES", "SWARMS" ]
+-  },
+-  {
+-    "id": "mon_magpie",
+-    "type": "MONSTER",
+-    "name": { "str": "magpie" },
+-    "description": "A small, elegant bird with black and white feathers.  They have a nasty reputation for stealing from humans.",
+-    "bodytype": "bird",
+-    "default_faction": "small_animal",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "950 ml",
+-    "weight": "170 g",
+-    "hp": 4,
+-    "speed": 140,
+-    "material": [ "flesh" ],
+-    "symbol": "v",
+-    "color": "dark_gray",
+-    "aggression": -99,
+-    "morale": 10,
+-    "melee_dice": 1,
+-    "melee_dice_sides": 1,
+-    "melee_cut": 0,
+-    "dodge": 4,
+-    "harvest": "bird_tiny",
+-    "fear_triggers": [ "SOUND", "PLAYER_CLOSE", "FRIEND_ATTACKED", "FRIEND_DIED", "FIRE", "HURT" ],
+-    "reproduction": { "baby_egg": "egg_magpie", "baby_count": 3, "baby_timer": 8 },
+-    "baby_flags": [ "SPRING" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 8 },
+-    "flags": [ "SEES", "HEARS", "SMELLS", "ANIMAL", "PATH_AVOID_DANGER_1", "WARM", "FLIES", "SWARMS" ]
+->>>>>>> c72880f1b7 (Volume Adjusting)
+   },
+   {
+     "id": "mon_bluejay",
+     "type": "MONSTER",
+     "name": { "str": "blue jay" },
+     "description": "A small, noisy bird with distinctive blue feathers.",
+-<<<<<<< HEAD
+     "copy-from": "mon_bird_flying_base",
+     "volume": "120 ml",
+     "weight": "90 g",
+-=======
+-    "bodytype": "bird",
+-    "default_faction": "small_animal",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "550 ml",
+-    "weight": "85 g",
+-    "hp": 3,
+-    "speed": 140,
+-    "material": [ "flesh" ],
+-    "symbol": "v",
+->>>>>>> c72880f1b7 (Volume Adjusting)
+     "color": "light_blue",
+     "reproduction": { "baby_egg": "egg_bluejay", "baby_count": 5, "baby_timer": 18 }
+   },
+@@ -222,22 +150,9 @@
+     "type": "MONSTER",
+     "name": { "str": "cardinal" },
+     "description": "A small songbird, famous for its distinctive crest and facial markings.  A well-known example of sexual dimorphism, the males are colored much more vibrantly than the females.",
+-<<<<<<< HEAD
+     "copy-from": "mon_bird_flying_base",
+     "volume": "60 ml",
+     "weight": "45 g",
+-=======
+-    "bodytype": "bird",
+-    "default_faction": "small_animal",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "450 ml",
+-    "weight": "40 g",
+-    "hp": 3,
+-    "speed": 140,
+-    "material": [ "flesh" ],
+-    "symbol": "v",
+->>>>>>> c72880f1b7 (Volume Adjusting)
+     "color": "red",
+     "reproduction": { "baby_egg": "egg_cardinal", "baby_count": 3, "baby_timer": 16 }
+   },
+diff --git a/data/json/monsters/feral_humans.json b/data/json/monsters/feral_humans.json
+index 72442a1e87..f71c9a5bf5 100644
+--- a/data/json/monsters/feral_humans.json
++++ b/data/json/monsters/feral_humans.json
+@@ -570,7 +570,7 @@
+     "id": "mon_feral_human_archaeologist",
+     "type": "MONSTER",
+     "name": "feral archaeologist",
+-    "description": "Judging by looks, this poor individual was probably an archeologist in their former life.  Rabid and bloodshot, they now seem intent to make you a part of their collection as they come at you with a shovel in hand.",
++    "description": "Judging by looks, this poor individual was probably an archaeologist in their former life.  Rabid and bloodshot, they now seem intent to make you a part of their collection as they come at you with a shovel in hand.",
+     "copy-from": "mon_feral_human_pipe",
+     "special_attacks": [
+       {
+diff --git a/data/json/monsters/mechsuits.json b/data/json/monsters/mechsuits.json
+index 8fb87dee62..69a2049381 100644
+--- a/data/json/monsters/mechsuits.json
++++ b/data/json/monsters/mechsuits.json
+@@ -49,7 +49,7 @@
+     "id": "mon_mech_combat",
+     "type": "MONSTER",
+     "name": { "str": "X-02: 'Grunt' Combat Mech" },
+-    "description": "The Boeing-Daewoo CMES (Combat Mechanical Exoskeleton Suit), a recent acquisition by the U.S. military, it was designed to be used in a fire support role, due to its fearsome integrated gatling laser.  It was not deployed before the Cataclysm hit, though there were a few prototypes in the field.  You may be able to hack it to accept you as its pilot.  Like all mech-suits, it can act as a UPS from its large battery.",
++    "description": "The Boeing-Daewoo CMES (Combat Mechanical Exoskeleton Suit), a recent acquisition by the U.S. military, it was designed to be used in a fire support role, due to its fearsome integrated Gatling laser.  It was not deployed before the Cataclysm hit, though there were a few prototypes in the field.  You may be able to hack it to accept you as its pilot.  Like all mech-suits, it can act as a UPS from its large battery.",
+     "default_faction": "mech_bot",
+     "species": [ "ROBOT" ],
+     "diff": 5,
+diff --git a/data/json/monsters/reptile_amphibian.json b/data/json/monsters/reptile_amphibian.json
+index ae43a57bbc..0a1d691feb 100644
+--- a/data/json/monsters/reptile_amphibian.json
++++ b/data/json/monsters/reptile_amphibian.json
+@@ -575,7 +575,7 @@
+     "id": "mon_bullfrog_frog",
+     "type": "MONSTER",
+     "copy-from": "mon_proxy_frog",
+-    "description": "The American bullfrog, in its natural habitat.  It feeds on insects, mice, lizards and any other living thing it can stuff down its gullet.",
++    "description": "The American bullfrog, in its natural habitat.  It feeds on insects, mice, lizards, and any other living thing it can stuff down its gullet.",
+     "name": { "str": "bullfrog" },
+     "volume": "1000 ml",
+     "weight": "750 g",
+@@ -616,7 +616,7 @@
+     "harvest": "mutant_tiny",
+     "upgrades": { "age_grow": 15, "into": "mon_foul_bigfrog" },
+     "extend": { "flags": [ "POISON", "NO_BREATHE" ] },
+-    "//": "NO_BREATHE flag is to prevent gassing by other 'foul' toads.  When possible, add effect for aoe morale debuff around toad. Possibly stack up until triggering nausea/vomitting."
++    "//": "NO_BREATHE flag is to prevent gassing by other 'foul' toads.  When possible, add effect for aoe morale debuff around toad. Possibly stack up until triggering nausea/vomiting."
+   },
+   {
+     "id": "mon_freedom_toad",
+diff --git a/data/json/monsters/rodentkin.json b/data/json/monsters/rodentkin.json
+index 021e3ce7c2..f4cf7edc01 100644
+--- a/data/json/monsters/rodentkin.json
++++ b/data/json/monsters/rodentkin.json
+@@ -61,7 +61,7 @@
+     "id": "mon_big_rat",
+     "type": "MONSTER",
+     "name": { "str": "big rat" },
+-    "//": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occured is nonsensical and should be reported as a bug.",
++    "//": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occurred is nonsensical and should be reported as a bug.",
+     "description": "This cat-sized rat snuffles along the ground looking for things to eat.  It hisses at anything that comes near it, baring sizable teeth.",
+     "default_faction": "ratkin",
+     "bodytype": "pig",
+@@ -109,7 +109,7 @@
+     "type": "MONSTER",
+     "name": { "str": "zap rattigan" },
+     "description": "This cat sized albino mouse sparks randomly, whenever anything approaches it.",
+-    "//": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occured is nonsensical and should be reported as a bug.",
++    "//": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occurred is nonsensical and should be reported as a bug.",
+     "default_faction": "ratkin",
+     "copy-from": "mon_big_rat",
+     "symbol": "R",
+@@ -129,7 +129,7 @@
+     "type": "MONSTER",
+     "name": { "str": "tunnel runner" },
+     "description": "Prior to the Cataclysm someone might have referred to this dog-sized rat as a 'mass of claws and teeth,' but that could describe nearly everything you meet these days.  In any case, this particular mass of claws and teeth is eyeing its surroundings hungrily.",
+-    "//": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occured is nonsensical and should be reported as a bug.",
++    "//": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occurred is nonsensical and should be reported as a bug.",
+     "default_faction": "ratkin",
+     "copy-from": "mon_big_rat",
+     "volume": "20 L",
+@@ -172,7 +172,7 @@
+     "name": { "str": "pack rat" },
+     "description": "This humanoid rodent stands over five feet tall, it pokes and bites at anything shiny, hastily shoving anything of interest into its mouth.",
+     "default_faction": "ratkin",
+-    "//": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occured is nonsensical and should be reported as a bug.",
++    "//": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occurred is nonsensical and should be reported as a bug.",
+     "copy-from": "mon_big_rat",
+     "volume": "20 L",
+     "weight": "30 kg",
+@@ -213,7 +213,7 @@
+     "name": { "str": "Mouse of NEMA", "str_pl": "Mice of NEMA" },
+     "description": "This albino, humanoid mouse walks on its hind legs.  You can see eddies of wind swirl unnaturally around it as it moves, debris caught in its wake.",
+     "default_faction": "ratkin",
+-    "//2": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occured is nonsensical and should be reported as a bug.",
++    "//2": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occurred is nonsensical and should be reported as a bug.",
+     "//": "High winds surrounding it make bash and bullets less effective.  Cut and stab are almost unaffected.",
+     "copy-from": "mon_big_rat",
+     "volume": "20 L",
+@@ -245,7 +245,7 @@
+     "name": { "str": "mausketeer" },
+     "description": "This humanoid rat seems to be inexplicably dressed for a renfaire in an imitation of Ancien Régime light cavalry, complete with a sword.",
+     "default_faction": "ratkin",
+-    "//": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occured is nonsensical and should be reported as a bug.",
++    "//": "All monsters with faction ratkin should only appear in places that make sense for them to appear.  They are specific to a unique lab and any appearances by them outside of that lab prior to at minimum two seasons after the Cataclysm occurred is nonsensical and should be reported as a bug.",
+     "copy-from": "mon_big_rat",
+     "volume": "20 L",
+     "weight": "30 kg",
+diff --git a/data/json/monsters/zed_lab.json b/data/json/monsters/zed_lab.json
+index abc74e3e9e..3fb212c15a 100644
+--- a/data/json/monsters/zed_lab.json
++++ b/data/json/monsters/zed_lab.json
+@@ -40,7 +40,7 @@
+     "id": "mon_zombie_phase_skulker",
+     "type": "MONSTER",
+     "name": { "str": "phase skulker" },
+-    "description": "What remains of a researcher lost to the portal storms, twisted and enervated by the presences that lurk beneath natural perception.  It walks and stumbles in a stuttered manner, and is granted tenuous corporality only by grace of the experimental gear it wore when it died.",
++    "description": "What remains of a researcher lost to the portal storms, twisted and enervated by the presences that lurk beneath natural perception.  It walks and stumbles in a stuttered manner, and is granted tenuous corporeality only by grace of the experimental gear it wore when it died.",
+     "default_faction": "zombie",
+     "bodytype": "human",
+     "species": [ "ABERRATION" ],
+diff --git a/data/json/monsters/zed_misc.json b/data/json/monsters/zed_misc.json
+index 82fffdedd9..8d5e05c8be 100644
+--- a/data/json/monsters/zed_misc.json
++++ b/data/json/monsters/zed_misc.json
+@@ -357,7 +357,7 @@
+     "burn_into": "mon_frog_husk",
+     "upgrades": { "half_life": 30, "into_group": "GROUP_ZOMBTREEFROG_UPGRADE" },
+     "extend": { "flags": [ "HARDTOSHOOT", "HIT_AND_RUN" ] },
+-    "//": "Translation note - 'Croaked' is a euphimistic way of saying 'died' in American English, while 'croak' is an onomatopoeic word for the sound frogs make.  A simple, literal translation of 'zombie treefrog' would also be fitting."
++    "//": "Translation note - 'Croaked' is a euphemistic way of saying 'died' in American English, while 'croak' is an onomatopoeic word for the sound frogs make.  A simple, literal translation of 'zombie treefrog' would also be fitting."
+   },
+   {
+     "id": "mon_frog_shadow",
+diff --git a/data/json/npcs/Backgrounds/codger.json b/data/json/npcs/Backgrounds/codger.json
+index 76a2546070..94a2e6a6f5 100644
+--- a/data/json/npcs/Backgrounds/codger.json
++++ b/data/json/npcs/Backgrounds/codger.json
+@@ -75,7 +75,7 @@
+     "id": "BGSS_CODGER_STORY6",
+     "type": "talk_topic",
+     "dynamic_line": {
+-      "gendered_line": "Anyway, long story short, I were headin' back up to Mount Greenwood to check on th'old ranger station again when I heard them bombs fallin and choppers flyin.  Decided to camp out there to see it all through, but it didn't ever end, now, did it?  So here I am.",
++      "gendered_line": "Anyway, long story short, I were headin' back up to Mount Greenwood to check on th' old ranger station again when I heard them bombs fallin' and choppers flyin'.  Decided to camp out there to see it all through, but it didn't ever end, now, did it?  So here I am.",
+       "relevant_genders": [ "npc" ]
+     },
+     "responses": [
+diff --git a/data/json/npcs/Backgrounds/evacuee_1.json b/data/json/npcs/Backgrounds/evacuee_1.json
+index 72e42d7357..1a2c4886ce 100644
+--- a/data/json/npcs/Backgrounds/evacuee_1.json
++++ b/data/json/npcs/Backgrounds/evacuee_1.json
+@@ -62,7 +62,7 @@
+     "id": "BGSS_EVACUEE_1_STORY4",
+     "type": "talk_topic",
+     "dynamic_line": {
+-      "gendered_line": "I thought I had those damned <zombies> figured out.  I got braver, started heading out by day more and more.  One of those screamer zombies spotted me and called in a horde, with a giant <swear> beastie at the head of it, the size of a volkswagen and all covered in bone plates.  I know when I'm outclassed.  The big guy was held back by his own horde of buddies, and I managed to book it back to my place.  I closed the windows, locked it down, but it was too late.  The giant followed me and just started hammering right through the walls.  I grabbed what I could and made for the horizon.  Last I saw of my squat, it was collapsing on the bastard.  For all I know, it died in the crash, but I am not going back to find out.",
++      "gendered_line": "I thought I had those damned <zombies> figured out.  I got braver, started heading out by day more and more.  One of those screamer zombies spotted me and called in a horde, with a giant <swear> beastie at the head of it, the size of a Volkswagen and all covered in bone plates.  I know when I'm outclassed.  The big guy was held back by his own horde of buddies, and I managed to book it back to my place.  I closed the windows, locked it down, but it was too late.  The giant followed me and just started hammering right through the walls.  I grabbed what I could and made for the horizon.  Last I saw of my squat, it was collapsing on the bastard.  For all I know, it died in the crash, but I am not going back to find out.",
+       "relevant_genders": [ "npc" ]
+     },
+     "responses": [
+diff --git a/data/json/snippets/home_pictures.json b/data/json/snippets/home_pictures.json
+index bea3b4f12a..0a0f667f6e 100644
+--- a/data/json/snippets/home_pictures.json
++++ b/data/json/snippets/home_pictures.json
+@@ -58,7 +58,7 @@
+       },
+       {
+         "id": "home_picture_14",
+-        "text": "A framed clipping of a newspaper article.  'Annual Chilli Cook-off Winner'.  Enclosed is a small article about the winner and the secret recipe."
++        "text": "A framed clipping of a newspaper article.  'Annual Chili Cook-off Winner'.  Enclosed is a small article about the winner and the secret recipe."
+       },
+       {
+         "id": "home_picture_15",
+@@ -74,7 +74,7 @@
+       },
+       {
+         "id": "home_picture_18",
+-        "text": "A picture of a Renaissance Fair.  A petite woman in ornate mediaeval clothing is holding a gigantic turkey leg and dramatically biting into it with exaggerated force."
++        "text": "A picture of a Renaissance Fair.  A petite woman in ornate medieval clothing is holding a gigantic turkey leg and dramatically biting into it with exaggerated force."
+       },
+       {
+         "id": "home_picture_19",
+diff --git a/data/json/snippets/schizophrenia.json b/data/json/snippets/schizophrenia.json
+index 4bf59f30cb..1941f5bbe0 100644
+--- a/data/json/snippets/schizophrenia.json
++++ b/data/json/snippets/schizophrenia.json
+@@ -207,7 +207,7 @@
+     "text": [
+       "Your weapon starts burning your hands!",
+       "Your weapon feels freezing cold!",
+-      "An electric shock shoots into your hand from Your weapon!",
++      "An electric shock shoots into your hand from your weapon!",
+       "Your weapon was working for… THEM",
+       "Your weapon is running away!",
+       "Your weapon is a dirty traitor!"
+diff --git a/data/mods/Aftershock/itemgroups/tool_groups.json b/data/mods/Aftershock/itemgroups/tool_groups.json
+index 59c2e1a5e3..8536501f33 100644
+--- a/data/mods/Aftershock/itemgroups/tool_groups.json
++++ b/data/mods/Aftershock/itemgroups/tool_groups.json
+@@ -217,7 +217,7 @@
+   {
+     "type": "item_group",
+     "id": "afs_tools_scavenging",
+-    "//": "lightweight tools used for finding and getting into places where you dont belong.",
++    "//": "lightweight tools used for finding and getting into places where you don't belong.",
+     "items": [
+       { "item": "electrohack", "prob": 100 },
+       {
+diff --git a/data/mods/Aftershock/itemgroups/weapons/energy_gun_groups.json b/data/mods/Aftershock/itemgroups/weapons/energy_gun_groups.json
+index dc04717c2b..c0ab2c38fe 100644
+--- a/data/mods/Aftershock/itemgroups/weapons/energy_gun_groups.json
++++ b/data/mods/Aftershock/itemgroups/weapons/energy_gun_groups.json
+@@ -104,7 +104,7 @@
+     "id": "afs_civilian_energy_gun",
+     "type": "item_group",
+     "subtype": "distribution",
+-    "//": "Plasma isnt sold to civilians",
++    "//": "Plasma isn't sold to civilians",
+     "items": [ { "group": "afs_civilian_laser_gun", "prob": 12 }, { "group": "afs_civilian_voltaic_gun", "prob": 2 } ]
+   },
+   {
+diff --git a/data/mods/Aftershock/items/tools.json b/data/mods/Aftershock/items/tools.json
+index 575b2ef46d..82f9710209 100644
+--- a/data/mods/Aftershock/items/tools.json
++++ b/data/mods/Aftershock/items/tools.json
+@@ -523,7 +523,7 @@
+     "type": "TOOL",
+     "id": "afs_shuttle_radiobeacon",
+     "name": { "str": "drone shuttle beacon" },
+-    "description": "A portable high-power radiobeacon.  Signals a drone shuttle from Port Augustmoon, which will make landfall in about 30 minutes and leave 4 hours later, wether you board it or not.  Single use, all expenses paid in advance, and non refundable.",
++    "description": "A portable high-power radiobeacon.  Signals a drone shuttle from Port Augustmoon, which will make landfall in about 30 minutes and leave 4 hours later, whether you board it or not.  Single use, all expenses paid in advance, and non refundable.",
+     "weight": "340 g",
+     "volume": "1 L",
+     "category": "tools",
+@@ -674,7 +674,7 @@
+     "id": "multi_cooker",
+     "copy-from": "multi_cooker",
+     "type": "TOOL",
+-    "//": "Makes it look more sci-fi so it isnt out of place, not many actual changes otherwise.",
++    "//": "Makes it look more sci-fi so it isn't out of place, not many actual changes otherwise.",
+     "name": { "str": "micro-cooker" },
+     "description": "A rugged kitchen in one tool, made for use within small spaceships or in the wilderness.  It can automatically prepare a variety of dishes while its owner focuses on other tasks.",
+     "weight": "5 kg",
+diff --git a/data/mods/Aftershock/lore/cyberpunk_future.md b/data/mods/Aftershock/lore/cyberpunk_future.md
+index 91cb18f2ad..3c5ab25cd7 100644
+--- a/data/mods/Aftershock/lore/cyberpunk_future.md
++++ b/data/mods/Aftershock/lore/cyberpunk_future.md
+@@ -10,4 +10,4 @@ The Solar Corporations currently mentioned in the mod are:
+ 
+ 
+ # Technology
+-Much was lost during the discontinuity. Colonies that survived relied on technology not much more advanced than the early space age of Earth. While artifacts from before the discontinuity can be found, the secrets of their functionality and construction are often lost. These artifacts can range from exotic weapons to seemingly miraculous medicines, from superefficient power cells to teleportation. Salus IV, as a pre-discontinuity colony is a known source of some of these artifacts, drawing archeologists and treasure hunters alike.
+\ No newline at end of file
++Much was lost during the discontinuity. Colonies that survived relied on technology not much more advanced than the early space age of Earth. While artifacts from before the discontinuity can be found, the secrets of their functionality and construction are often lost. These artifacts can range from exotic weapons to seemingly miraculous medicines, from superefficient power cells to teleportation. Salus IV, as a pre-discontinuity colony is a known source of some of these artifacts, drawing archaeologists and treasure hunters alike.
+\ No newline at end of file
+diff --git a/data/mods/Aftershock/lore/factions.md b/data/mods/Aftershock/lore/factions.md
+index 4908e789ba..ff23caf808 100644
+--- a/data/mods/Aftershock/lore/factions.md
++++ b/data/mods/Aftershock/lore/factions.md
+@@ -1,6 +1,6 @@
+ 
+ ## United Interstellar Coordination Agency [UICA]
+-Formed relatively recently, after the discovery of the new FTL method, the United Interstellar Coordination Agency is a loose confederation of Solar Corporations, Governments, and NGOs dedicated to reclaiming and bringing most extra-solar colonies back under Earth's control. Since most colonies never possessed the technological and industrial base to support themselves on the long term, this goal is usually achieved through relatively peaceful means, even then, UICA fields the largest military in human history for when peaceful reintegration isnt possible.
++Formed relatively recently, after the discovery of the new FTL method, the United Interstellar Coordination Agency is a loose confederation of Solar Corporations, Governments, and NGOs dedicated to reclaiming and bringing most extra-solar colonies back under Earth's control. Since most colonies never possessed the technological and industrial base to support themselves on the long term, this goal is usually achieved through relatively peaceful means, even then, UICA fields the largest military in human history for when peaceful reintegration isn't possible.
+ 
+ While this all nice and noble (as long as you ask an Earthling) this far out in the frontier UICA personnel is either irremediably corrupt and/or incompetent. They will willingly part with valuable military equipment or classified information in exchange for appropriate sums of money or personal favors.
+ 
+diff --git a/data/mods/Aftershock/npcs/factions.json b/data/mods/Aftershock/npcs/factions.json
+index 1138ac98d4..8b5cdbd44e 100644
+--- a/data/mods/Aftershock/npcs/factions.json
++++ b/data/mods/Aftershock/npcs/factions.json
+@@ -243,7 +243,7 @@
+       "Prepnet_Phyle": { "kill on sight": true },
+       "marloss": { "kill on sight": true }
+     },
+-    "description": "A massive, multi-system corporation with major investments across artificial intelligence, shipbuilding, military cybernetics and applied robotics.  Among the oldest of the Solar Corporations, it is a major player in the Orion Arm, and a key military supplier of UICA's military hardware.  It is best known for its normally secretive and highly advanced research and archeology division."
++    "description": "A massive, multi-system corporation with major investments across artificial intelligence, shipbuilding, military cybernetics and applied robotics.  Among the oldest of the Solar Corporations, it is a major player in the Orion Arm, and a key military supplier of UICA's military hardware.  It is best known for its normally secretive and highly advanced research and archaeology division."
+   },
+   {
+     "type": "faction",
+diff --git a/data/mods/CrazyCataclysm/crazy_monstergroups.json b/data/mods/CrazyCataclysm/crazy_monstergroups.json
+index cba4788eee..15be7f6b7e 100644
+--- a/data/mods/CrazyCataclysm/crazy_monstergroups.json
++++ b/data/mods/CrazyCataclysm/crazy_monstergroups.json
+@@ -6,7 +6,7 @@
+       { "monster": "mon_zombie_skeltal", "weight": 1, "cost_multiplier": 60 },
+       { "monster": "mon_zombie_skeltal", "weight": 1, "cost_multiplier": 30, "conditions": [ "AUTUMN" ] }
+     ],
+-    "//": "Autumn is halloween"
++    "//": "Autumn is Halloween"
+   },
+   {
+     "type": "monstergroup",
+diff --git a/data/mods/Defense_Mode/mod_interactions/BombasticPerks/perks.json b/data/mods/Defense_Mode/mod_interactions/BombasticPerks/perks.json
+index b6ea46f95e..1f2c02ad71 100644
+--- a/data/mods/Defense_Mode/mod_interactions/BombasticPerks/perks.json
++++ b/data/mods/Defense_Mode/mod_interactions/BombasticPerks/perks.json
+@@ -4,7 +4,7 @@
+     "id": "perk_money_maker_merc",
+     "name": { "str": "Money Makin' Mercenary" },
+     "points": 0,
+-    "description": "You've always had a knack for finding the value in life, wether it's $200 or $50 for a life.  You get more money from completing hordes.",
++    "description": "You've always had a knack for finding the value in life, whether it's $200 or $50 for a life.  You get more money from completing hordes.",
+     "category": [ "perk" ],
+     "processed_eocs": [ "money_maker_setup" ]
+   },
+diff --git a/data/mods/Magiclysm/items/herbs_and_flowers.json b/data/mods/Magiclysm/items/herbs_and_flowers.json
+index e2c0a741ce..379a27c26b 100644
+--- a/data/mods/Magiclysm/items/herbs_and_flowers.json
++++ b/data/mods/Magiclysm/items/herbs_and_flowers.json
+@@ -3,7 +3,7 @@
+     "type": "COMESTIBLE",
+     "id": "platonic_flower",
+     "name": { "str": "philosopher's flower" },
+-    "//2": "there will be some thoughts about how this alchemy stuff works. the relation are pretty stretchy, because i dont want to make bazillion of plants for each purpose, so dont mind if 'light' related plant will occur in 'darkness' flask effect",
++    "//2": "there will be some thoughts about how this alchemy stuff works. the relation are pretty stretchy, because I don't want to make bazillion of plants for each purpose, so don't mind if 'light' related plant will occur in 'darkness' flask effect",
+     "//": "same as barnacle weed, 'duration' and 'sustaining', but not so long and more powerful, for effective and non standard effects like night vision",
+     "color": "pink",
+     "comestible_type": "FOOD",
+diff --git a/doc/VITAMIN.md b/doc/VITAMIN.md
+index 1e2ea08d85..bd3030b617 100644
+--- a/doc/VITAMIN.md
++++ b/doc/VITAMIN.md
+@@ -31,7 +31,7 @@ Mandatory. The type of the vitamin. Valid values are:
+ 
+ #### `vitamin`
+ When simplified nutrition is enabled, this vitamin will not be added to any items and any time the game attempts to retrieve it from the player it will give 0.
+-Only nutritional vitamins should have this type. **Vitamins are inputed in JSON as RDA everything else is a constant value**
++Only nutritional vitamins should have this type. **Vitamins are inputted in JSON as RDA everything else is a constant value**
+ 
+ #### `toxin`
+ This is some toxic chemical or component. This currently has no effect.
+-- 
+2.45.2
+

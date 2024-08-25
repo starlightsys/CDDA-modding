@@ -1,0 +1,29 @@
+From 7eb8dee4fc00ff16f3bf510f97f7fb8dcb2d208f Mon Sep 17 00:00:00 2001
+From: Psithief <psithief@gmail.com>
+Date: Sat, 17 Aug 2024 13:52:54 +0800
+Subject: [PATCH 048/125] Allow cephalopods to eat, sleep underwater
+
+---
+ data/json/mutations/mutations.json | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/data/json/mutations/mutations.json b/data/json/mutations/mutations.json
+index 106b400dc7..49d9bf904b 100644
+--- a/data/json/mutations/mutations.json
++++ b/data/json/mutations/mutations.json
+@@ -8958,9 +8958,9 @@
+     "points": 1,
+     "vitamin_cost": 60,
+     "description": "Falling asleep underwater is easy for you, and you spend less time asleep when you rest there.  You can also eat underwater, though you can't drink.",
+-    "prereqs": [ "SEESLEEP", "FROG_EYES" ],
+-    "category": [ "FISH", "BATRACHIAN" ],
+-    "threshreq": [ "THRESH_FISH", "THRESH_BATRACHIAN" ]
++    "prereqs": [ "SEESLEEP", "FROG_EYES", "GILLS_CEPH" ],
++    "category": [ "FISH", "BATRACHIAN", "CEPHALOPOD" ],
++    "threshreq": [ "THRESH_FISH", "THRESH_BATRACHIAN", "THRESH_CEPHALOPOD" ]
+   },
+   {
+     "type": "mutation",
+-- 
+2.45.2
+

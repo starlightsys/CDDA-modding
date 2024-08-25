@@ -1,0 +1,944 @@
+From 99dc36e2a7b4e9e9ef33bdb44aba4f9f0ed7381f Mon Sep 17 00:00:00 2001
+From: Maleclypse <54345792+Maleclypse@users.noreply.github.com>
+Date: Sun, 18 Aug 2024 17:21:56 -0500
+Subject: [PATCH 058/125] [ Xedra Evolved ] Dream wounds: Shadows (#74678)
+
+* Shadows
+
+* Update monster_spells.json
+
+* more changes
+
+* Shadow enchantment
+
+* Map extra
+
+* Update data/mods/Xedra_Evolved/damage_types.json
+
+* Banishment effect applied to spells
+
+* Update monster_spells.json
+
+* fixes
+
+* Update dream_wound_monsters.json
+
+* Update data/mods/Xedra_Evolved/field_type.json
+
+* Update dream_wound_monsters.json
+
+* Update dream_wound_monsters.json
+
+* Lint effects
+
+* Lint map extras
+
+* Update damage_types.json
+
+* Update species.json
+
+* Fixes
+
+* Update data/mods/Xedra_Evolved/itemgroups/monster_drops.json
+
+* Fixes
+
+* Update resources.json
+
+* Update data/mods/Xedra_Evolved/items/resources.json
+
+* Fixes
+
+* Update data/mods/Xedra_Evolved/items/resources.json
+
+* Update map_extras.json
+
+* Update data/mods/Xedra_Evolved/effects/goblin_fruit_effects.json
+
+* Fixes but remove dealth guilt duplicate
+
+* Update data/mods/Xedra_Evolved/monsters/monster_spells.json
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+* Failed fix
+
+* Renaming file to get around load error issues
+
+* Revert "Renaming file to get around load error issues"
+
+This reverts commit 1bf22ddc4cb7d4d4126682eb5c1aadf8f3495548.
+
+* Fixes
+
+* More fixes need flags for damage, banishment fails
+
+* rename spell file
+
+* Update data/mods/Xedra_Evolved/field_type.json
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+* Create json_flags.json
+
+* Update json_flags.json
+
+* Update map_extras.json
+
+* Update data/mods/Xedra_Evolved/json_flags.json
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+* Update dream_wound_monsters.json
+
+---------
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+---
+ data/mods/Xedra_Evolved/damage_types.json     |  53 +++++
+ data/mods/Xedra_Evolved/effects/effects.json  |   8 +
+ .../effects/goblin_fruit_effects.json         |  10 +
+ data/mods/Xedra_Evolved/field_type.json       |  21 ++
+ .../itemgroups/monster_drops.json             |  50 +++++
+ data/mods/Xedra_Evolved/items/ammo_type.json  |   6 +
+ .../items/comestibles/goblin_fruits.json      |  21 ++
+ data/mods/Xedra_Evolved/items/resources.json  |  36 ++++
+ data/mods/Xedra_Evolved/json_flags.json       |  12 ++
+ .../mods/Xedra_Evolved/mapgen/map_extras.json |  54 +++++
+ data/mods/Xedra_Evolved/material.json         |  18 ++
+ .../monsters/dream_wound_monsters.json        | 186 ++++++++++++++++++
+ .../Xedra_Evolved/monsters/monfaction.json    |   4 +-
+ .../monsters/monster_spells.json              | 124 ++++++++++++
+ .../Xedra_Evolved/monsters/monstergroup.json  |   9 +
+ data/mods/Xedra_Evolved/monsters/species.json |   5 +-
+ data/mods/Xedra_Evolved/regional_overlay.json |   2 +
+ .../Xedra_Evolved/spells/dreamer_spells.json  |   2 +-
+ 18 files changed, 616 insertions(+), 5 deletions(-)
+ create mode 100644 data/mods/Xedra_Evolved/json_flags.json
+ create mode 100644 data/mods/Xedra_Evolved/monsters/dream_wound_monsters.json
+
+diff --git a/data/mods/Xedra_Evolved/damage_types.json b/data/mods/Xedra_Evolved/damage_types.json
+index 60915654ba..21b116ddf0 100644
+--- a/data/mods/Xedra_Evolved/damage_types.json
++++ b/data/mods/Xedra_Evolved/damage_types.json
+@@ -61,5 +61,58 @@
+     "pet_prot_info": { "order": 999999, "show_type": false },
+     "melee_combat_info": { "order": 999999, "show_type": false },
+     "ablative_info": { "order": 999999, "show_type": false }
++  },
++  {
++    "id": "xe_shadow_damage",
++    "type": "damage_type",
++    "physical": false,
++    "magic_color": "dark_gray",
++    "name": "sharp edged shadows",
++    "skill": "cutting",
++    "derived_from": [ "cut", 0.8 ],
++    "immune_flags": { "character": [ "SHADOW_CHAR_IMMUNE" ], "monster": [ "SHADOW_MONSTER_IMMUNE" ] },
++    "ondamage_eocs": [ "EOC_SHADOW_DAMAGE_BLIND_CHANCE", "EOC_SHADOW_DAMAGE_EXTRA_BLIND_CHANCE" ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_SHADOW_DAMAGE_BLIND_CHANCE",
++    "condition": {
++      "and": [
++        { "x_in_y_chance": { "x": 1, "y": 5 } },
++        { "math": [ "_damage_taken", ">", "0" ] },
++        { "not": { "npc_has_trait": "SHADOWED" } },
++        { "not": { "npc_has_flag": "SHADOW_CHAR_IMMUNE" } },
++        { "not": { "npc_has_flag": "SHADOW_MONSTER_IMMUNE" } }
++      ]
++    },
++    "effect": [ { "npc_add_effect": "blind", "duration": "3 s" } ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_SHADOW_DAMAGE_EXTRA_BLIND_CHANCE",
++    "condition": {
++      "and": [
++        { "x_in_y_chance": { "x": 1, "y": 24 } },
++        { "math": [ "_damage_taken", ">", "0" ] },
++        { "not": { "npc_has_trait": "SHADOWED" } },
++        { "not": { "npc_has_flag": "SHADOW_CHAR_IMMUNE" } },
++        { "not": { "npc_has_flag": "SHADOW_MONSTER_IMMUNE" } }
++      ]
++    },
++    "effect": [
++      { "u_message": "A bit of shadowstuff settles over your eyes, blocking your vision!", "type": "bad" },
++      { "npc_add_effect": "blind", "duration": "10 s" }
++    ]
++  },
++  {
++    "id": "xe_shadow_damage",
++    "type": "damage_info_order",
++    "info_display": "detailed",
++    "verb": "umbrous",
++    "bionic_info": { "order": 999903, "show_type": false },
++    "protection_info": { "order": 999903, "show_type": false },
++    "pet_prot_info": { "order": 999903, "show_type": false },
++    "melee_combat_info": { "order": 999903, "show_type": false },
++    "ablative_info": { "order": 999903, "show_type": false }
+   }
+ ]
+diff --git a/data/mods/Xedra_Evolved/effects/effects.json b/data/mods/Xedra_Evolved/effects/effects.json
+index a7d3dced9b..1b111093af 100644
+--- a/data/mods/Xedra_Evolved/effects/effects.json
++++ b/data/mods/Xedra_Evolved/effects/effects.json
+@@ -156,6 +156,14 @@
+     "base_mods": { "int_mod": [ -2 ], "dex_mod": [ -1 ], "per_mod": [ -4 ] },
+     "blood_analysis_description": "Hallucinations"
+   },
++  {
++    "type": "effect_type",
++    "id": "effect_monster_shadow_damage_reduction",
++    "name": [ "Shadow Damage Reduction" ],
++    "desc": [ "You are flatter and less real in ways that makes you less susceptible to damage." ],
++    "show_in_info": true,
++    "enchantments": [ { "values": [ { "value": "ARMOR_BULLET", "multiply": -0.75 }, { "value": "ARMOR_BASH", "multiply": -0.75 } ] } ]
++  },
+   {
+     "type": "effect_type",
+     "id": "creativity",
+diff --git a/data/mods/Xedra_Evolved/effects/goblin_fruit_effects.json b/data/mods/Xedra_Evolved/effects/goblin_fruit_effects.json
+index ce649f9a51..3d73ec61fd 100644
+--- a/data/mods/Xedra_Evolved/effects/goblin_fruit_effects.json
++++ b/data/mods/Xedra_Evolved/effects/goblin_fruit_effects.json
+@@ -140,6 +140,16 @@
+     "limb_score_mods": [ { "limb_score": "night_vis", "modifier": 6 } ],
+     "flags": [ "EFFECT_LIMB_SCORE_MOD" ]
+   },
++  {
++    "type": "effect_type",
++    "id": "effect_goblin_fruit_shadow",
++    "name": [ "Muffled" ],
++    "desc": [ "Your movements are muffled." ],
++    "apply_message": "Your footsteps feel quieter.",
++    "remove_message": "Your steps are normal once again.",
++    "rating": "good",
++    "enchantments": [ { "values": [ { "value": "FOOTSTEP_NOISE", "multiply": -0.67 } ] } ]
++  },
+   {
+     "type": "effect_type",
+     "id": "effect_goblin_fruit_nobleed",
+diff --git a/data/mods/Xedra_Evolved/field_type.json b/data/mods/Xedra_Evolved/field_type.json
+index 11db655651..85506ebfa9 100644
+--- a/data/mods/Xedra_Evolved/field_type.json
++++ b/data/mods/Xedra_Evolved/field_type.json
+@@ -36,6 +36,27 @@
+     "display_field": true,
+     "looks_like": "fd_smoke"
+   },
++  {
++    "id": "fd_dream_wound_shadow",
++    "type": "field_type",
++    "intensity_levels": [
++      {
++        "name": "oily sheen",
++        "color": "light_gray",
++        "sym": "*",
++        "dangerous": true,
++        "intensity_upgrade_chance": 10,
++        "intensity_upgrade_duration": "6 hours"
++      },
++      { "name": "deep shadows", "color": "dark_gray" },
++      { "name": "roiling shadows", "color": "black_green", "transparent": false }
++    ],
++    "description_affix": "under",
++    "priority": 8,
++    "display_items": true,
++    "display_field": true,
++    "looks_like": "fd_smoke"
++  },
+   {
+     "id": "fd_blood_karma",
+     "type": "field_type",
+diff --git a/data/mods/Xedra_Evolved/itemgroups/monster_drops.json b/data/mods/Xedra_Evolved/itemgroups/monster_drops.json
+index e1387a0444..00a70f4fee 100644
+--- a/data/mods/Xedra_Evolved/itemgroups/monster_drops.json
++++ b/data/mods/Xedra_Evolved/itemgroups/monster_drops.json
+@@ -452,6 +452,56 @@
+       { "item": "bio_ar", "prob": 1 }
+     ]
+   },
++  {
++    "id": "mon_dream_shadow_death_drops",
++    "type": "item_group",
++    "subtype": "collection",
++    "entries": [
++      { "item": "scrap_dreamdross", "prob": 80, "count": [ 0, 3 ] },
++      { "item": "scrap_shadowstuff", "prob": 60, "count": [ 0, 2 ] },
++      { "item": "chunk_shadowstuff", "prob": 40, "count": [ 0, 1 ] }
++    ]
++  },
++  {
++    "id": "mon_dream_shadowbeast_death_drops",
++    "type": "item_group",
++    "subtype": "collection",
++    "entries": [
++      { "item": "scrap_dreamdross", "prob": 60, "count": [ 0, 4 ] },
++      { "item": "scrap_shadowstuff", "prob": 80, "count": [ 0, 4 ] },
++      { "item": "chunk_shadowstuff", "prob": 70, "count": [ 0, 2 ] },
++      { "item": "shadow_fruit", "prob": 30, "count": [ 0, 1 ] }
++    ]
++  },
++  {
++    "id": "mon_dream_shadowman_death_drops",
++    "type": "item_group",
++    "subtype": "collection",
++    "entries": [
++      { "item": "scrap_dreamdross", "prob": 100, "count": [ 0, 4 ] },
++      { "item": "scrap_shadowstuff", "prob": 100, "count": [ 0, 4 ] },
++      { "item": "chunk_shadowstuff", "prob": 100, "count": [ 0, 2 ] },
++      { "group": "xe_shadowman_spell_drops", "prob": 100, "count": 1 }
++    ]
++  },
++  {
++    "type": "item_group",
++    "id": "xe_shadowman_spell_drops",
++    "//": "Spell drops for shadow wounds",
++    "subtype": "distribution",
++    "entries": [
++      { "group": "xe_dreamer_spell_group0", "prob": 6 },
++      { "group": "xe_dreamer_spell_group1", "prob": 12 },
++      { "group": "xe_dreamer_spell_group2", "prob": 25 },
++      { "group": "xe_dreamer_spell_group3", "prob": 100 },
++      { "group": "xe_dreamer_spell_group4", "prob": 50 },
++      { "group": "xe_eater_spell_group0", "prob": 6 },
++      { "group": "xe_eater_spell_group1", "prob": 12 },
++      { "group": "xe_eater_spell_group2", "prob": 25 },
++      { "group": "xe_eater_spell_group3", "prob": 100 },
++      { "group": "xe_eater_spell_group4", "prob": 50 }
++    ]
++  },
+   {
+     "id": "triffid_heart",
+     "type": "harvest",
+diff --git a/data/mods/Xedra_Evolved/items/ammo_type.json b/data/mods/Xedra_Evolved/items/ammo_type.json
+index 4f1a0f1361..d600333442 100644
+--- a/data/mods/Xedra_Evolved/items/ammo_type.json
++++ b/data/mods/Xedra_Evolved/items/ammo_type.json
+@@ -23,6 +23,12 @@
+     "name": "scraps of dreamdross",
+     "default": "scrap_dreamdross"
+   },
++  {
++    "type": "ammunition_type",
++    "id": "scrap_shadowstuff",
++    "name": "scraps of shadowstuff",
++    "default": "scrap_shadowstuff"
++  },
+   {
+     "type": "ammunition_type",
+     "id": "glamour_charge",
+diff --git a/data/mods/Xedra_Evolved/items/comestibles/goblin_fruits.json b/data/mods/Xedra_Evolved/items/comestibles/goblin_fruits.json
+index 52399cad43..0b1c171477 100644
+--- a/data/mods/Xedra_Evolved/items/comestibles/goblin_fruits.json
++++ b/data/mods/Xedra_Evolved/items/comestibles/goblin_fruits.json
+@@ -429,6 +429,27 @@
+     "id": "EOC_GOBLIN_WATER_BREATHING",
+     "effect": [ { "u_add_effect": "effect_goblin_fruit_water_breathing", "duration": { "math": [ "500 + rand(5000)" ] } } ]
+   },
++  {
++    "type": "COMESTIBLE",
++    "id": "shadow_fruit",
++    "name": { "str": "shadowy goblin fruit" },
++    "description": "This greyish goblin fruit is shaped like a pear, if pears had scales like a pinecone.  There is a pulpy meat underneath the scales.",
++    "copy-from": "goblin_fruit_abstract",
++    "comestible_type": "FOOD",
++    "color": "dark_gray",
++    "weight": "118 g",
++    "volume": "151 ml",
++    "use_action": {
++      "type": "effect_on_conditions",
++      "description": "Eat the shadowy goblin fruit.",
++      "effect_on_conditions": [ "EOC_GOBLIN_FRUIT_SHADOW" ]
++    }
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_GOBLIN_FRUIT_SHADOW",
++    "effect": [ { "u_add_effect": "effect_goblin_fruit_shadow", "duration": { "math": [ "500 + rand(5000)" ] } } ]
++  },
+   {
+     "type": "COMESTIBLE",
+     "id": "goblin_fruit_giant_growth",
+diff --git a/data/mods/Xedra_Evolved/items/resources.json b/data/mods/Xedra_Evolved/items/resources.json
+index 3019c96c2e..3fe22c8f16 100644
+--- a/data/mods/Xedra_Evolved/items/resources.json
++++ b/data/mods/Xedra_Evolved/items/resources.json
+@@ -56,6 +56,42 @@
+     "calories": 0,
+     "extend": { "flags": [ "NUTRIENT_OVERRIDE" ] }
+   },
++  {
++    "id": "scrap_shadowstuff",
++    "type": "AMMO",
++    "category": "spare_parts",
++    "name": { "str": "scrap shadowstuff", "str_pl": "scraps of shadowstuff" },
++    "description": "A bulky assortment of small bits of scrap shadowstuff, possibly useful in ephemeral crafting.",
++    "weight": "5 g",
++    "volume": "25 ml",
++    "price": "5 USD",
++    "price_postapoc": "10 cent",
++    "count": 2,
++    "stack_size": 10,
++    "//": "Density .5g/ml.",
++    "material": [ "shadowstuff" ],
++    "ammo_type": "scrap_shadowstuff",
++    "symbol": ",",
++    "color": "light_gray"
++  },
++  {
++    "id": "chunk_shadowstuff",
++    "type": "AMMO",
++    "category": "spare_parts",
++    "name": { "str": "chunk shadowstuff", "str_pl": "scraps of shadowstuff" },
++    "description": "A bulky assortment of larger bits of scrap shadowstuff, possibly useful in ephemeral crafting.",
++    "weight": "5 g",
++    "volume": "25 ml",
++    "price": "5 USD",
++    "price_postapoc": "10 cent",
++    "count": 2,
++    "stack_size": 10,
++    "//": "Density .5g/ml.",
++    "material": [ "shadowstuff" ],
++    "ammo_type": "components",
++    "symbol": ",",
++    "color": "light_gray"
++  },
+   {
+     "id": "scrap_dreamdross",
+     "type": "AMMO",
+diff --git a/data/mods/Xedra_Evolved/json_flags.json b/data/mods/Xedra_Evolved/json_flags.json
+new file mode 100644
+index 0000000000..00713d03e7
+--- /dev/null
++++ b/data/mods/Xedra_Evolved/json_flags.json
+@@ -0,0 +1,12 @@
++[
++  {
++    "id": "SHADOW_CHAR_IMMUNE",
++    "type": "json_flag",
++    "//": "Immune to shadow damage"
++  },
++  {
++    "id": "SHADOW_MONSTER_IMMUNE",
++    "type": "monster_flag",
++    "//": "Immune to shadow damage"
++  }
++]
+diff --git a/data/mods/Xedra_Evolved/mapgen/map_extras.json b/data/mods/Xedra_Evolved/mapgen/map_extras.json
+index 30cc93276c..b2b283266e 100644
+--- a/data/mods/Xedra_Evolved/mapgen/map_extras.json
++++ b/data/mods/Xedra_Evolved/mapgen/map_extras.json
+@@ -859,5 +859,59 @@
+       "flags": [ "ERASE_ALL_BEFORE_PLACING_TERRAIN" ],
+       "place_monster": [ { "group": "GROUP_CHANGELING_STRIKE_FORCE", "x": [ 0, 14 ], "y": [ 0, 14 ], "chance": 75, "repeat": [ 7, 15 ] } ]
+     }
++  },
++  {
++    "type": "mapgen",
++    "method": "json",
++    "nested_mapgen_id": "dreamwound_shadow",
++    "object": {
++      "mapgensize": [ 6, 6 ],
++      "flags": [ "ERASE_ALL_BEFORE_PLACING_TERRAIN" ],
++      "terrain": { " ": "t_region_groundcover" },
++      "furniture": { " ": "f_rubble_rock" },
++      "place_fields": [
++        { "field": "fd_dream_wound_shadow", "x": [ 2, 4 ], "y": [ 2, 4 ], "intensity": [ 1, 3 ], "repeat": 15 },
++        { "field": "fd_gibs_flesh", "x": [ 0, 6 ], "y": [ 0, 6 ], "intensity": [ 0, 3 ] }
++      ],
++      "place_monsters": [ { "monster": "GROUP_DREAM_WOUND_SHADOW", "x": [ 0, 6 ], "y": [ 0, 6 ], "density": 0.3 } ],
++      "place_monster": [ { "monster": "mon_dream_shadowman", "x": [ 0, 6 ], "y": [ 0, 6 ] } ]
++    }
++  },
++  {
++    "type": "mapgen",
++    "method": "json",
++    "nested_mapgen_id": "dreamwound_shadow_from_dreams",
++    "object": {
++      "mapgensize": [ 6, 6 ],
++      "flags": [ "ERASE_ALL_BEFORE_PLACING_TERRAIN" ],
++      "terrain": { " ": "t_region_groundcover" },
++      "furniture": { " ": "f_rubble_rock" },
++      "place_fields": [
++        { "field": "fd_dream_wound_shadow", "x": [ 2, 4 ], "y": [ 2, 4 ], "intensity": [ 1, 3 ], "repeat": 15 },
++        { "field": "fd_gibs_flesh", "x": [ 0, 6 ], "y": [ 0, 6 ], "intensity": [ 0, 3 ] }
++      ],
++      "place_monsters": [ { "monster": "GROUP_DREAM_WOUND_SHADOW", "x": [ 0, 6 ], "y": [ 0, 6 ], "density": 0.3 } ],
++      "place_monster": [ { "monster": "mon_dream_shadowman", "name": "Crowing Shadowman", "x": [ 0, 6 ], "y": [ 0, 6 ], "target": true } ]
++    }
++  },
++  {
++    "type": "mapgen",
++    "method": "json",
++    "update_mapgen_id": "mx_dreamwound_shadow",
++    "object": {
++      "place_nested": [ { "chunks": [ "dreamwound_shadow" ], "x": [ 2, 17 ], "y": [ 2, 17 ] } ],
++      "monsters": { " ": { "monster": "GROUP_DREAM_WOUND_SHADOW", "chance": 1, "density": 0.0001 } }
++    }
++  },
++  {
++    "id": "mx_dreamwound_shadow",
++    "type": "map_extra",
++    "name": { "str": "a shadowy wound in reality" },
++    "description": "What you can only describe as a wound in reality appears to be leaking shadows.",
++    "generator": { "generator_method": "update_mapgen", "generator_id": "mx_dreamwound_shadow" },
++    "sym": "w",
++    "min_max_zlevel": [ 0, 0 ],
++    "color": "dark_gray_red",
++    "autonote": true
+   }
+ ]
+diff --git a/data/mods/Xedra_Evolved/material.json b/data/mods/Xedra_Evolved/material.json
+index f6af38fa2d..c0e3f43237 100644
+--- a/data/mods/Xedra_Evolved/material.json
++++ b/data/mods/Xedra_Evolved/material.json
+@@ -137,6 +137,24 @@
+     "//2": "Resist ratios between gossamer and quilted gossamer are the same as between cotton and quilted cotton.",
+     "resist": { "bash": 4, "cut": 6, "acid": 6, "heat": 2, "bullet": 5 }
+   },
++  {
++    "type": "material",
++    "id": "shadowstuff",
++    "name": "shadowstuff",
++    "density": 0.5,
++    "specific_heat_liquid": 0.49,
++    "specific_heat_solid": 0.39,
++    "latent_heat": 205,
++    "conductive": true,
++    "chip_resist": 18,
++    "dmg_adj": [ "marked", "dented", "smashed", "shattered" ],
++    "salvaged_into": "scrap_shadowstuff",
++    "bash_dmg_verb": "torn",
++    "cut_dmg_verb": "bleached",
++    "breathability": "SECOND_SKIN",
++    "resist": { "bash": 4, "cut": 1, "acid": 2, "heat": 7, "bullet": 5 },
++    "repair_difficulty": 7
++  },
+   {
+     "type": "material",
+     "id": "dreamstuff",
+diff --git a/data/mods/Xedra_Evolved/monsters/dream_wound_monsters.json b/data/mods/Xedra_Evolved/monsters/dream_wound_monsters.json
+new file mode 100644
+index 0000000000..34384bb657
+--- /dev/null
++++ b/data/mods/Xedra_Evolved/monsters/dream_wound_monsters.json
+@@ -0,0 +1,186 @@
++[
++  {
++    "id": "mon_dream_shadow",
++    "type": "MONSTER",
++    "name": { "str": "shadow" },
++    "description": "An animate shadow.  Looking like nothing more than an errant patch of normal shadow, it draws your attention by the way it moves subtly and whispers softly in the back of your mind.  Strange intrusive thoughts accompany the quiet murmur, trying to forcefully supplant your own.",
++    "default_faction": "nightmares",
++    "species": [ "NIGHTMARE" ],
++    "diff": 2,
++    "volume": "750 ml",
++    "weight": "1 kg",
++    "hp": 60,
++    "speed": 90,
++    "symbol": "A",
++    "color": "dark_gray",
++    "aggression": 100,
++    "morale": 100,
++    "melee_skill": 6,
++    "melee_dice": 1,
++    "melee_dice_sides": 2,
++    "melee_damage": [ { "damage_type": "xe_shadow_damage", "amount": 0 } ],
++    "dodge": 4,
++    "vision_day": 50,
++    "families": [ "prof_wp_netherium_abomination" ],
++    "weakpoint_sets": [ "wps_netherium_abomination" ],
++    "death_drops": "mon_dream_shadow_death_drops",
++    "harvest": "exempt",
++    "special_attacks": [
++      {
++        "id": "mon_spell_shadow_damage_reduction",
++        "type": "spell",
++        "spell_data": { "id": "spell_shadow_damage_reduction" },
++        "cooldown": 120,
++        "condition": { "not": { "u_has_effect": "effect_monster_shadow_damage_reduction" } },
++        "monster_message": "%1$s's appears to become two dimensional."
++      }
++    ],
++    "death_function": { "corpse_type": "NO_CORPSE", "message": "The %s melts away." },
++    "flags": [
++      "SEES",
++      "HEARS",
++      "GOODHEARING",
++      "SMELLS",
++      "NOHEAD",
++      "HARDTOSHOOT",
++      "WEBWALK",
++      "FLIES",
++      "PLASTIC",
++      "ELECTRIC",
++      "ACIDPROOF",
++      "HIT_AND_RUN",
++      "NO_BREATHE",
++      "NIGHT_INVISIBILITY",
++      "NOGIB"
++    ]
++  },
++  {
++    "id": "mon_dream_shadowbeast",
++    "type": "MONSTER",
++    "name": { "str": "shadow beast" },
++    "description": "A large beastly looking shadow",
++    "bodytype": "bear",
++    "default_faction": "nightmares",
++    "species": [ "NIGHTMARE" ],
++    "volume": "154250 ml",
++    "weight": "154250 g",
++    "hp": 100,
++    "speed": 140,
++    "symbol": "8",
++    "color": "dark_gray",
++    "aggression": 100,
++    "morale": 100,
++    "melee_skill": 6,
++    "melee_dice": 4,
++    "melee_dice_sides": 6,
++    "melee_damage": [ { "damage_type": "xe_shadow_damage", "amount": 4 } ],
++    "vision_night": 10,
++    "path_settings": { "max_dist": 10 },
++    "dodge": 4,
++    "vision_day": 50,
++    "families": [ "prof_wp_netherium_abomination" ],
++    "weakpoint_sets": [ "wps_netherium_abomination" ],
++    "death_drops": "mon_dream_shadowbeast_death_drops",
++    "harvest": "exempt",
++    "death_function": { "corpse_type": "NO_CORPSE", "message": "The %s melts away." },
++    "special_attacks": [
++      { "type": "bite", "cooldown": 15, "infection_chance": 0 },
++      {
++        "id": "mon_spell_shadow_damage_reduction",
++        "type": "spell",
++        "spell_data": { "id": "spell_shadow_damage_reduction" },
++        "cooldown": 120,
++        "condition": { "not": { "u_has_effect": "effect_monster_shadow_damage_reduction" } },
++        "monster_message": "%1$s's appears to become two dimensional."
++      }
++    ],
++    "flags": [
++      "SEES",
++      "HEARS",
++      "GOODHEARING",
++      "SMELLS",
++      "NOHEAD",
++      "HARDTOSHOOT",
++      "WEBWALK",
++      "FLIES",
++      "PLASTIC",
++      "ELECTRIC",
++      "ACIDPROOF",
++      "HIT_AND_RUN",
++      "NO_BREATHE",
++      "NIGHT_INVISIBILITY",
++      "NOGIB"
++    ],
++    "armor": { "cold": 12, "electric": 12 }
++  },
++  {
++    "id": "mon_dream_shadowman",
++    "type": "MONSTER",
++    "name": { "str": "quickling shadow" },
++    "description": "A slight and spry shadow about the size of a tall boy, with a shadowy dagger in hand.  It flits through the air from spot to spot, while it flies you can see ragged and frayed threads hanging from the bottom of its feet.",
++    "default_faction": "nightmares",
++    "species": [ "NIGHTMARE" ],
++    "diff": 2,
++    "volume": "875000 ml",
++    "weight": "200 kg",
++    "hp": 160,
++    "speed": 140,
++    "symbol": "p",
++    "color": "dark_gray",
++    "aggression": 100,
++    "morale": 100,
++    "melee_skill": 6,
++    "melee_dice": 3,
++    "melee_dice_sides": 8,
++    "melee_damage": [ { "damage_type": "xe_shadow_damage", "amount": 3 } ],
++    "dodge": 3,
++    "vision_day": 50,
++    "luminance": 6,
++    "families": [ "prof_wp_netherium_abomination" ],
++    "weakpoint_sets": [ "wps_netherium_abomination" ],
++    "death_drops": "mon_dream_shadowman_death_drops",
++    "harvest": "exempt",
++    "special_attacks": [
++      {
++        "id": "mon_spell_shadowman_teleport",
++        "type": "spell",
++        "spell_data": { "id": "dream_shadowman_teleport", "hit_self": true },
++        "cooldown": 15,
++        "monster_message": "The quickling shadow flits across the space almost faster than the eye can see, striking without warning!"
++      },
++      {
++        "id": "mon_spell_shadow_damage_reduction",
++        "type": "spell",
++        "spell_data": { "id": "spell_shadow_damage_reduction" },
++        "cooldown": 120,
++        "condition": { "not": { "u_has_effect": "effect_monster_shadow_damage_reduction" } },
++        "monster_message": "%1$s's appears to become two dimensional."
++      },
++      [ "scratch", 15 ]
++    ],
++    "death_function": {
++      "effect": { "id": "death_shadowman", "hit_self": true },
++      "message": "Threads stitch the %s back into whatever realm it comes from!",
++      "corpse_type": "NO_CORPSE"
++    },
++    "regenerates_in_dark": true,
++    "flags": [
++      "SEES",
++      "HEARS",
++      "GOODHEARING",
++      "SMELLS",
++      "NOHEAD",
++      "HARDTOSHOOT",
++      "WEBWALK",
++      "FLIES",
++      "PLASTIC",
++      "ELECTRIC",
++      "ACIDPROOF",
++      "HIT_AND_RUN",
++      "NO_BREATHE",
++      "NIGHT_INVISIBILITY",
++      "NOGIB"
++    ],
++    "armor": { "bash": 12, "cut": 8, "bullet": 36, "electric": 3 }
++  }
++]
+diff --git a/data/mods/Xedra_Evolved/monsters/monfaction.json b/data/mods/Xedra_Evolved/monsters/monfaction.json
+index 38ca94dca3..f803fc6a2b 100644
+--- a/data/mods/Xedra_Evolved/monsters/monfaction.json
++++ b/data/mods/Xedra_Evolved/monsters/monfaction.json
+@@ -109,12 +109,12 @@
+     "type": "MONSTER_FACTION",
+     "name": "isolated_artisans",
+     "copy-from": "isolated_artisans",
+-    "extend": { "hate": [ "changeling", "vampire" ] }
++    "extend": { "hate": [ "changeling", "vampire", "nightmares" ] }
+   },
+   {
+     "type": "MONSTER_FACTION",
+     "name": "nightmares",
+-    "base_faction": "nether",
++    "base_faction": "nether_hate_humans",
+     "neutral": [ "fish", "small_animal", "slime" ],
+     "by_mood": [ "nether", "changeling", "vampire" ]
+   }
+diff --git a/data/mods/Xedra_Evolved/monsters/monster_spells.json b/data/mods/Xedra_Evolved/monsters/monster_spells.json
+index cc9e6cc48b..7ec53e8bef 100644
+--- a/data/mods/Xedra_Evolved/monsters/monster_spells.json
++++ b/data/mods/Xedra_Evolved/monsters/monster_spells.json
+@@ -127,6 +127,130 @@
+     "min_duration": 3000,
+     "max_duration": 18000
+   },
++  {
++    "id": "death_guilt",
++    "type": "SPELL",
++    "name": { "str": "Death Guilt" },
++    "description": "Feeling guilty over killing a monster.",
++    "valid_targets": [ "hostile" ],
++    "flags": [ "SILENT", "NO_PROJECTILE", "NO_EXPLOSION_SFX" ],
++    "shape": "blast",
++    "effect": "guilt",
++    "effect_str": "NULL",
++    "min_damage": 100,
++    "max_damage": 100,
++    "min_duration": 180000,
++    "max_duration": 180000,
++    "min_range": 5,
++    "max_range": 5
++  },
++  {
++    "id": "death_shadowman",
++    "type": "SPELL",
++    "name": { "str": "Shadowman Death" },
++    "valid_targets": [ "ground", "ally", "hostile", "self" ],
++    "description": "Eliminates any dream shadows in the area.",
++    "max_level": 1,
++    "teachable": false,
++    "effect": "banishment",
++    "shape": "blast",
++    "targeted_monster_ids": [ "mon_dream_shadowbeast", "mon_dream_shadow" ],
++    "damage_type": "pure",
++    "min_damage": 407,
++    "max_damage": 407,
++    "min_aoe": 60,
++    "max_aoe": 60,
++    "extra_effects": [ { "id": "CLOSE_DREAMWOUND_SHADOW", "hit_self": true } ],
++    "flags": [ "NO_PROJECTILE", "NO_HANDS", "NO_LEGS", "NO_FAIL", "SILENT", "IGNORE_WALLS", "NO_EXPLOSION_SFX" ]
++  },
++  {
++    "type": "SPELL",
++    "id": "CLOSE_DREAMWOUND_SHADOW",
++    "name": { "str": "Close Dreamwound Shadow" },
++    "description": "Closes a shadowy wound between reality and dreams.",
++    "message": "",
++    "min_aoe": 60,
++    "max_aoe": 60,
++    "valid_targets": [ "ground" ],
++    "flags": [ "IGNORE_WALLS", "NO_PROJECTILE", "NO_EXPLOSION_SFX" ],
++    "shape": "blast",
++    "effect": "ter_transform",
++    "effect_str": "ter_shadowman_close_wound"
++  },
++  {
++    "type": "ter_furn_transform",
++    "id": "ter_shadowman_close_wound",
++    "field": [
++      {
++        "result": "fd_null",
++        "valid_field": [ "fd_dream_wound_shadow" ],
++        "message": "The shadowy rift pulls closed!",
++        "message_good": true
++      }
++    ]
++  },
++  {
++    "type": "SPELL",
++    "id": "shadowman_teleport",
++    "name": { "str": "Shadowman Teleport" },
++    "description": "Teleports the monster.",
++    "effect": "short_range_teleport",
++    "shape": "blast",
++    "valid_targets": [ "none" ],
++    "flags": [ "SOMATIC", "SILENT", "NO_LEGS", "NO_EXPLOSION_SFX" ],
++    "min_range": 2,
++    "max_range": 12,
++    "min_aoe": 2,
++    "max_aoe": 12,
++    "base_casting_time": 100
++  },
++  {
++    "type": "SPELL",
++    "id": "dream_shadowman_teleport",
++    "name": { "str": "Shadowman Teleport" },
++    "description": "An explosive movement of shadowy knives.",
++    "extra_effects": [ { "id": "shadowman_teleport", "hit_self": true } ],
++    "valid_targets": [ "hostile", "ground", "self", "ally" ],
++    "effect": "attack",
++    "shape": "blast",
++    "flags": [ "LOUD", "RANDOM_DAMAGE", "RANDOM_AOE", "NO_PROJECTILE", "NO_EXPLOSION_SFX" ],
++    "base_casting_time": 100,
++    "min_damage": 8,
++    "max_damage": 24,
++    "damage_type": "xe_shadow_damage",
++    "min_aoe": 4,
++    "max_aoe": 8,
++    "min_range": 2,
++    "max_range": 6
++  },
++  {
++    "type": "SPELL",
++    "id": "spell_shadow_damage_reduction",
++    "name": { "str": "Shadow DR Monster enemy check" },
++    "description": "Preps for using Shadow Damage Reduction when a hostile target is detected.",
++    "flags": [ "SILENT", "NO_HANDS", "NO_LEGS", "MUST_HAVE_CLASS_TO_LEARN" ],
++    "valid_targets": [ "hostile" ],
++    "max_level": 1,
++    "effect": "attack",
++    "extra_effects": [ { "id": "spell_shadow_damage_reduction_self", "hit_self": true } ],
++    "shape": "blast",
++    "min_range": 60,
++    "max_range": 60
++  },
++  {
++    "type": "SPELL",
++    "id": "spell_shadow_damage_reduction_self",
++    "name": { "str": "Shadow DR Monster Effect" },
++    "description": "Grants the effect for a shadow to gain damage resistance to bash and bullets..",
++    "flags": [ "NO_HANDS", "NO_LEGS", "MUST_HAVE_CLASS_TO_LEARN", "RANDOM_DURATION" ],
++    "valid_targets": [ "self" ],
++    "max_level": 1,
++    "effect": "attack",
++    "effect_str": "effect_monster_shadow_damage_reduction",
++    "shape": "blast",
++    "min_duration": 9000,
++    "max_duration": 27000
++  },
+   {
+     "id": "mon_firebird_explosion",
+     "type": "SPELL",
+diff --git a/data/mods/Xedra_Evolved/monsters/monstergroup.json b/data/mods/Xedra_Evolved/monsters/monstergroup.json
+index 5909ff8973..d588cf14bf 100644
+--- a/data/mods/Xedra_Evolved/monsters/monstergroup.json
++++ b/data/mods/Xedra_Evolved/monsters/monstergroup.json
+@@ -34,6 +34,15 @@
+       { "monster": "mon_fetch_child", "weight": 200, "cost_multiplier": 1 }
+     ]
+   },
++  {
++    "type": "monstergroup",
++    "name": "GROUP_DREAM_WOUND_SHADOW",
++    "default": "mon_dream_shadow",
++    "monsters": [
++      { "monster": "mon_dream_shadow", "weight": 500, "cost_multiplier": 0 },
++      { "monster": "mon_dream_shadowbeast", "weight": 200, "cost_multiplier": 0 }
++    ]
++  },
+   {
+     "type": "monstergroup",
+     "name": "GROUP_FOREST",
+diff --git a/data/mods/Xedra_Evolved/monsters/species.json b/data/mods/Xedra_Evolved/monsters/species.json
+index d3bfa63fd5..b0dad670af 100644
+--- a/data/mods/Xedra_Evolved/monsters/species.json
++++ b/data/mods/Xedra_Evolved/monsters/species.json
+@@ -51,12 +51,13 @@
+     "type": "SPECIES",
+     "id": "VAMPIRE",
+     "description": "a variety of creatures that subsist off the blood of living humans",
+-    "flags": [ "NO_NECRO", "VAMP_VIRUS" ],
++    "flags": [ "NO_NECRO", "VAMP_VIRUS", "DRACULIN_IMMUNE" ],
+     "fear_triggers": [ "FIRE" ]
+   },
+   {
+     "type": "SPECIES",
+     "id": "NIGHTMARE",
+-    "description": "creatures made from dreams, technically not alive"
++    "description": "creatures made from dreams, technically not alive",
++    "flags": [ "DRACULIN_IMMUNE" ]
+   }
+ ]
+diff --git a/data/mods/Xedra_Evolved/regional_overlay.json b/data/mods/Xedra_Evolved/regional_overlay.json
+index 9291f9766b..ee0b4b029c 100644
+--- a/data/mods/Xedra_Evolved/regional_overlay.json
++++ b/data/mods/Xedra_Evolved/regional_overlay.json
+@@ -18,6 +18,7 @@
+           "mx_supplydrop": 100,
+           "mx_portal": 50,
+           "mx_portal_in": 40,
++          "mx_dreamwound_shadow": 25,
+           "mx_roadworks": 1000,
+           "mx_mayhem": 500,
+           "mx_casings": 1000,
+@@ -31,6 +32,7 @@
+       "field": {
+         "chance": 75,
+         "extras": {
++          "mx_dreamwound_shadow": 5,
+           "mx_trees_map_salamander": 75,
+           "mx_trees_map_sylph": 75,
+           "mx_trees_map_ierde": 75,
+diff --git a/data/mods/Xedra_Evolved/spells/dreamer_spells.json b/data/mods/Xedra_Evolved/spells/dreamer_spells.json
+index b95370bbff..e743d4c934 100644
+--- a/data/mods/Xedra_Evolved/spells/dreamer_spells.json
++++ b/data/mods/Xedra_Evolved/spells/dreamer_spells.json
+@@ -144,7 +144,7 @@
+     "description": "Attempts to banish monsters crafted from the darkest of nights.",
+     "teachable": false,
+     "valid_targets": [ "hostile", "ally" ],
+-    "effect": "attack",
++    "effect": "banishment",
+     "shape": "blast",
+     "targeted_monster_ids": [ "mon_darkman", "mon_shadow", "mon_shadow_snake" ],
+     "spell_class": "DREAMER",
+-- 
+2.45.2
+

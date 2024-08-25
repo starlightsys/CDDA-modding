@@ -1,0 +1,25 @@
+From 9dab9910b049fbe139b64ea10b708a3061f65538 Mon Sep 17 00:00:00 2001
+From: Holli <hollierthanthouare@gmail.com>
+Date: Sat, 24 Aug 2024 16:56:05 -0600
+Subject: [PATCH 120/125] Update 38.json
+
+---
+ data/json/items/gun/38.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/json/items/gun/38.json b/data/json/items/gun/38.json
+index ae531394dd..daa2b07448 100644
+--- a/data/json/items/gun/38.json
++++ b/data/json/items/gun/38.json
+@@ -175,7 +175,7 @@
+         "pocket_type": "MAGAZINE",
+         "rigid": true,
+         "ammo_restriction": { "357mag": 6, "38": 6 },
+-        "allowed_speedloaders": [ "38_speedloader" ]
++        "allowed_speedloaders": [ "38_speedloader6" ]
+       }
+     ],
+     "variant_type": "gun",
+-- 
+2.45.2
+

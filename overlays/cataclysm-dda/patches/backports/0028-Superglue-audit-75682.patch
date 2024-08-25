@@ -1,0 +1,1964 @@
+From 1e5f84e5e306043e72d04f4ae1808e18a4bc3bf9 Mon Sep 17 00:00:00 2001
+From: Holli <78005870+Holli-Git@users.noreply.github.com>
+Date: Thu, 15 Aug 2024 21:17:11 -0600
+Subject: [PATCH 028/125] Superglue audit (#75682)
+
+* convert superglue to use charges
+
+* superglue bottles
+
+* Replace itemgroups
+
+* adjust recipes
+
+* Few fixes
+
+* Add explanation to charge
+
+* lint
+
+* Description update
+
+* move superglue to generic item
+
+* description fix
+
+* revert material to plastic
+
+* Adjusts containers to prevent unloading
+
+* Turn bone glue into ammo
+
+This is to prevent innawoods migration getting mad at me
+
+* Migration
+
+* Mod adjustments
+
+* missed old superglue
+
+* remove superglue recipe (again)
+
+* Typo fix (Thanks Ferret!)
+
+* Superglue migrates into smaller container
+
+* innawoods migration fix
+
+* Update data/json/items/containers/containers.json
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+---------
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+---
+ data/json/construction/walls.json             |  2 +-
+ .../itemgroups/Clothing_Gear/clothing.json    |  2 +-
+ data/json/itemgroups/Clothing_Gear/gear.json  |  2 +-
+ .../Locations_MapExtras/locations.json        |  8 +--
+ .../locations_commercial.json                 | 18 +++---
+ data/json/itemgroups/SUS/domestic.json        |  8 +--
+ .../json/itemgroups/collections_domestic.json |  6 +-
+ data/json/itemgroups/defense_mode.json        |  2 +-
+ data/json/itemgroups/electronics.json         |  2 +-
+ data/json/itemgroups/science_and_tech.json    |  2 +-
+ data/json/itemgroups/supplies.json            | 10 ++--
+ data/json/itemgroups/tools.json               | 21 ++++++-
+ .../itemgroups/vehicles_fuel_related.json     |  2 +-
+ data/json/items/ammo_types.json               |  6 ++
+ data/json/items/containers/containers.json    | 58 +++++++++++++++++++
+ data/json/items/generic.json                  | 14 +++--
+ data/json/npcs/NC_JUNK_SHOPKEEP.json          |  2 +-
+ .../campus/great_library_librarian_goods.json |  2 +-
+ .../npcs/exodii/exodii_merchant_itemlist.json |  4 +-
+ data/json/npcs/items_generic.json             |  2 +-
+ .../NPC_Garry_Villeneuve.json                 |  2 +-
+ .../Smokes/free_merchant_shopkeep_goods.json  |  2 +-
+ .../migration_items.json                      |  6 ++
+ data/json/recipes/ammo/weldgas.json           |  1 -
+ data/json/recipes/armor/head.json             |  2 +-
+ data/json/recipes/armor/other.json            |  9 +--
+ data/json/recipes/armor/suit.json             |  9 +--
+ data/json/recipes/other/materials.json        |  3 +-
+ data/json/recipes/other/parts.json            |  8 +--
+ .../recipes/other/parts_construction.json     |  4 +-
+ data/json/recipes/other/power_supplies.json   |  3 +-
+ data/json/recipes/practice/devices.json       |  2 +-
+ data/json/recipes/recipe_ammo.json            |  2 +-
+ .../json/recipes/recipe_medsandchemicals.json |  2 +-
+ .../recipes/recipe_music_instruments.json     | 10 ++--
+ data/json/recipes/recipe_traps.json           | 10 ++--
+ data/json/recipes/tools/lights.json           | 28 +++------
+ data/json/recipes/tools/tool.json             | 11 ++--
+ data/json/recipes/tools/tools_electronic.json | 17 +++---
+ data/json/recipes/tools/tools_hand.json       |  8 +--
+ data/json/recipes/weapon/bashing.json         |  2 +-
+ data/json/recipes/weapon/cutting.json         | 20 ++-----
+ data/json/recipes/weapon/explosive.json       | 34 +++++------
+ data/json/recipes/weapon/mods.json            |  2 +-
+ data/json/recipes/weapon/piercing.json        | 30 ++--------
+ data/json/recipes/weapon/ranged.json          |  8 +--
+ data/json/requirements/materials.json         | 20 ++++++-
+ data/json/requirements/tailoring.json         |  4 +-
+ .../Aftershock/itemgroups/tool_groups.json    |  4 +-
+ .../Aftershock/recipes/recipe_overrides.json  |  6 +-
+ data/mods/MindOverMatter/recipes/tools.json   |  2 +-
+ data/mods/MindOverMatter/recipes/travel.json  |  2 +-
+ data/mods/MindOverMatter/recipes/weapons.json |  2 +-
+ data/mods/Sky_Island/upgrade_missions.json    |  6 +-
+ data/mods/Xedra_Evolved/recipes/meds.json     |  2 +-
+ data/mods/innawood/items/misc.json            |  7 +++
+ data/mods/innawood/migration_items.json       |  4 +-
+ data/mods/innawood/recipes/armor/head.json    |  2 +-
+ data/mods/innawood/recipes/chem_other.json    | 26 +++++++++
+ data/mods/innawood/recipes/recipe_others.json |  2 +-
+ data/mods/innawood/recipes/tool.json          |  2 +-
+ .../innawood/recipes/tools_electronic.json    |  2 +-
+ data/mods/innawood/recipes/tools_lights.json  |  2 +-
+ 63 files changed, 294 insertions(+), 209 deletions(-)
+
+diff --git a/data/json/construction/walls.json b/data/json/construction/walls.json
+index f9ea3fb3f8..596dd9fe28 100644
+--- a/data/json/construction/walls.json
++++ b/data/json/construction/walls.json
+@@ -258,7 +258,7 @@
+       [ [ "frame_wood", 1 ] ],
+       [ [ "chunk_rubber", 16 ] ],
+       [ [ "glass_sheet", 2 ] ],
+-      [ [ "superglue", 2 ], [ "duct_tape", 10 ] ]
++      [ [ "super_glue", 2 ], [ "duct_tape", 10 ] ]
+     ],
+     "pre_note": "Must be supported on at least two sides.",
+     "pre_special": "check_support",
+diff --git a/data/json/itemgroups/Clothing_Gear/clothing.json b/data/json/itemgroups/Clothing_Gear/clothing.json
+index cd419b6e11..e44b9771e3 100644
+--- a/data/json/itemgroups/Clothing_Gear/clothing.json
++++ b/data/json/itemgroups/Clothing_Gear/clothing.json
+@@ -1621,7 +1621,7 @@
+       [ "10gal_hat", 3 ],
+       [ "glasses_monocle", 2 ],
+       [ "duct_tape", 60 ],
+-      [ "superglue", 20 ],
++      { "group": "superglue", "prob": 20 },
+       [ "firecracker_pack", 5 ],
+       [ "firecracker", 5 ],
+       [ "wolfsuit", 3 ],
+diff --git a/data/json/itemgroups/Clothing_Gear/gear.json b/data/json/itemgroups/Clothing_Gear/gear.json
+index 95644d1642..36f6dda016 100644
+--- a/data/json/itemgroups/Clothing_Gear/gear.json
++++ b/data/json/itemgroups/Clothing_Gear/gear.json
+@@ -172,7 +172,7 @@
+       { "group": "tools_tailor", "prob": 20 },
+       { "group": "ammo_pocket_batteries_full", "prob": 10 },
+       [ "duct_tape", 10 ],
+-      [ "superglue", 5 ],
++      { "group": "superglue", "prob": 5 },
+       [ "plastichoboreel", 5 ],
+       [ "survivormap", 5 ],
+       { "item": "teargas_sprayer", "prob": 25, "charges": [ 9, 10 ] }
+diff --git a/data/json/itemgroups/Locations_MapExtras/locations.json b/data/json/itemgroups/Locations_MapExtras/locations.json
+index decf6a03fb..c3c840d82e 100644
+--- a/data/json/itemgroups/Locations_MapExtras/locations.json
++++ b/data/json/itemgroups/Locations_MapExtras/locations.json
+@@ -289,7 +289,7 @@
+       { "item": "liq_bandage_spray", "prob": 5, "charges": [ 1, -1 ] },
+       { "group": "adhesive_bandages_box_used", "prob": 15 },
+       { "item": "duct_tape", "prob": 20, "charges": [ 50, 200 ] },
+-      { "item": "superglue", "prob": 10 },
++      { "group": "superglue", "prob": 10 },
+       { "item": "sewing_kit", "prob": 10, "charges": [ 0, -1 ] },
+       { "item": "mouthpiece", "prob": 10 },
+       { "item": "cigar", "prob": 20, "count": [ 1, 5 ] },
+@@ -377,7 +377,7 @@
+       [ "stereo", 10 ],
+       [ "wrench", 10 ],
+       [ "screwdriver", 15 ],
+-      [ "superglue", 5 ],
++      { "group": "superglue", "prob": 5 },
+       [ "boots", 70 ],
+       [ "boots_steel", 50 ],
+       [ "sneakers_steel", 35 ],
+@@ -2139,7 +2139,7 @@
+       { "item": "chem_calcium_chloride", "prob": 2 },
+       { "prob": 3, "group": "yeast_bag_plastic" },
+       { "prob": 1, "group": "yogurt_starter_culture_bag_plastic_4" },
+-      { "item": "superglue", "prob": 30 },
++      { "group": "superglue", "prob": 30 },
+       { "item": "bottle_glass", "prob": 10 },
+       { "item": "syringe", "prob": 1 },
+       { "item": "adrenaline_injector", "prob": 1 },
+@@ -2465,7 +2465,7 @@
+       [ "screwdriver", 40 ],
+       [ "screwdriver_set", 10 ],
+       { "item": "duct_tape", "prob": 10, "charges": [ 25, 400 ] },
+-      { "item": "superglue", "prob": 5 },
++      { "group": "superglue", "prob": 5 },
+       [ "boots", 70 ],
+       [ "boots_winter", 60 ],
+       [ "boots_hiking", 30 ],
+diff --git a/data/json/itemgroups/Locations_MapExtras/locations_commercial.json b/data/json/itemgroups/Locations_MapExtras/locations_commercial.json
+index 168a11587b..7b563dc598 100644
+--- a/data/json/itemgroups/Locations_MapExtras/locations_commercial.json
++++ b/data/json/itemgroups/Locations_MapExtras/locations_commercial.json
+@@ -97,11 +97,10 @@
+       [ "toilet_paper", 10 ],
+       { "item": "handflare", "prob": 15, "charges": 300 },
+       [ "duct_tape", 25 ],
+-      [ "superglue", 20 ],
++      { "group": "superglue", "prob": 45 },
+       { "item": "flashlight", "prob": 25, "charges": [ 0, 300 ] },
+       [ "thread", 20 ],
+       { "group": "ammo_pocket_batteries_full", "prob": 25 },
+-      [ "superglue", 25 ],
+       { "item": "candle", "prob": 25, "charges": [ 0, 100 ] },
+       [ "hammer", 20 ],
+       [ "screwdriver", 20 ],
+@@ -1202,7 +1201,7 @@
+       { "item": "screwdriver", "prob": 40 },
+       { "item": "screwdriver_set", "prob": 20 },
+       { "item": "socket_screwdriver_set", "prob": 10 },
+-      { "item": "superglue", "prob": 30 },
++      { "group": "superglue", "prob": 55 },
+       { "item": "hacksaw", "prob": 17 },
+       { "item": "pliers", "prob": 40 },
+       { "item": "gloves_leather", "prob": 45 },
+@@ -1211,7 +1210,6 @@
+       { "item": "manual_mechanics", "prob": 35 },
+       { "item": "manual_fabrication", "prob": 20 },
+       { "item": "duct_tape", "prob": 70, "charges": [ 50, 200 ] },
+-      { "item": "superglue", "prob": 25 },
+       { "item": "misc_repairkit", "prob": 15 },
+       { "group": "tools_toolbox", "prob": 2 }
+     ]
+@@ -1272,7 +1270,7 @@
+           { "item": "screwdriver_set", "prob": 20 },
+           { "item": "socket_screwdriver_set", "prob": 20 },
+           { "item": "duct_tape", "prob": 50 },
+-          { "item": "superglue", "prob": 10 },
++          { "group": "superglue", "prob": 10 },
+           { "item": "misc_repairkit", "prob": 25 },
+           { "group": "tools_toolbox", "prob": 2 }
+         ]
+@@ -1450,7 +1448,7 @@
+       [ "glasses_safety", 10 ],
+       [ "solar_cell", 10 ],
+       [ "screwdriver", 15 ],
+-      [ "superglue", 5 ],
++      { "group": "superglue", "prob": 5 },
+       [ "hand_controls", 1 ],
+       { "item": "polisher", "prob": 15, "charges": [ 0, 100 ] },
+       [ "solar_panel", 15 ]
+@@ -1510,7 +1508,7 @@
+       [ "glasses_safety", 10 ],
+       [ "solar_cell", 10 ],
+       [ "screwdriver", 15 ],
+-      [ "superglue", 5 ],
++      { "group": "superglue", "prob": 5 },
+       { "item": "polisher", "prob": 15, "charges": [ 0, 100 ] },
+       [ "solar_panel", 15 ],
+       [ "spare_tire_carrier", 10 ],
+@@ -1541,7 +1539,7 @@
+       [ "glasses_safety", 10 ],
+       [ "solar_cell", 10 ],
+       [ "screwdriver", 15 ],
+-      [ "superglue", 5 ],
++      { "group": "superglue", "prob": 5 },
+       { "item": "polisher", "prob": 15, "charges": [ 0, 100 ] },
+       [ "solar_panel", 15 ],
+       [ "spare_tire_carrier", 10 ],
+@@ -1799,7 +1797,7 @@
+       { "item": "soldering_iron", "prob": 65 },
+       { "item": "soldering_iron_portable", "prob": 65, "charges": [ 0, 50 ] },
+       [ "solder_wire", 50 ],
+-      [ "superglue", 55 ],
++      { "group": "superglue", "prob": 55 },
+       [ "screwdriver", 60 ],
+       [ "motor_small", 30 ]
+     ]
+@@ -2099,7 +2097,7 @@
+       [ "yarn", 15 ],
+       [ "sinew", 15 ],
+       [ "duct_tape", 15 ],
+-      [ "superglue", 5 ],
++      { "group": "superglue", "prob": 5 },
+       [ "feather", 15 ],
+       [ "mag_animecon", 15 ],
+       [ "mag_beauty", 15 ],
+diff --git a/data/json/itemgroups/SUS/domestic.json b/data/json/itemgroups/SUS/domestic.json
+index 96eae4d71c..833732ded1 100644
+--- a/data/json/itemgroups/SUS/domestic.json
++++ b/data/json/itemgroups/SUS/domestic.json
+@@ -130,7 +130,7 @@
+       { "item": "string_36", "count": [ 1, 4 ], "prob": 50 },
+       { "item": "string_36", "count": [ 1, 4 ], "prob": 20 },
+       { "item": "duct_tape", "prob": 40, "charges": [ 25, 400 ] },
+-      { "item": "superglue", "prob": 30 },
++      { "group": "superglue", "prob": 30 },
+       { "item": "plastic_straw", "prob": 70, "count": [ 1, 6 ] },
+       { "item": "plastic_straw", "prob": 40, "count": [ 1, 6 ] },
+       { "item": "corkscrew", "prob": 60 },
+@@ -286,7 +286,7 @@
+       { "item": "thread", "prob": 30 },
+       { "item": "sewing_kit", "prob": 47, "charges": [ 50, 150 ] },
+       { "item": "solder_wire", "prob": 40 },
+-      { "item": "superglue", "prob": 40 },
++      { "group": "superglue", "prob": 40 },
+       { "item": "knitting_needles", "prob": 40 },
+       { "item": "duct_tape", "prob": 40, "charges": [ 5, 160 ] },
+       { "item": "wax_paraffin", "prob": 10 },
+@@ -329,7 +329,7 @@
+     "subtype": "collection",
+     "entries": [
+       { "group": "tools_common", "count": 2 },
+-      { "item": "superglue", "prob": 90 },
++      { "group": "superglue", "prob": 90 },
+       { "item": "boxcutter", "prob": 85 },
+       { "item": "duct_tape", "prob": 85, "charges": [ 5, 200 ] },
+       { "item": "flashlight", "prob": 80, "ammo-item": "light_disposable_cell", "charges": [ 100, 300 ] },
+@@ -397,7 +397,7 @@
+       { "item": "corkscrew", "prob": 70 },
+       { "group": "adhesive_bandages_box_used", "prob": 60 },
+       { "item": "duct_tape", "prob": 40, "charges": [ 100, 400 ] },
+-      { "item": "superglue", "prob": 30 },
++      { "group": "superglue", "prob": 30 },
+       { "item": "light_battery_cell", "count": 4, "prob": 50, "charges": 100 },
+       { "item": "deck_of_cards", "prob": 50 },
+       { "item": "teleumbrella", "prob": 50 },
+diff --git a/data/json/itemgroups/collections_domestic.json b/data/json/itemgroups/collections_domestic.json
+index b7bef96a62..3bffda514b 100644
+--- a/data/json/itemgroups/collections_domestic.json
++++ b/data/json/itemgroups/collections_domestic.json
+@@ -153,7 +153,7 @@
+       { "item": "binoculars", "prob": 20 },
+       { "item": "roller_blades", "prob": 20 },
+       { "item": "duct_tape", "prob": 100, "charges": [ 50, 200 ] },
+-      { "item": "superglue", "prob": 60 },
++      { "group": "superglue", "prob": 60 },
+       { "item": "lawnmower", "prob": 25 },
+       { "item": "lawn_dart", "prob": 10 },
+       { "item": "dehydrator", "prob": 15 },
+@@ -205,7 +205,7 @@
+       { "prob": 2, "group": "yeast_bag_plastic" },
+       { "prob": 1, "group": "yogurt_starter_culture_bag_plastic_4" },
+       { "item": "royal_jelly", "prob": 8 },
+-      { "item": "superglue", "prob": 20 },
++      { "group": "superglue", "prob": 20 },
+       { "item": "bottle_glass", "prob": 10 },
+       { "item": "syringe", "prob": 4 },
+       { "item": "adrenaline_injector", "prob": 2 },
+@@ -1438,7 +1438,7 @@
+           { "item": "xacto", "prob": 10 },
+           { "item": "screwdriver", "prob": 10 },
+           { "item": "duct_tape", "prob": 5, "charges": [ 25, 100 ] },
+-          { "item": "superglue", "prob": 10 },
++          { "group": "superglue", "prob": 10 },
+           { "item": "splinter", "prob": 10, "count": [ 2, 3 ] },
+           { "item": "toolbox_empty", "prob": 100 }
+         ],
+diff --git a/data/json/itemgroups/defense_mode.json b/data/json/itemgroups/defense_mode.json
+index 4046b2623e..dbc27d06e2 100644
+--- a/data/json/itemgroups/defense_mode.json
++++ b/data/json/itemgroups/defense_mode.json
+@@ -74,7 +74,7 @@
+       { "item": "cotton_patchwork" },
+       { "item": "fur" },
+       { "item": "leather" },
+-      { "item": "superglue" },
++      { "group": "superglue" },
+       { "item": "string_36" },
+       { "item": "chain" },
+       { "item": "processor" },
+diff --git a/data/json/itemgroups/electronics.json b/data/json/itemgroups/electronics.json
+index 37d06c4cd8..8611d361ac 100644
+--- a/data/json/itemgroups/electronics.json
++++ b/data/json/itemgroups/electronics.json
+@@ -7,7 +7,7 @@
+       { "item": "voltmeter", "prob": 30, "charges": [ 0, 100 ] },
+       { "item": "multimeter", "prob": 30, "charges": [ 0, 100 ] },
+       [ "jumper_cable_heavy", 10 ],
+-      [ "superglue", 30 ],
++      { "group": "superglue", "prob": 30 },
+       { "item": "electrohack", "prob": 3, "charges": [ 0, 100 ] },
+       [ "processor", 15 ],
+       [ "RAM", 22 ],
+diff --git a/data/json/itemgroups/science_and_tech.json b/data/json/itemgroups/science_and_tech.json
+index 466fd3361a..070cd6c3a2 100644
+--- a/data/json/itemgroups/science_and_tech.json
++++ b/data/json/itemgroups/science_and_tech.json
+@@ -165,7 +165,7 @@
+       { "item": "chem_baking_soda", "prob": 5, "charges": [ 1, -1 ] },
+       { "item": "chem_calcium_chloride", "prob": 5 },
+       [ "panacea", 8 ],
+-      [ "superglue", 30 ],
++      { "group": "superglue", "prob": 30 },
+       [ "bottle_glass", 10 ],
+       [ "syringe", 8 ],
+       [ "adrenaline_injector", 4 ],
+diff --git a/data/json/itemgroups/supplies.json b/data/json/itemgroups/supplies.json
+index 1192223472..87285c555d 100644
+--- a/data/json/itemgroups/supplies.json
++++ b/data/json/itemgroups/supplies.json
+@@ -235,7 +235,7 @@
+       { "group": "ammo_pocket_batteries_full", "prob": 50 },
+       [ "pilot_light", 50 ],
+       { "item": "duct_tape", "prob": 200, "charges": [ 50, 200 ] },
+-      [ "superglue", 100 ],
++      { "group": "superglue", "prob": 100 },
+       [ "string_6", 100 ],
+       [ "string_36", 100 ],
+       [ "rubber_cement", 50 ],
+@@ -336,7 +336,7 @@
+   {
+     "type": "item_group",
+     "id": "supplies_woodcrafts",
+-    "items": [ [ "superglue", 40 ], [ "sandpaper", 40 ], [ "screwdriver", 5 ], [ "chisel", 10 ], [ "hammer", 5 ] ]
++    "items": [ { "group": "superglue", "prob": 40 }, [ "sandpaper", 40 ], [ "screwdriver", 5 ], [ "chisel", 10 ], [ "hammer", 5 ] ]
+   },
+   {
+     "id": "supplies_hardware",
+@@ -363,7 +363,7 @@
+       { "item": "brick", "prob": 20, "count": [ 5, 10 ] },
+       { "group": "wrapped_gasmask_filter", "count": [ 2, 6 ], "prob": 20 },
+       [ "solder_wire", 20 ],
+-      [ "superglue", 30 ],
++      { "group": "superglue", "prob": 30 },
+       [ "rubber_cement", 25 ],
+       [ "magnet", 10 ],
+       [ "chain", 20 ],
+@@ -756,7 +756,7 @@
+       { "item": "cell_phone", "prob": 3, "charges": [ 0, 150 ] },
+       { "item": "smart_phone", "prob": 18, "charges": [ 0, -1 ] },
+       { "item": "duct_tape", "prob": 5, "charges": [ 50, 200 ] },
+-      { "item": "superglue", "prob": 5 },
++      { "group": "superglue", "prob": 5 },
+       { "group": "ammo_pocket_batteries", "prob": 5 },
+       { "item": "flashlight", "prob": 10, "charges": [ 0, 300 ] },
+       [ "office_holepunch", 10 ],
+@@ -795,7 +795,7 @@
+       { "group": "writing_utensils", "prob": 35 },
+       [ "file", 15 ],
+       { "item": "duct_tape", "prob": 15, "charges": [ 50, 200 ] },
+-      { "item": "superglue", "prob": 15 },
++      { "group": "superglue", "prob": 15 },
+       [ "file", 15 ],
+       [ "office_holepunch", 15 ],
+       [ "bubblewrap", 15 ],
+diff --git a/data/json/itemgroups/tools.json b/data/json/itemgroups/tools.json
+index 01f14953f8..5567500a14 100644
+--- a/data/json/itemgroups/tools.json
++++ b/data/json/itemgroups/tools.json
+@@ -45,7 +45,7 @@
+       { "item": "tuning_pegs", "prob": 100, "count": [ 5, 15 ] },
+       { "item": "piano_wire", "prob": 100, "count": [ 1, 3 ] },
+       [ "hand_drill", 20 ],
+-      { "item": "superglue", "prob": 100, "count": [ 1, 3 ] },
++      { "item": "super_glue", "prob": 100, "count": [ 1, 3 ] },
+       [ "chisel", 10 ],
+       [ "sandpaper", 100 ]
+     ]
+@@ -101,7 +101,7 @@
+       [ "screwdriver_set", 50 ],
+       [ "socket_screwdriver_set", 10 ],
+       [ "duct_tape", 10 ],
+-      [ "superglue", 10 ],
++      { "group": "superglue", "prob": 10 },
+       [ "tin_snips", 10 ],
+       [ "wrench", 20 ],
+       [ "wrench_small", 20 ],
+@@ -820,7 +820,7 @@
+       [ "teleporter", 1 ],
+       { "item": "laptop", "prob": 4, "charges": [ 0, 500 ] },
+       { "item": "plut_cell", "prob": 4, "charges": [ 1, 5 ] },
+-      [ "superglue", 30 ],
++      { "group": "superglue", "prob": 30 },
+       [ "pliers", 10 ],
+       [ "tin_snips", 10 ],
+       { "item": "matches", "prob": 10, "charges": [ 1, 20 ] },
+@@ -1040,5 +1040,20 @@
+     "subtype": "collection",
+     "id": "dynamite_shipment",
+     "items": [ { "item": "dynamite", "count": [ 2, 3 ] } ]
++  },
++  {
++    "type": "item_group",
++    "subtype": "distribution",
++    "id": "superglue",
++    "items": [ { "item": "super_glue", "charges-min": 0, "charges-max": 600, "container-group": "superglue_bottles" } ]
++  },
++  {
++    "type": "item_group",
++    "subtype": "distribution",
++    "id": "superglue_bottles",
++    "items": [
++      { "item": "small_squeeze_tube", "variant": "small_squeeze_tube_superglue", "prob": 90 },
++      { "item": "bottle_plastic_tiny_glue", "variant": "bottle_plastic_tiny_superglue", "prob": 10 }
++    ]
+   }
+ ]
+diff --git a/data/json/itemgroups/vehicles_fuel_related.json b/data/json/itemgroups/vehicles_fuel_related.json
+index 41a0092ca0..dbd61cb3db 100644
+--- a/data/json/itemgroups/vehicles_fuel_related.json
++++ b/data/json/itemgroups/vehicles_fuel_related.json
+@@ -85,7 +85,7 @@
+         "prob": 80
+       },
+       { "item": "duct_tape", "charges": [ 20, 200 ], "prob": 30 },
+-      { "item": "superglue", "prob": 20 },
++      { "group": "superglue", "prob": 20 },
+       { "distribution": [ { "item": "pockknife" }, { "item": "boxcutter" } ], "prob": 60 },
+       { "item": "glowstick", "count": [ 0, 2 ], "charges": 1400, "prob": 30 },
+       {
+diff --git a/data/json/items/ammo_types.json b/data/json/items/ammo_types.json
+index 6a4464e27b..659b908289 100644
+--- a/data/json/items/ammo_types.json
++++ b/data/json/items/ammo_types.json
+@@ -479,6 +479,12 @@
+     "name": "duct tape",
+     "default": "duct_tape"
+   },
++  {
++    "type": "ammunition_type",
++    "id": "superglue",
++    "name": "super glue",
++    "default": "super_glue"
++  },
+   {
+     "type": "ammunition_type",
+     "id": "battery",
+diff --git a/data/json/items/containers/containers.json b/data/json/items/containers/containers.json
+index fc177b9637..3901cf2221 100644
+--- a/data/json/items/containers/containers.json
++++ b/data/json/items/containers/containers.json
+@@ -678,6 +678,64 @@
+     "color": "white",
+     "flags": [ "COLLAPSE_CONTENTS" ]
+   },
++  {
++    "id": "bottle_plastic_tiny_glue",
++    "type": "GENERIC",
++    "copy-from": "bottle_plastic_tiny",
++    "name": { "str": "tiny plastic glue bottle" },
++    "description": "A watertight plastic bottle, holds 30 mL of liquid.  Due to the design of the tip, it cannot be refilled.",
++    "longest_side": "120 mm",
++    "extend": { "flags": [ "NO_RELOAD", "NO_UNLOAD" ] },
++    "variant_type": "generic",
++    "variants": [
++      {
++        "id": "bottle_plastic_tiny_superglue",
++        "name": { "str": "large superglue bottle" },
++        "description": "This one reads \"Super Glue - All Purpose!\", with directions and cautions below.",
++        "weight": 1,
++        "append": true
++      }
++    ]
++  },
++  {
++    "id": "small_squeeze_tube",
++    "type": "GENERIC",
++    "category": "container",
++    "name": { "str": "small squeeze tube" },
++    "description": "A small squeeze tube, holds 3 mL of liquid.  It cannot be refilled after it's empty.",
++    "ascii_picture": "bottle_plastic_small",
++    "weight": "2 g",
++    "volume": "11 ml",
++    "longest_side": "3 cm",
++    "pocket_data": [
++      {
++        "pocket_type": "CONTAINER",
++        "watertight": true,
++        "rigid": true,
++        "max_contains_volume": "4 ml",
++        "max_item_volume": "4 ml",
++        "max_contains_weight": "50 g",
++        "moves": 400
++      }
++    ],
++    "price": "0 cent",
++    "price_postapoc": "0 cent",
++    "to_hit": { "grip": "bad", "length": "hand", "surface": "any", "balance": "clumsy" },
++    "material": [ "plastic" ],
++    "symbol": ")",
++    "color": "white",
++    "flags": [ "NO_RELOAD", "NO_UNLOAD", "COLLAPSE_CONTENTS" ],
++    "variant_type": "generic",
++    "variants": [
++      {
++        "id": "small_squeeze_tube_superglue",
++        "name": { "str": "superglue tube" },
++        "description": "This one reads \"Super Glue - All Purpose!\", with directions and cautions below.",
++        "weight": 1,
++        "append": true
++      }
++    ]
++  },
+   {
+     "id": "bottle_plastic_pill_prescription",
+     "type": "GENERIC",
+diff --git a/data/json/items/generic.json b/data/json/items/generic.json
+index fba168a7e5..f3907cda5e 100644
+--- a/data/json/items/generic.json
++++ b/data/json/items/generic.json
+@@ -311,18 +311,22 @@
+     "flags": [ "TRADER_AVOID", "FIREWOOD", "TINDER" ]
+   },
+   {
+-    "type": "GENERIC",
+-    "id": "superglue",
++    "type": "AMMO",
++    "id": "super_glue",
+     "category": "spare_parts",
+     "symbol": ",",
++    "phase": "liquid",
+     "color": "white",
+     "name": { "str_sp": "superglue" },
+     "description": "A tube of strong glue.  Used in many crafting recipes.",
+     "price": "18 USD",
+     "price_postapoc": "1 USD",
+     "material": [ "plastic" ],
+-    "weight": "8 g",
+-    "volume": "10 ml",
++    "weight": "1 g",
++    "volume": "1 ml",
++    "ammo_type": "superglue",
++    "//": "1 charge of superglue should cover an area of 5mm^2",
++    "count": 40,
+     "flags": [ "UNRECOVERABLE" ]
+   },
+   {
+@@ -332,7 +336,7 @@
+     "symbol": ",",
+     "color": "white",
+     "name": { "str_sp": "rubber cement" },
+-    "looks_like": "superglue",
++    "looks_like": "super_glue",
+     "description": "A tin of adhesive typically used to glue rubber together.  It forms a less rigid bond than typical superglue, making it ideal for projects requiring flexibility.  Typically smelly and toxic.",
+     "price": "18 USD",
+     "price_postapoc": "80 cent",
+diff --git a/data/json/npcs/NC_JUNK_SHOPKEEP.json b/data/json/npcs/NC_JUNK_SHOPKEEP.json
+index 5a63c07332..7b04a57463 100644
+--- a/data/json/npcs/NC_JUNK_SHOPKEEP.json
++++ b/data/json/npcs/NC_JUNK_SHOPKEEP.json
+@@ -122,7 +122,7 @@
+       { "item": "pistol_scope", "prob": 10 },
+       { "item": "improve_sights", "prob": 20 },
+       { "item": "ashot", "prob": 5 },
+-      { "item": "superglue", "prob": 30 },
++      { "group": "superglue", "prob": 30 },
+       { "item": "string_6", "prob": 2 },
+       { "item": "string_36", "prob": 40 },
+       { "item": "wrench", "prob": 30 },
+diff --git a/data/json/npcs/campus/great_library_librarian_goods.json b/data/json/npcs/campus/great_library_librarian_goods.json
+index 5756ab5edf..c9d0910ec1 100644
+--- a/data/json/npcs/campus/great_library_librarian_goods.json
++++ b/data/json/npcs/campus/great_library_librarian_goods.json
+@@ -22,7 +22,7 @@
+     "subtype": "distribution",
+     "items": [
+       { "item": "duct_tape", "charges": [ 35, 50 ] },
+-      { "item": "superglue", "count": [ 0, 1 ] },
++      { "group": "superglue", "count": [ 0, 1 ] },
+       { "item": "paper", "count": [ 150, 200 ] },
+       { "item": "cardboard", "count": [ 10, 20 ] }
+     ]
+diff --git a/data/json/npcs/exodii/exodii_merchant_itemlist.json b/data/json/npcs/exodii/exodii_merchant_itemlist.json
+index dff5086ec3..4ab3d17b5e 100644
+--- a/data/json/npcs/exodii/exodii_merchant_itemlist.json
++++ b/data/json/npcs/exodii/exodii_merchant_itemlist.json
+@@ -109,7 +109,7 @@
+           { "item": "zipper_long_plastic", "prob": 10, "count": [ 1, 2 ] },
+           { "item": "snapfastener_steel", "prob": 40, "count": [ 5, 10 ] },
+           { "item": "chunk_rubber", "prob": 50, "count": [ 1, 2 ] },
+-          { "item": "superglue", "prob": 30, "count": [ 1, 2 ] },
++          { "group": "superglue", "prob": 30, "count": [ 1, 2 ] },
+           { "item": "rubber_cement", "prob": 40, "count": [ 1, 2 ] }
+         ],
+         "prob": 50
+@@ -126,7 +126,7 @@
+           { "item": "ragpouch", "prob": 40, "count": [ 1, 2 ] },
+           { "item": "tool_belt", "prob": 40 },
+           { "item": "leather_pouch", "prob": 10 },
+-          { "item": "superglue", "prob": 30, "count": [ 1, 2 ] }
++          { "group": "superglue", "prob": 30, "count": [ 1, 2 ] }
+         ],
+         "prob": 50
+       }
+diff --git a/data/json/npcs/items_generic.json b/data/json/npcs/items_generic.json
+index 3055e771b5..c73037c828 100644
+--- a/data/json/npcs/items_generic.json
++++ b/data/json/npcs/items_generic.json
+@@ -1037,7 +1037,7 @@
+       [ "string_6", 4 ],
+       [ "sugar", 7 ],
+       [ "sugar_beet", 2 ],
+-      [ "superglue", 8 ],
++      { "group": "superglue", "prob": 8 },
+       [ "suppressor", 1 ],
+       [ "survival_book", 3 ],
+       [ "survnote", 3 ],
+diff --git a/data/json/npcs/refugee_center/surface_refugees/NPC_Garry_Villeneuve.json b/data/json/npcs/refugee_center/surface_refugees/NPC_Garry_Villeneuve.json
+index b59671cbe2..e66a26465a 100644
+--- a/data/json/npcs/refugee_center/surface_refugees/NPC_Garry_Villeneuve.json
++++ b/data/json/npcs/refugee_center/surface_refugees/NPC_Garry_Villeneuve.json
+@@ -57,7 +57,7 @@
+     "type": "item_group",
+     "id": "REFUGEE_Garry_carried",
+     "subtype": "collection",
+-    "entries": [ { "item": "duct_tape" }, { "item": "superglue" } ]
++    "entries": [ { "item": "duct_tape" }, { "group": "superglue" } ]
+   },
+   {
+     "type": "item_group",
+diff --git a/data/json/npcs/refugee_center/surface_staff/Smokes/free_merchant_shopkeep_goods.json b/data/json/npcs/refugee_center/surface_staff/Smokes/free_merchant_shopkeep_goods.json
+index f9b06cbbff..4e236db179 100644
+--- a/data/json/npcs/refugee_center/surface_staff/Smokes/free_merchant_shopkeep_goods.json
++++ b/data/json/npcs/refugee_center/surface_staff/Smokes/free_merchant_shopkeep_goods.json
+@@ -40,7 +40,7 @@
+       { "item": "thread", "charges": [ 100, 240 ] },
+       { "item": "nail", "charges": [ 80, 100 ] },
+       { "item": "duct_tape", "charges": [ 35, 50 ] },
+-      { "item": "superglue", "count": [ 0, 1 ] },
++      { "group": "superglue", "count": [ 0, 1 ] },
+       { "item": "glass_shard", "count": [ 150, 200 ] },
+       { "item": "clay_lump", "count": [ 2, 3 ] },
+       { "item": "splinter", "count": [ 5, 7 ] },
+diff --git a/data/json/obsoletion_and_migration_0.I/migration_items.json b/data/json/obsoletion_and_migration_0.I/migration_items.json
+index f70d0f5344..1cf8670de9 100644
+--- a/data/json/obsoletion_and_migration_0.I/migration_items.json
++++ b/data/json/obsoletion_and_migration_0.I/migration_items.json
+@@ -1819,5 +1819,11 @@
+     "id": "g36mag_100rd",
+     "type": "MIGRATION",
+     "replace": "stanag100drum"
++  },
++  {
++    "id": "superglue",
++    "type": "MIGRATION",
++    "replace": "small_squeeze_tube",
++    "contents": [ { "id": "super_glue", "count": 40 } ]
+   }
+ ]
+diff --git a/data/json/recipes/ammo/weldgas.json b/data/json/recipes/ammo/weldgas.json
+index b55c29a44c..d84e0faf1d 100644
+--- a/data/json/recipes/ammo/weldgas.json
++++ b/data/json/recipes/ammo/weldgas.json
+@@ -84,7 +84,6 @@
+       [ [ "material_limestone", 1 ], [ "chem_manganese_dioxide", 1 ], [ "light_disposable_cell", 1 ] ],
+       [
+         [ "rosin", 5 ],
+-        [ "superglue", 1 ],
+         [ "bone_glue", 1 ],
+         [ "sugar", 1 ],
+         [ "plastic_chunk", 1 ],
+diff --git a/data/json/recipes/armor/head.json b/data/json/recipes/armor/head.json
+index f9fb7c4e5b..27ada58982 100644
+--- a/data/json/recipes/armor/head.json
++++ b/data/json/recipes/armor/head.json
+@@ -317,7 +317,7 @@
+     "components": [
+       [ [ "goggles_ski", 1 ], [ "goggles_welding", 1 ], [ "glasses_safety", 1 ] ],
+       [ [ "duct_tape", 120 ], [ "medical_tape", 120 ] ],
+-      [ [ "superglue", 1 ] ]
++      [ [ "super_glue", 1 ] ]
+     ],
+     "proficiencies": [ { "proficiency": "prof_plasticworking" } ]
+   },
+diff --git a/data/json/recipes/armor/other.json b/data/json/recipes/armor/other.json
+index 47cbca0418..b670e20f1d 100644
+--- a/data/json/recipes/armor/other.json
++++ b/data/json/recipes/armor/other.json
+@@ -442,12 +442,11 @@
+       [ "manual_swimming", 3 ]
+     ],
+     "proficiencies": [ { "proficiency": "prof_closures_waterproofing" } ],
+-    "using": [ [ "soldering_standard", 40 ] ],
++    "using": [ [ "soldering_standard", 40 ], [ "glue_waterproof", 10 ] ],
+     "qualities": [ { "id": "PRESSURIZATION", "level": 1 }, { "id": "FABRIC_CUT", "level": 1 } ],
+     "components": [
+       [ [ "hose", 2 ] ],
+       [ [ "rebreather_filler_soda_lime", 90 ] ],
+-      [ [ "superglue", 1 ] ],
+       [ [ "wire_mesh", 1 ] ],
+       [ [ "scrap", 8 ], [ "can_food", 4 ], [ "can_drink", 4 ], [ "canister_empty", 4 ] ],
+       [ [ "small_scuba_tank", 1 ], [ "oxygen_tank", 1 ] ]
+@@ -472,13 +471,12 @@
+       [ "manual_swimming", 3 ]
+     ],
+     "proficiencies": [ { "proficiency": "prof_closures_waterproofing" } ],
+-    "using": [ [ "soldering_standard", 40 ] ],
++    "using": [ [ "soldering_standard", 40 ], [ "glue_waterproof", 10 ] ],
+     "tools": [ [ [ "pseudo_app_oxygen_concentrator", 1620 ] ], [ [ "pseudo_app_hd_compressor_unit", 1350 ] ] ],
+     "qualities": [ { "id": "FABRIC_CUT", "level": 1 } ],
+     "components": [
+       [ [ "hose", 2 ] ],
+       [ [ "rebreather_filler_soda_lime", 180 ] ],
+-      [ [ "superglue", 1 ] ],
+       [ [ "wire_mesh", 1 ] ],
+       [ [ "scrap", 8 ], [ "can_food", 4 ], [ "can_drink", 4 ], [ "canister_empty", 4 ] ],
+       [ [ "small_scuba_tank", 1 ], [ "oxygen_tank", 1 ] ]
+@@ -533,12 +531,11 @@
+       [ "manual_swimming", 3 ]
+     ],
+     "proficiencies": [ { "proficiency": "prof_closures_waterproofing" } ],
+-    "using": [ [ "soldering_standard", 40 ] ],
++    "using": [ [ "soldering_standard", 40 ], [ "glue_waterproof", 10 ] ],
+     "qualities": [ { "id": "FABRIC_CUT", "level": 1 } ],
+     "components": [
+       [ [ "hose", 2 ] ],
+       [ [ "rebreather_filler_ko2", 360 ] ],
+-      [ [ "superglue", 1 ] ],
+       [ [ "wire_mesh", 1 ] ],
+       [ [ "scrap", 10 ], [ "can_food", 5 ], [ "can_drink", 5 ], [ "canister_empty", 5 ] ]
+     ]
+diff --git a/data/json/recipes/armor/suit.json b/data/json/recipes/armor/suit.json
+index 174798d632..38c890f51c 100644
+--- a/data/json/recipes/armor/suit.json
++++ b/data/json/recipes/armor/suit.json
+@@ -1730,7 +1730,7 @@
+     "skills_required": [ "tailor", 6 ],
+     "time": "6 h",
+     "book_learn": [ [ "textbook_fireman", 8 ], [ "tailor_portfolio", 8 ] ],
+-    "using": [ [ "sewing_standard", 200 ], [ "tailoring_nomex_patchwork", 40 ] ],
++    "using": [ [ "sewing_standard", 200 ], [ "tailoring_nomex_patchwork", 40 ], [ "glue_strong", 1000 ] ],
+     "qualities": [ { "id": "FABRIC_CUT", "level": 2 } ],
+     "proficiencies": [
+       { "proficiency": "prof_closures" },
+@@ -1739,7 +1739,6 @@
+     ],
+     "components": [
+       [ [ "sheet_kevlar_layered", 8 ] ],
+-      [ [ "duct_tape", 200 ], [ "superglue", 5 ] ],
+       [
+         [ "kevlar", 1 ],
+         [ "ballistic_vest_light", 1 ],
+@@ -1753,11 +1752,10 @@
+     "type": "recipe",
+     "copy-from": "entry_suit",
+     "time": "6 h",
+-    "using": [ [ "sewing_standard", 150 ], [ "tailoring_nomex_patchwork", 30 ] ],
++    "using": [ [ "sewing_standard", 150 ], [ "tailoring_nomex_patchwork", 30 ], [ "glue_strong", 750 ] ],
+     "qualities": [ { "id": "FABRIC_CUT", "level": 2 } ],
+     "components": [
+       [ [ "sheet_kevlar_layered", 6 ] ],
+-      [ [ "duct_tape", 150 ], [ "superglue", 3 ] ],
+       [
+         [ "kevlar", 1 ],
+         [ "ballistic_vest_light", 1 ],
+@@ -1771,11 +1769,10 @@
+     "type": "recipe",
+     "copy-from": "entry_suit",
+     "time": "6 h 45 m",
+-    "using": [ [ "sewing_standard", 300 ], [ "tailoring_nomex_patchwork", 50 ] ],
++    "using": [ [ "sewing_standard", 300 ], [ "tailoring_nomex_patchwork", 50 ], [ "glue_strong", 1500 ] ],
+     "qualities": [ { "id": "FABRIC_CUT", "level": 2 } ],
+     "components": [
+       [ [ "sheet_kevlar_layered", 12 ] ],
+-      [ [ "duct_tape", 300 ], [ "superglue", 7 ] ],
+       [
+         [ "kevlar", 2 ],
+         [ "ballistic_vest_light", 2 ],
+diff --git a/data/json/recipes/other/materials.json b/data/json/recipes/other/materials.json
+index 70920e1740..08d2551b10 100644
+--- a/data/json/recipes/other/materials.json
++++ b/data/json/recipes/other/materials.json
+@@ -970,7 +970,8 @@
+     "time": "45 m",
+     "autolearn": true,
+     "proficiencies": [ { "proficiency": "prof_polymerworking" } ],
+-    "components": [ [ [ "sheet_kevlar", 16 ], [ "sheet_kevlar_layered", 1 ] ], [ [ "superglue", 1 ] ] ]
++    "using": [ [ "glue_strong", 450 ] ],
++    "components": [ [ [ "sheet_kevlar", 16 ], [ "sheet_kevlar_layered", 1 ] ] ]
+   },
+   {
+     "result": "sheet_cotton",
+diff --git a/data/json/recipes/other/parts.json b/data/json/recipes/other/parts.json
+index d63814ca72..adbe157a5e 100644
+--- a/data/json/recipes/other/parts.json
++++ b/data/json/recipes/other/parts.json
+@@ -658,11 +658,11 @@
+     "difficulty": 3,
+     "time": "60 m",
+     "book_learn": [ [ "textbook_fabrication", 3 ], [ "textbook_mechanics", 3 ], [ "welding_book", 5 ] ],
+-    "using": [ [ "welding_standard", 20 ] ],
++    "using": [ [ "welding_standard", 20 ], [ "glue_strong", 4 ] ],
+     "//": "20cm weld",
+     "proficiencies": [ { "proficiency": "prof_metalworking" }, { "proficiency": "prof_welding_basic" }, { "proficiency": "prof_welding" } ],
+     "qualities": [ { "id": "SAW_M", "level": 1 } ],
+-    "components": [ [ [ "omnicamera", 1 ] ], [ [ "wire", 4 ] ], [ [ "superglue", 1 ] ] ]
++    "components": [ [ [ "omnicamera", 1 ] ], [ [ "wire", 4 ] ] ]
+   },
+   {
+     "type": "recipe",
+@@ -950,9 +950,9 @@
+     "time": "2 h 30 m",
+     "autolearn": true,
+     "proficiencies": [ { "proficiency": "prof_plasticworking", "time_multiplier": 1.25, "skill_penalty": 0.125 } ],
+-    "using": [ [ "surface_heat", 10 ] ],
++    "using": [ [ "surface_heat", 10 ], [ "glue_any", 1 ] ],
+     "qualities": [ { "id": "FILE", "level": 1 }, { "id": "CUT", "level": 2 }, { "id": "SAW_M", "level": 1 } ],
+-    "components": [ [ [ "chunk_rubber", 8 ] ], [ [ "superglue", 4 ], [ "bone_glue", 4 ] ], [ [ "wheel_caster", 1 ] ] ]
++    "components": [ [ [ "chunk_rubber", 8 ] ], [ [ "wheel_caster", 1 ] ] ]
+   },
+   {
+     "type": "recipe",
+diff --git a/data/json/recipes/other/parts_construction.json b/data/json/recipes/other/parts_construction.json
+index 2ceb33d23f..426a8b9361 100644
+--- a/data/json/recipes/other/parts_construction.json
++++ b/data/json/recipes/other/parts_construction.json
+@@ -532,14 +532,14 @@
+     "difficulty": 2,
+     "time": "40 m",
+     "book_learn": [ [ "textbook_fabrication", 3 ], [ "textbook_mechanics", 3 ], [ "welding_book", 5 ] ],
+-    "using": [ [ "welding_standard", 80 ] ],
++    "using": [ [ "welding_standard", 80 ], [ "glue_strong", 250 ] ],
+     "proficiencies": [
+       { "proficiency": "prof_metalworking" },
+       { "proficiency": "prof_welding_basic", "skill_penalty": 0.5 },
+       { "proficiency": "prof_welding" }
+     ],
+     "qualities": [ { "id": "SAW_M", "level": 1 } ],
+-    "components": [ [ [ "glass_sheet", 1 ] ], [ [ "wire", 8 ] ], [ [ "superglue", 1 ] ] ]
++    "components": [ [ [ "glass_sheet", 1 ] ], [ [ "wire", 8 ] ] ]
+   },
+   {
+     "type": "recipe",
+diff --git a/data/json/recipes/other/power_supplies.json b/data/json/recipes/other/power_supplies.json
+index 262b5e942c..80122923cd 100644
+--- a/data/json/recipes/other/power_supplies.json
++++ b/data/json/recipes/other/power_supplies.json
+@@ -568,7 +568,7 @@
+       [ "textbook_fabrication", 3 ],
+       [ "manual_fabrication", 4 ]
+     ],
+-    "using": [ [ "soldering_standard", 10 ], [ "surface_heat", 10 ] ],
++    "using": [ [ "soldering_standard", 10 ], [ "surface_heat", 10 ], [ "glue_strong", 5 ] ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "proficiencies": [
+       { "proficiency": "prof_plasticworking" },
+@@ -577,7 +577,6 @@
+     ],
+     "components": [
+       [ [ "plastic_chunk", 5 ] ],
+-      [ [ "superglue", 1 ] ],
+       [ [ "power_supply", 1 ] ],
+       [ [ "e_scrap", 3 ] ],
+       [ [ "scrap", 3 ] ],
+diff --git a/data/json/recipes/practice/devices.json b/data/json/recipes/practice/devices.json
+index 101c45f230..9d9e2c5e72 100644
+--- a/data/json/recipes/practice/devices.json
++++ b/data/json/recipes/practice/devices.json
+@@ -74,7 +74,7 @@
+     "time": "1 h",
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "components": [
+-      [ [ "superglue", 1 ], [ "duct_tape", 25 ] ],
++      [ [ "super_glue", 1 ], [ "duct_tape", 25 ] ],
+       [ [ "scrap", 3 ], [ "steel_chunk", 1 ], [ "canister_empty", 1 ], [ "clay_canister", 1 ], [ "can_food", 1 ] ],
+       [ [ "bb", 60 ], [ "nails", 30, "LIST" ] ]
+     ],
+diff --git a/data/json/recipes/recipe_ammo.json b/data/json/recipes/recipe_ammo.json
+index b196cb2424..3df2fe564e 100644
+--- a/data/json/recipes/recipe_ammo.json
++++ b/data/json/recipes/recipe_ammo.json
+@@ -71,7 +71,7 @@
+     "autolearn": true,
+     "using": [ [ "tailoring_leather_small", 2 ] ],
+     "proficiencies": [ { "proficiency": "prof_leatherworking_basic" } ],
+-    "components": [ [ [ "string_36", 3 ], [ "cordage_36", 3 ] ], [ [ "superglue", 1 ], [ "bone_glue", 1 ] ] ],
++    "components": [ [ [ "string_36", 3 ], [ "cordage_36", 3 ] ], [ [ "super_glue", 5 ], [ "bone_glue", 1 ] ] ],
+     "//": "Essentially a ball of glued-together string with some leather around it"
+   },
+   {
+diff --git a/data/json/recipes/recipe_medsandchemicals.json b/data/json/recipes/recipe_medsandchemicals.json
+index bc81ac68ef..b58ca4d62e 100644
+--- a/data/json/recipes/recipe_medsandchemicals.json
++++ b/data/json/recipes/recipe_medsandchemicals.json
+@@ -1780,7 +1780,7 @@
+     "book_learn": [ [ "textbook_anarch", 5 ], [ "recipe_labchem", 4 ], [ "textbook_chemistry", 5 ] ],
+     "proficiencies": [ { "proficiency": "prof_intro_chemistry" }, { "proficiency": "prof_inorganic_chemistry" } ],
+     "qualities": [ { "id": "BOIL", "level": 2 } ],
+-    "components": [ [ [ "chem_zinc_powder", 645 ] ], [ [ "chem_sulphur", 750 ] ], [ [ "superglue", 2 ] ] ]
++    "components": [ [ [ "chem_zinc_powder", 645 ] ], [ [ "chem_sulphur", 750 ] ] ]
+   },
+   {
+     "type": "recipe",
+diff --git a/data/json/recipes/recipe_music_instruments.json b/data/json/recipes/recipe_music_instruments.json
+index 77ab11b41c..751400eef0 100644
+--- a/data/json/recipes/recipe_music_instruments.json
++++ b/data/json/recipes/recipe_music_instruments.json
+@@ -14,7 +14,7 @@
+     "byproducts": [ [ "splinter", 68 ] ],
+     "components": [
+       [ [ "tonewood", 2 ] ],
+-      [ [ "superglue", 2 ] ],
++      [ [ "super_glue", 2 ] ],
+       [ [ "wood_panel", 1 ] ],
+       [ [ "piano_wire", 5 ] ],
+       [ [ "tuning_pegs", 5 ] ]
+@@ -35,7 +35,7 @@
+     "byproducts": [ [ "splinter", 68 ] ],
+     "components": [
+       [ [ "tonewood", 3 ] ],
+-      [ [ "superglue", 2 ] ],
++      [ [ "super_glue", 2 ] ],
+       [ [ "wood_panel", 1 ] ],
+       [ [ "piano_wire", 5 ] ],
+       [ [ "tuning_pegs", 5 ] ]
+@@ -56,7 +56,7 @@
+     "byproducts": [ [ "splinter", 89 ] ],
+     "components": [
+       [ [ "tonewood", 2 ] ],
+-      [ [ "superglue", 2 ] ],
++      [ [ "super_glue", 2 ] ],
+       [ [ "wood_panel", 1 ] ],
+       [ [ "piano_wire", 6 ] ],
+       [ [ "tuning_pegs", 6 ] ]
+@@ -75,7 +75,7 @@
+     "qualities": [ { "id": "LUTHIER", "level": 1 }, { "id": "SAW_W", "level": 2 }, { "id": "CHISEL_WOOD", "level": 1 } ],
+     "proficiencies": [ { "proficiency": "prof_carpentry_basic" } ],
+     "byproducts": [ [ "splinter", 89 ] ],
+-    "components": [ [ [ "tonewood", 6 ] ], [ [ "superglue", 2 ] ], [ [ "drum_skin", 2 ] ], [ [ "tuning_pegs", 12 ] ] ]
++    "components": [ [ [ "tonewood", 6 ] ], [ [ "super_glue", 2 ] ], [ [ "drum_skin", 2 ] ], [ [ "tuning_pegs", 12 ] ] ]
+   },
+   {
+     "result": "drum_percussion_primitive",
+@@ -90,6 +90,6 @@
+     "qualities": [ { "id": "LUTHIER", "level": 1 }, { "id": "SAW_W", "level": 2 }, { "id": "CHISEL_WOOD", "level": 1 } ],
+     "proficiencies": [ { "proficiency": "prof_carpentry_basic" } ],
+     "byproducts": [ [ "splinter", 89 ] ],
+-    "components": [ [ [ "tonewood", 6 ] ], [ [ "superglue", 2 ] ], [ [ "tanned_hide", 2 ] ], [ [ "tuning_pegs", 12 ] ] ]
++    "components": [ [ [ "tonewood", 6 ] ], [ [ "super_glue", 2 ] ], [ [ "tanned_hide", 2 ] ], [ [ "tuning_pegs", 12 ] ] ]
+   }
+ ]
+diff --git a/data/json/recipes/recipe_traps.json b/data/json/recipes/recipe_traps.json
+index 49dee9dcce..86b65b1d86 100644
+--- a/data/json/recipes/recipe_traps.json
++++ b/data/json/recipes/recipe_traps.json
+@@ -26,7 +26,8 @@
+     "time": "25 m",
+     "autolearn": true,
+     "qualities": [ { "id": "HAMMER", "level": 1 } ],
+-    "components": [ [ [ "glass_shard", 4 ] ], [ [ "superglue", 1 ], [ "bone_glue", 1 ] ] ]
++    "using": [ [ "glue_any", 4 ] ],
++    "components": [ [ [ "glass_shard", 4 ] ] ]
+   },
+   {
+     "type": "recipe",
+@@ -56,7 +57,8 @@
+     "difficulty": 1,
+     "time": "5 m",
+     "autolearn": true,
+-    "components": [ [ [ "nm_teeth", 4 ] ], [ [ "superglue", 1 ], [ "bone_glue", 1 ] ] ]
++    "using": [ [ "glue_any", 4 ] ],
++    "components": [ [ [ "nm_teeth", 4 ] ] ]
+   },
+   {
+     "type": "recipe",
+@@ -88,7 +90,7 @@
+     "autolearn": true,
+     "using": [ [ "cordage", 1 ] ],
+     "proficiencies": [ { "proficiency": "prof_traps" } ],
+-    "components": [ [ [ "superglue", 1 ] ] ]
++    "components": [ [ [ "super_glue", 1 ] ] ]
+   },
+   {
+     "type": "recipe",
+@@ -226,7 +228,7 @@
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "proficiencies": [ { "proficiency": "prof_traps" }, { "proficiency": "prof_trapsetting" } ],
+     "components": [
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ] ],
++      [ [ "super_glue", 150 ], [ "duct_tape", 75 ] ],
+       [ [ "scrap", 3 ], [ "steel_chunk", 1 ], [ "canister_empty", 1 ], [ "clay_canister", 1 ], [ "can_food", 1 ] ],
+       [ [ "bb", 200 ], [ "nails", 100, "LIST" ] ],
+       [
+diff --git a/data/json/recipes/tools/lights.json b/data/json/recipes/tools/lights.json
+index c7f9fc4444..11fc63cdaf 100644
+--- a/data/json/recipes/tools/lights.json
++++ b/data/json/recipes/tools/lights.json
+@@ -29,13 +29,8 @@
+     "decomp_learn": 2,
+     "book_learn": [ [ "manual_electronics", 3 ], [ "advanced_electronics", 3 ] ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+-    "components": [
+-      [ [ "plastic_chunk", 1 ] ],
+-      [ [ "superglue", 1 ] ],
+-      [ [ "power_supply", 1 ] ],
+-      [ [ "cable", 1 ] ],
+-      [ [ "light_bulb", 1 ], [ "e_scrap", 1 ] ]
+-    ]
++    "using": [ [ "glue_any", 1 ] ],
++    "components": [ [ [ "plastic_chunk", 1 ] ], [ [ "power_supply", 1 ] ], [ [ "cable", 1 ] ], [ [ "light_bulb", 1 ], [ "e_scrap", 1 ] ] ]
+   },
+   {
+     "type": "recipe",
+@@ -199,9 +194,9 @@
+     "book_learn": [ [ "textbook_electronics", 3 ], [ "advanced_electronics", 3 ], [ "recipe_caseless", 2 ] ],
+     "proficiencies": [ { "proficiency": "prof_plasticworking" } ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
++    "using": [ [ "glue_any", 1 ] ],
+     "components": [
+       [ [ "plastic_chunk", 1 ] ],
+-      [ [ "superglue", 1 ] ],
+       [ [ "power_supply", 1 ] ],
+       [ [ "cable", 1 ] ],
+       [ [ "light_bulb", 1 ], [ "e_scrap", 1 ] ],
+@@ -368,10 +363,10 @@
+     "time": "45 m",
+     "//": "25cm weld",
+     "book_learn": [ [ "textbook_fabrication", 3 ], [ "textbook_mechanics", 3 ], [ "welding_book", 5 ] ],
+-    "using": [ [ "welding_standard", 25 ] ],
++    "using": [ [ "welding_standard", 25 ], [ "glue_strong", 10 ] ],
+     "proficiencies": [ { "proficiency": "prof_metalworking" }, { "proficiency": "prof_welding_basic" }, { "proficiency": "prof_welding" } ],
+     "qualities": [ { "id": "SAW_M", "level": 1 } ],
+-    "components": [ [ [ "car_headlight", 1 ] ], [ [ "wire", 2 ] ], [ [ "superglue", 1 ] ] ]
++    "components": [ [ [ "car_headlight", 1 ] ], [ [ "wire", 2 ] ] ]
+   },
+   {
+     "type": "recipe",
+@@ -384,10 +379,10 @@
+     "time": "45 m",
+     "//": "25cm weld",
+     "book_learn": [ [ "textbook_fabrication", 3 ], [ "textbook_mechanics", 3 ], [ "welding_book", 5 ] ],
+-    "using": [ [ "welding_standard", 25 ] ],
++    "using": [ [ "welding_standard", 25 ], [ "glue_strong", 15 ] ],
+     "proficiencies": [ { "proficiency": "prof_metalworking" }, { "proficiency": "prof_welding_basic" }, { "proficiency": "prof_welding" } ],
+     "qualities": [ { "id": "SAW_M", "level": 1 } ],
+-    "components": [ [ [ "car_wide_headlight", 1 ] ], [ [ "wire", 3 ] ], [ [ "superglue", 1 ] ] ]
++    "components": [ [ [ "car_wide_headlight", 1 ] ], [ [ "wire", 3 ] ] ]
+   },
+   {
+     "type": "recipe",
+@@ -402,12 +397,7 @@
+     "book_learn": [ [ "textbook_electronics", 4 ], [ "advanced_electronics", 4 ], [ "recipe_caseless", 3 ] ],
+     "proficiencies": [ { "proficiency": "prof_plasticworking" } ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+-    "components": [
+-      [ [ "plastic_chunk", 2 ] ],
+-      [ [ "superglue", 1 ] ],
+-      [ [ "power_supply", 1 ] ],
+-      [ [ "cable", 2 ] ],
+-      [ [ "betavoltaic", 4 ] ]
+-    ]
++    "using": [ [ "glue_any", 1 ] ],
++    "components": [ [ [ "plastic_chunk", 2 ] ], [ [ "power_supply", 1 ] ], [ [ "cable", 2 ] ], [ [ "betavoltaic", 4 ] ] ]
+   }
+ ]
+diff --git a/data/json/recipes/tools/tool.json b/data/json/recipes/tools/tool.json
+index b4159c43cd..8170e7337b 100644
+--- a/data/json/recipes/tools/tool.json
++++ b/data/json/recipes/tools/tool.json
+@@ -626,12 +626,8 @@
+     "proficiencies": [ { "proficiency": "prof_metalworking" } ],
+     "tools": [ [ [ "material_sand", -1 ] ] ],
+     "qualities": [ { "id": "DRILL", "level": 2 }, { "id": "HAMMER", "level": 2 } ],
+-    "components": [
+-      [ [ "pot", 1 ], [ "pot_copper", 1 ] ],
+-      [ [ "cu_pipe", 1 ] ],
+-      [ [ "bone_glue", 1 ], [ "superglue", 1 ] ],
+-      [ [ "duct_tape", 10 ] ]
+-    ]
++    "using": [ [ "glue_waterproof", 15 ] ],
++    "components": [ [ [ "pot", 1 ], [ "pot_copper", 1 ] ], [ [ "cu_pipe", 1 ] ], [ [ "duct_tape", 10 ] ] ]
+   },
+   {
+     "result": "electrolyzer_makeshift",
+@@ -1378,7 +1374,8 @@
+     "autolearn": true,
+     "qualities": [ { "id": "CUT", "level": 2 }, { "id": "SEW", "level": 2 } ],
+     "proficiencies": [ { "proficiency": "prof_leatherworking_basic" } ],
+-    "components": [ [ [ "leather", 2 ] ], [ [ "superglue", 1 ] ], [ [ "filament", 40, "LIST" ] ] ]
++    "using": [ [ "glue_waterproof", 12 ] ],
++    "components": [ [ [ "leather", 2 ] ], [ [ "filament", 40, "LIST" ] ] ]
+   },
+   {
+     "result": "masonrysaw_off",
+diff --git a/data/json/recipes/tools/tools_electronic.json b/data/json/recipes/tools/tools_electronic.json
+index f3d70cf19c..371c5f5649 100644
+--- a/data/json/recipes/tools/tools_electronic.json
++++ b/data/json/recipes/tools/tools_electronic.json
+@@ -218,7 +218,7 @@
+     "difficulty": 8,
+     "time": "1 h",
+     "book_learn": [ [ "textbook_electronics", 7 ], [ "textbook_robots", 6 ] ],
+-    "using": [ [ "soldering_standard", 10 ] ],
++    "using": [ [ "soldering_standard", 10 ], [ "glue_any", 1 ] ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "proficiencies": [
+       { "proficiency": "prof_plasticworking", "time_multiplier": 1.5 },
+@@ -227,7 +227,6 @@
+       { "proficiency": "prof_elec_integrated_circuits" }
+     ],
+     "components": [
+-      [ [ "superglue", 1 ] ],
+       [ [ "processor", 1 ] ],
+       [ [ "RAM", 2 ] ],
+       [ [ "amplifier", 1 ] ],
+@@ -549,9 +548,9 @@
+     "book_learn": [ [ "recipe_caseless", 8 ] ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "proficiencies": [ { "proficiency": "prof_plasticworking" }, { "proficiency": "prof_elec_semiconductors" } ],
++    "using": [ [ "glue_any", 1 ] ],
+     "components": [
+       [ [ "plastic_chunk", 5 ] ],
+-      [ [ "superglue", 1 ] ],
+       [ [ "power_supply", 2 ] ],
+       [ [ "wire_mesh", 1 ], [ "cotton_patchwork", 1 ] ],
+       [ [ "thermos", 2 ] ],
+@@ -601,14 +600,14 @@
+     "difficulty": 3,
+     "time": "30 m",
+     "autolearn": true,
+-    "using": [ [ "soldering_standard", 5 ], [ "plastic_molding", 2 ] ],
++    "using": [ [ "soldering_standard", 5 ], [ "plastic_molding", 2 ], [ "glue_waterproof", 4 ] ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "proficiencies": [
+       { "proficiency": "prof_plasticworking" },
+       { "proficiency": "prof_elec_soldering" },
+       { "proficiency": "prof_elec_circuits" }
+     ],
+-    "components": [ [ [ "superglue", 1 ] ], [ [ "scrap", 1 ] ], [ [ "plastic_chunk", 3 ] ], [ [ "cable", 5 ] ], [ [ "motor_micro", 1 ] ] ]
++    "components": [ [ [ "scrap", 1 ] ], [ [ "plastic_chunk", 3 ] ], [ [ "cable", 5 ] ], [ [ "motor_micro", 1 ] ] ]
+   },
+   {
+     "type": "recipe",
+@@ -679,7 +678,7 @@
+     "time": "1 h",
+     "reversible": true,
+     "book_learn": [ [ "advanced_electronics", 4 ], [ "mag_electronics", 6 ], [ "manual_electronics", 5 ] ],
+-    "using": [ [ "soldering_standard", 10 ] ],
++    "using": [ [ "soldering_standard", 10 ], [ "glue_any", 2 ] ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "proficiencies": [
+       { "proficiency": "prof_plasticworking" },
+@@ -690,7 +689,6 @@
+       [ [ "scrap_aluminum", 4 ] ],
+       [ [ "plastic_chunk", 2 ] ],
+       [ [ "motor_micro", 1 ] ],
+-      [ [ "superglue", 2 ] ],
+       [ [ "element", 2 ], [ "crude_heating_element", 2 ] ],
+       [ [ "hose", 1 ] ],
+       [ [ "power_supply", 1 ] ]
+@@ -767,7 +765,7 @@
+     "components": [
+       [ [ "plastic_chunk", 10 ] ],
+       [ [ "scrap", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ] ],
++      [ [ "super_glue", 5 ], [ "duct_tape", 10 ] ],
+       [ [ "string_36", 4 ] ],
+       [ [ "motor_micro", 1 ] ],
+       [ [ "e_scrap", 1 ] ]
+@@ -801,7 +799,7 @@
+     "time": "8 h 45 m",
+     "decomp_learn": 5,
+     "book_learn": [ [ "textbook_electronics", 7 ], [ "textbook_robots", 6 ] ],
+-    "using": [ [ "soldering_standard", 10 ], [ "plastic_molding", 8 ] ],
++    "using": [ [ "soldering_standard", 10 ], [ "plastic_molding", 8 ], [ "glue_any", 1 ] ],
+     "qualities": [ { "id": "SCREW", "level": 1 }, { "id": "SAW_M", "level": 1 }, { "id": "CUT", "level": 2 } ],
+     "proficiencies": [
+       { "proficiency": "prof_plasticworking", "time_multiplier": 1.5 },
+@@ -809,7 +807,6 @@
+       { "proficiency": "prof_elec_semiconductors" }
+     ],
+     "components": [
+-      [ [ "superglue", 4 ], [ "bone_glue", 4 ] ],
+       [ [ "antenna", 1 ] ],
+       [ [ "motor_micro", 2 ] ],
+       [ [ "amplifier", 2 ] ],
+diff --git a/data/json/recipes/tools/tools_hand.json b/data/json/recipes/tools/tools_hand.json
+index cc421690bd..3cafa85828 100644
+--- a/data/json/recipes/tools/tools_hand.json
++++ b/data/json/recipes/tools/tools_hand.json
+@@ -1683,7 +1683,7 @@
+       [ [ "clay_lump", 1 ] ],
+       [ [ "material_sand", 113 ] ],
+       [ [ "2x4", 2 ], [ "stick", 2 ] ],
+-      [ [ "nail", 8 ], [ "bronze_nail", 8 ], [ "superglue", 4 ] ]
++      [ [ "nail", 8 ], [ "bronze_nail", 8 ], [ "super_glue", 4 ] ]
+     ]
+   },
+   {
+@@ -1702,7 +1702,7 @@
+       [ [ "clay_lump", 32 ] ],
+       [ [ "material_sand", 9000 ] ],
+       [ [ "2x4", 8 ] ],
+-      [ [ "nail", 16 ], [ "bronze_nail", 16 ], [ "superglue", 8 ] ]
++      [ [ "nail", 16 ], [ "bronze_nail", 16 ], [ "super_glue", 8 ] ]
+     ]
+   },
+   {
+@@ -1721,7 +1721,7 @@
+       [ [ "clay_lump", 9 ] ],
+       [ [ "material_sand", 2532 ] ],
+       [ [ "2x4", 8 ] ],
+-      [ [ "nail", 16 ], [ "bronze_nail", 16 ], [ "superglue", 8 ] ]
++      [ [ "nail", 16 ], [ "bronze_nail", 16 ], [ "super_glue", 8 ] ]
+     ]
+   },
+   {
+@@ -1740,7 +1740,7 @@
+       [ [ "clay_lump", 5 ] ],
+       [ [ "material_sand", 1350 ] ],
+       [ [ "2x4", 4 ], [ "stick", 4 ] ],
+-      [ [ "nails", 8, "LIST" ], [ "superglue", 4 ] ]
++      [ [ "nails", 8, "LIST" ], [ "super_glue", 4 ] ]
+     ]
+   },
+   {
+diff --git a/data/json/recipes/weapon/bashing.json b/data/json/recipes/weapon/bashing.json
+index fc361c920d..135a0b6330 100644
+--- a/data/json/recipes/weapon/bashing.json
++++ b/data/json/recipes/weapon/bashing.json
+@@ -214,7 +214,7 @@
+     "autolearn": true,
+     "qualities": [ { "id": "CUT", "level": 2 }, { "id": "HAMMER", "level": 1 } ],
+     "proficiencies": [ { "proficiency": "prof_carving", "time_multiplier": 1.5, "skill_penalty": 0.15 } ],
+-    "components": [ [ [ "stick_long", 1 ], [ "long_pole", 1 ] ], [ [ "hammer", 1 ] ], [ [ "superglue", 1 ] ] ]
++    "components": [ [ [ "stick_long", 1 ], [ "long_pole", 1 ] ], [ [ "hammer", 1 ] ], [ [ "super_glue", 1 ] ] ]
+   },
+   {
+     "type": "recipe",
+diff --git a/data/json/recipes/weapon/cutting.json b/data/json/recipes/weapon/cutting.json
+index 11b6b91037..6fa0c7acef 100644
+--- a/data/json/recipes/weapon/cutting.json
++++ b/data/json/recipes/weapon/cutting.json
+@@ -2308,16 +2308,10 @@
+     "skills_required": [ "melee", 5 ],
+     "time": "25 m",
+     "autolearn": true,
+-    "using": [ [ "soldering_standard", 20 ] ],
++    "using": [ [ "soldering_standard", 20 ], [ "glue_strong", 5 ] ],
+     "proficiencies": [ { "proficiency": "prof_metalworking" } ],
+     "qualities": [ { "id": "HAMMER", "level": 1 }, { "id": "SAW_M", "level": 1 }, { "id": "GRIND", "level": 2 } ],
+-    "components": [
+-      [ [ "machete", 1 ] ],
+-      [ [ "duct_tape", 150 ] ],
+-      [ [ "filament_durable", 20, "LIST" ] ],
+-      [ [ "leather", 2 ], [ "chunk_rubber", 1 ] ],
+-      [ [ "rubber_cement", 1 ], [ "superglue", 1 ] ]
+-    ]
++    "components": [ [ [ "machete", 1 ] ], [ [ "filament_durable", 20, "LIST" ] ], [ [ "leather", 2 ], [ "chunk_rubber", 1 ] ] ]
+   },
+   {
+     "result": "survivor_machete_qt",
+@@ -2330,17 +2324,11 @@
+     "skills_required": [ "melee", 5 ],
+     "time": "4 h 48 m",
+     "book_learn": [ [ "textbook_weapwest", 5 ], [ "welding_book", 6 ] ],
+-    "using": [ [ "soldering_standard", 20 ], [ "blacksmithing_standard", 10 ] ],
++    "using": [ [ "soldering_standard", 20 ], [ "blacksmithing_standard", 10 ], [ "glue_strong", 5 ] ],
+     "qualities": [ { "id": "SAW_M", "level": 1 }, { "id": "GRIND", "level": 2 } ],
+     "tools": [ [ [ "swage", -1 ] ], [ [ "metal_tank", -1 ] ], [ [ "water", -80 ], [ "water_clean", -80 ] ] ],
+     "proficiencies": [ { "proficiency": "prof_metalworking" }, { "proficiency": "prof_quenching", "skill_penalty": 1 } ],
+-    "components": [
+-      [ [ "machete", 1 ] ],
+-      [ [ "duct_tape", 150 ] ],
+-      [ [ "filament_durable", 20, "LIST" ] ],
+-      [ [ "leather", 2 ], [ "chunk_rubber", 1 ] ],
+-      [ [ "rubber_cement", 1 ], [ "superglue", 1 ] ]
+-    ]
++    "components": [ [ [ "machete", 1 ] ], [ [ "filament_durable", 20, "LIST" ] ], [ [ "leather", 2 ], [ "chunk_rubber", 1 ] ] ]
+   },
+   {
+     "type": "recipe",
+diff --git a/data/json/recipes/weapon/explosive.json b/data/json/recipes/weapon/explosive.json
+index 99979d268c..3f6f1cfa82 100644
+--- a/data/json/recipes/weapon/explosive.json
++++ b/data/json/recipes/weapon/explosive.json
+@@ -100,7 +100,7 @@
+     "using": [ [ "small_grenade_case", 1 ] ],
+     "components": [
+       [ [ "pilot_light", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
++      [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ],
+       [ [ "oxy_powder", 75 ] ],
+       [ [ "incendiary", 50 ] ]
+     ]
+@@ -124,7 +124,7 @@
+     "components": [
+       [ [ "bleach", 2 ], [ "oxy_powder", 200 ] ],
+       [ [ "ammonia_liquid", 2 ], [ "lye_powder", 200 ] ],
+-      [ [ "superglue", 1 ] ]
++      [ [ "super_glue", 5 ] ]
+     ]
+   },
+   {
+@@ -146,7 +146,7 @@
+       [ [ "triffid_fungicide", 1 ], [ "fungicide", 50 ] ],
+       [ [ "chem_sulphur", 150 ] ],
+       [ [ "small_gas_canister_case", 1, "LIST" ] ],
+-      [ [ "superglue", 1 ] ]
++      [ [ "super_glue", 5 ] ]
+     ]
+   },
+   {
+@@ -168,7 +168,7 @@
+       [ [ "insecticide", 1 ] ],
+       [ [ "water", 2 ], [ "water_clean", 2 ] ],
+       [ [ "small_gas_canister_case", 1, "LIST" ] ],
+-      [ [ "superglue", 1 ] ]
++      [ [ "super_glue", 5 ] ]
+     ]
+   },
+   {
+@@ -239,7 +239,7 @@
+       [ [ "water", 1 ], [ "water_clean", 1 ], [ "salt_water", 1 ], [ "saline", 5 ] ],
+       [ [ "sugar", 16 ] ],
+       [ [ "chem_saltpetre", 24 ] ],
+-      [ [ "superglue", 1 ] ]
++      [ [ "super_glue", 5 ] ]
+     ]
+   },
+   {
+@@ -260,7 +260,7 @@
+     "components": [
+       [ [ "water", 1 ], [ "water_clean", 1 ], [ "salt_water", 1 ], [ "saline", 5 ] ],
+       [ [ "white_phosphorous", 20 ] ],
+-      [ [ "superglue", 1 ] ]
++      [ [ "super_glue", 5 ] ]
+     ]
+   },
+   {
+@@ -280,7 +280,7 @@
+     "using": [ [ "military_explosive", 46 ], [ "explosives_casting_standard", 1 ], [ "small_grenade_case", 1 ] ],
+     "components": [
+       [ [ "delay_fuze", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
++      [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ],
+       [ [ "nails", 50, "LIST" ], [ "scrap", 2 ] ]
+     ]
+   },
+@@ -301,7 +301,7 @@
+     "using": [ [ "military_explosive", 92 ], [ "explosives_casting_standard", 1 ] ],
+     "components": [
+       [ [ "delay_fuze", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
++      [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ],
+       [ [ "can_medium", 1 ] ],
+       [ [ "nails", 100, "LIST" ], [ "scrap", 4 ] ]
+     ]
+@@ -339,7 +339,7 @@
+     "qualities": [ { "id": "SAW_M", "level": 1 } ],
+     "components": [
+       [ [ "delay_fuze", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
++      [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ],
+       [ [ "jug_plastic", 1 ] ],
+       [ [ "nails", 750, "LIST" ], [ "scrap", 30 ] ]
+     ]
+@@ -359,7 +359,7 @@
+     "using": [ [ "explosives_casting_standard", 5 ], [ "military_explosive", 10000 ] ],
+     "components": [
+       [ [ "delay_fuze", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
++      [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ],
+       [ [ "keg_steel", 1 ] ]
+     ]
+   },
+@@ -378,7 +378,7 @@
+     "using": [ [ "explosives_casting_standard", 10 ], [ "military_explosive", 20000 ] ],
+     "components": [
+       [ [ "delay_fuze", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
++      [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ],
+       [ [ "30gal_drum", 1 ] ]
+     ]
+   },
+@@ -400,7 +400,7 @@
+       [ [ "small_grenade_case", 1, "LIST" ] ],
+       [ [ "stable_explosive", 15, "LIST" ], [ "volatile_explosive", 15, "LIST" ] ],
+       [ [ "fuse", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
++      [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ],
+       [ [ "nails", 50, "LIST" ], [ "scrap", 2 ] ]
+     ]
+   },
+@@ -422,7 +422,7 @@
+       [ [ "can_medium", 1 ] ],
+       [ [ "stable_explosive", 30, "LIST" ], [ "volatile_explosive", 30, "LIST" ] ],
+       [ [ "fuse", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
++      [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ],
+       [ [ "nails", 100, "LIST" ], [ "scrap", 4 ] ]
+     ]
+   },
+@@ -487,7 +487,7 @@
+     "qualities": [ { "id": "SAW_M", "level": 1 } ],
+     "components": [
+       [ [ "fuse", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
++      [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ],
+       [ [ "jug_plastic", 1 ] ],
+       [ [ "nails", 750, "LIST" ], [ "scrap", 30 ] ]
+     ]
+@@ -507,7 +507,7 @@
+     "proficiencies": [ { "proficiency": "prof_handloading" } ],
+     "using": [ [ "stable_explosive", 253 ], [ "volatile_explosive", 6 ] ],
+     "qualities": [ { "id": "SAW_M", "level": 1 } ],
+-    "components": [ [ [ "fuse", 1 ] ], [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ], [ [ "jug_plastic", 1 ] ] ]
++    "components": [ [ [ "fuse", 1 ] ], [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ], [ [ "jug_plastic", 1 ] ] ]
+   },
+   {
+     "result": "half_barrel_bomb",
+@@ -522,7 +522,7 @@
+     "book_learn": [ [ "manual_launcher", 7 ], [ "textbook_anarch", 8 ] ],
+     "proficiencies": [ { "proficiency": "prof_handloading" } ],
+     "using": [ [ "volatile_explosive", 86 ], [ "stable_explosive", 3354 ] ],
+-    "components": [ [ [ "fuse", 1 ] ], [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ], [ [ "keg_steel", 1 ] ] ]
++    "components": [ [ [ "fuse", 1 ] ], [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ], [ [ "keg_steel", 1 ] ] ]
+   },
+   {
+     "result": "full_barrel_bomb",
+@@ -537,6 +537,6 @@
+     "book_learn": [ [ "manual_launcher", 7 ], [ "textbook_anarch", 8 ] ],
+     "proficiencies": [ { "proficiency": "prof_handloading" } ],
+     "using": [ [ "volatile_explosive", 173 ], [ "stable_explosive", 6747 ] ],
+-    "components": [ [ [ "fuse", 1 ] ], [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ], [ [ "30gal_drum", 1 ] ] ]
++    "components": [ [ [ "fuse", 1 ] ], [ [ "super_glue", 4 ], [ "duct_tape", 10 ], [ "cordage", 1, "LIST" ] ], [ [ "30gal_drum", 1 ] ] ]
+   }
+ ]
+diff --git a/data/json/recipes/weapon/mods.json b/data/json/recipes/weapon/mods.json
+index 34e203122b..cbfabee3b8 100644
+--- a/data/json/recipes/weapon/mods.json
++++ b/data/json/recipes/weapon/mods.json
+@@ -777,7 +777,7 @@
+     "time": "10 m",
+     "book_learn": [ [ "mag_archery", 1 ], [ "manual_archery", 1 ] ],
+     "qualities": [ { "id": "CUT", "level": 2 } ],
+-    "components": [ [ [ "chunk_rubber", 1 ] ], [ [ "superglue", 1 ] ] ]
++    "components": [ [ [ "chunk_rubber", 1 ] ], [ [ "super_glue", 5 ] ] ]
+   },
+   {
+     "type": "recipe",
+diff --git a/data/json/recipes/weapon/piercing.json b/data/json/recipes/weapon/piercing.json
+index ae2c85c80a..18a5a58078 100644
+--- a/data/json/recipes/weapon/piercing.json
++++ b/data/json/recipes/weapon/piercing.json
+@@ -1427,16 +1427,10 @@
+     "time": "2 h",
+     "reversible": true,
+     "book_learn": [ [ "textbook_electronics", 3 ], [ "advanced_electronics", 3 ], [ "recipe_melee", 4 ] ],
+-    "using": [ [ "soldering_standard", 10 ] ],
++    "using": [ [ "soldering_standard", 10 ], [ "adhesive", 1 ] ],
+     "proficiencies": [ { "proficiency": "prof_elec_soldering" }, { "proficiency": "prof_shock_weapons" } ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+-    "components": [
+-      [ [ "fencing_foil_sharpened", 1 ] ],
+-      [ [ "fur", 1 ], [ "leather", 1 ] ],
+-      [ [ "duct_tape", 100 ], [ "superglue", 1 ] ],
+-      [ [ "tazer", 1 ] ],
+-      [ [ "cable", 10 ] ]
+-    ]
++    "components": [ [ [ "fencing_foil_sharpened", 1 ] ], [ [ "fur", 1 ], [ "leather", 1 ] ], [ [ "tazer", 1 ] ], [ [ "cable", 10 ] ] ]
+   },
+   {
+     "type": "recipe",
+@@ -1450,16 +1444,10 @@
+     "time": "2 h",
+     "reversible": true,
+     "book_learn": [ [ "textbook_electronics", 3 ], [ "advanced_electronics", 3 ], [ "recipe_melee", 4 ] ],
+-    "using": [ [ "soldering_standard", 10 ] ],
++    "using": [ [ "soldering_standard", 10 ], [ "adhesive", 1 ] ],
+     "proficiencies": [ { "proficiency": "prof_elec_soldering" }, { "proficiency": "prof_shock_weapons" } ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+-    "components": [
+-      [ [ "fencing_epee_sharpened", 1 ] ],
+-      [ [ "fur", 1 ], [ "leather", 1 ] ],
+-      [ [ "duct_tape", 100 ], [ "superglue", 1 ] ],
+-      [ [ "tazer", 1 ] ],
+-      [ [ "cable", 10 ] ]
+-    ]
++    "components": [ [ [ "fencing_epee_sharpened", 1 ] ], [ [ "fur", 1 ], [ "leather", 1 ] ], [ [ "tazer", 1 ] ], [ [ "cable", 10 ] ] ]
+   },
+   {
+     "type": "recipe",
+@@ -1473,16 +1461,10 @@
+     "time": "2 h",
+     "reversible": true,
+     "book_learn": [ [ "textbook_electronics", 3 ], [ "advanced_electronics", 3 ], [ "recipe_melee", 4 ] ],
+-    "using": [ [ "soldering_standard", 10 ] ],
++    "using": [ [ "soldering_standard", 10 ], [ "adhesive", 1 ] ],
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "proficiencies": [ { "proficiency": "prof_elec_soldering" }, { "proficiency": "prof_shock_weapons" } ],
+-    "components": [
+-      [ [ "fencing_sabre_sharpened", 1 ] ],
+-      [ [ "fur", 1 ], [ "leather", 1 ] ],
+-      [ [ "duct_tape", 100 ], [ "superglue", 1 ] ],
+-      [ [ "tazer", 1 ] ],
+-      [ [ "cable", 10 ] ]
+-    ]
++    "components": [ [ [ "fencing_sabre_sharpened", 1 ] ], [ [ "fur", 1 ], [ "leather", 1 ] ], [ [ "tazer", 1 ] ], [ [ "cable", 10 ] ] ]
+   },
+   {
+     "type": "recipe",
+diff --git a/data/json/recipes/weapon/ranged.json b/data/json/recipes/weapon/ranged.json
+index 8fbd4dfab1..9b4dc08d54 100644
+--- a/data/json/recipes/weapon/ranged.json
++++ b/data/json/recipes/weapon/ranged.json
+@@ -712,7 +712,6 @@
+       [ [ "steel_standard", 2, "LIST" ] ],
+       [ [ "plastic_chunk", 10 ] ],
+       [ [ "sheet_metal_small", 8 ] ],
+-      [ [ "duct_tape", 200 ], [ "superglue", 8 ] ],
+       [ [ "cordage_superior", 18, "LIST" ] ]
+     ]
+   },
+@@ -1215,7 +1214,7 @@
+     "difficulty": 5,
+     "time": "8 h",
+     "book_learn": [ [ "advanced_electronics", 5 ], [ "textbook_electronics", 5 ], [ "textbook_anarch", 6 ] ],
+-    "using": [ [ "soldering_standard", 20 ], [ "plastic_molding", 7 ] ],
++    "using": [ [ "soldering_standard", 20 ], [ "plastic_molding", 7 ], [ "glue_any", 1 ] ],
+     "qualities": [ { "id": "SAW_M_FINE", "level": 1 }, { "id": "SCREW", "level": 1 }, { "id": "SCREW_FINE", "level": 1 } ],
+     "proficiencies": [
+       { "proficiency": "prof_elec_soldering" },
+@@ -1226,7 +1225,6 @@
+     "tools": [ [ [ "laptop", -1 ] ] ],
+     "components": [
+       [ [ "plastic_chunk", 10 ] ],
+-      [ [ "superglue", 1 ] ],
+       [ [ "processor", 1 ] ],
+       [ [ "circuit", 2 ] ],
+       [ [ "power_supply", 2 ] ],
+@@ -1377,7 +1375,7 @@
+       [ [ "ruger_1022", 1 ] ],
+       [ [ "qt_wire", 1 ], [ "piano_wire", 1 ] ],
+       [ [ "sheet_metal_small", 2 ] ],
+-      [ [ "superglue", 1 ] ]
++      [ [ "super_glue", 5 ] ]
+     ]
+   },
+   {
+@@ -1405,7 +1403,7 @@
+       [ [ "ruger_charger", 1 ] ],
+       [ [ "qt_wire", 1 ], [ "piano_wire", 1 ] ],
+       [ [ "sheet_metal_small", 2 ] ],
+-      [ [ "superglue", 1 ] ]
++      [ [ "super_glue", 5 ] ]
+     ]
+   }
+ ]
+diff --git a/data/json/requirements/materials.json b/data/json/requirements/materials.json
+index 7d4e33f1b5..256fd8a714 100644
+--- a/data/json/requirements/materials.json
++++ b/data/json/requirements/materials.json
+@@ -3,7 +3,25 @@
+     "id": "adhesive",
+     "type": "requirement",
+     "//": "Materials used for joining (typically non-metallic) parts",
+-    "components": [ [ [ "duct_tape", 25 ], [ "superglue", 1 ], [ "bone_glue", 1 ] ] ]
++    "components": [ [ [ "duct_tape", 25 ], [ "super_glue", 10 ], [ "bone_glue", 1 ] ] ]
++  },
++  {
++    "id": "glue_any",
++    "type": "requirement",
++    "//": "Any type of all-surface glue.  Each unit is 1cm^2 of coverage",
++    "components": [ [ [ "super_glue", 4 ], [ "bone_glue", 1 ] ] ]
++  },
++  {
++    "id": "glue_waterproof",
++    "type": "requirement",
++    "//": "Any type of waterproof glue, which is just about everything except bone/hide glue.  Each unit is 1cm^2 of coverage",
++    "components": [ [ [ "super_glue", 4 ] ] ]
++  },
++  {
++    "id": "glue_strong",
++    "type": "requirement",
++    "//": "Strong glue, such as superglues, epoxy resin.  Each unit is 0.5cm^2 of coverage",
++    "components": [ [ [ "super_glue", 1 ] ] ]
+   },
+   {
+     "id": "adhesive_cordage",
+diff --git a/data/json/requirements/tailoring.json b/data/json/requirements/tailoring.json
+index 786c47befa..32af678cbb 100644
+--- a/data/json/requirements/tailoring.json
++++ b/data/json/requirements/tailoring.json
+@@ -66,7 +66,7 @@
+     "type": "requirement",
+     "//": "Shaping and attaching a rigid Kevlar plate to something, per 430 g of rigid Kevlar.  Time needed is 45 minutes per unit.",
+     "qualities": [ { "id": "CUT", "level": 2 } ],
+-    "components": [ [ [ "rigid_kevlar_plate", 1 ] ], [ [ "superglue", 1 ] ] ]
++    "components": [ [ [ "rigid_kevlar_plate", 1 ] ], [ [ "super_glue", 1 ] ] ]
+   },
+   {
+     "id": "armor_kevlar_layered",
+@@ -93,7 +93,7 @@
+     "type": "requirement",
+     "//": "Layering paper sheets, cutting holes in them, laminating them with glue, and connecting multiple of resulting plates with cordage, per 162 g of paper.  Time needed is 50 minutes per unit.",
+     "qualities": [ { "id": "CUT", "level": 2 } ],
+-    "components": [ [ [ "paper", 50 ] ], [ [ "superglue", 1 ], [ "bone_glue", 1 ] ], [ [ "cordage_short", 2, "LIST" ] ] ]
++    "components": [ [ [ "paper", 50 ] ], [ [ "super_glue", 4 ], [ "bone_glue", 1 ] ], [ [ "cordage_short", 2, "LIST" ] ] ]
+   },
+   {
+     "id": "armor_wood",
+diff --git a/data/mods/Aftershock/itemgroups/tool_groups.json b/data/mods/Aftershock/itemgroups/tool_groups.json
+index 8536501f33..519e1f6e26 100644
+--- a/data/mods/Aftershock/itemgroups/tool_groups.json
++++ b/data/mods/Aftershock/itemgroups/tool_groups.json
+@@ -58,7 +58,7 @@
+     "//": "Keeps your solar panels, lights and well everything going.",
+     "items": [
+       [ "screwdriver_set", 20 ],
+-      [ "superglue", 30 ],
++      { "group": "superglue", "prob": 30 },
+       [ "pliers", 10 ],
+       [ "multitool", 20 ],
+       [ "voltmeter", 20 ],
+@@ -210,7 +210,7 @@
+       { "item": "multitool", "prob": 5 },
+       { "item": "screwdriver_set", "prob": 15 },
+       { "item": "pliers", "prob": 5 },
+-      { "item": "superglue", "prob": 5 },
++      { "group": "superglue", "prob": 5 },
+       { "item": "duct_tape", "prob": 10, "count": [ 1, 2 ] }
+     ]
+   },
+diff --git a/data/mods/Aftershock/recipes/recipe_overrides.json b/data/mods/Aftershock/recipes/recipe_overrides.json
+index b379d0eb6c..842f6c2d8e 100644
+--- a/data/mods/Aftershock/recipes/recipe_overrides.json
++++ b/data/mods/Aftershock/recipes/recipe_overrides.json
+@@ -13,7 +13,7 @@
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "components": [
+       [ [ "plastic_chunk", 5 ] ],
+-      [ [ "superglue", 1 ] ],
++      [ [ "super_glue", 5 ] ],
+       [ [ "power_supply", 1 ] ],
+       [ [ "element", 1 ] ],
+       [ [ "scrap", 2 ] ],
+@@ -34,7 +34,7 @@
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "components": [
+       [ [ "plastic_chunk", 1 ] ],
+-      [ [ "superglue", 1 ] ],
++      [ [ "super_glue", 1 ] ],
+       [ [ "power_supply", 1 ] ],
+       [ [ "cable", 1 ] ],
+       [ [ "plut_cell", 1 ] ]
+@@ -54,7 +54,7 @@
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "components": [
+       [ [ "plastic_chunk", 2 ] ],
+-      [ [ "superglue", 1 ] ],
++      [ [ "super_glue", 1 ] ],
+       [ [ "power_supply", 1 ] ],
+       [ [ "cable", 2 ] ],
+       [ [ "plut_cell", 2 ] ]
+diff --git a/data/mods/MindOverMatter/recipes/tools.json b/data/mods/MindOverMatter/recipes/tools.json
+index 0ba3a82416..e4fda7fd32 100644
+--- a/data/mods/MindOverMatter/recipes/tools.json
++++ b/data/mods/MindOverMatter/recipes/tools.json
+@@ -94,7 +94,7 @@
+     "qualities": [ { "id": "SCREW", "level": 1 }, { "id": "MATRIX_CHANNEL", "level": 1 } ],
+     "components": [
+       [ [ "plastic_chunk", 2 ] ],
+-      [ [ "superglue", 1 ] ],
++      [ [ "super_glue", 1 ] ],
+       [ [ "lightstrip_inactive", 1 ], [ "light_bulb", 1 ] ],
+       [ [ "matrix_crystal_pyrokin_dust_refined", 2 ] ],
+       [ [ "psionic_serum_base", 2 ] ],
+diff --git a/data/mods/MindOverMatter/recipes/travel.json b/data/mods/MindOverMatter/recipes/travel.json
+index 08af9458e0..4abe434bb1 100644
+--- a/data/mods/MindOverMatter/recipes/travel.json
++++ b/data/mods/MindOverMatter/recipes/travel.json
+@@ -31,7 +31,7 @@
+       [ [ "matrix_crystal_clair_dust_refined", 8 ] ],
+       [ [ "memory_card", 2 ] ],
+       [ [ "plastic_chunk", 4 ] ],
+-      [ [ "superglue", 1 ] ],
++      [ [ "super_glue", 1 ] ],
+       [ [ "RAM", 4 ] ],
+       [ [ "amplifier", 2 ] ],
+       [ [ "power_supply", 1 ] ],
+diff --git a/data/mods/MindOverMatter/recipes/weapons.json b/data/mods/MindOverMatter/recipes/weapons.json
+index a5c5d4c069..e0f5232a0e 100644
+--- a/data/mods/MindOverMatter/recipes/weapons.json
++++ b/data/mods/MindOverMatter/recipes/weapons.json
+@@ -20,7 +20,7 @@
+     "using": [ [ "volatile_explosive", 20, "LIST" ], [ "explosives_casting_standard", 1 ] ],
+     "components": [
+       [ [ "fuse", 1 ] ],
+-      [ [ "superglue", 1 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
++      [ [ "super_glue", 4 ], [ "duct_tape", 75 ], [ "cordage", 1, "LIST" ] ],
+       [ [ "small_grenade_case", 1, "LIST" ] ],
+       [ [ "matrix_crystal_pyrokin_dust", 5 ], [ "matrix_crystal_pyrokin_dust_refined", 1 ] ]
+     ]
+diff --git a/data/mods/Sky_Island/upgrade_missions.json b/data/mods/Sky_Island/upgrade_missions.json
+index 2ad74cf483..9d25c13efb 100644
+--- a/data/mods/Sky_Island/upgrade_missions.json
++++ b/data/mods/Sky_Island/upgrade_missions.json
+@@ -195,7 +195,7 @@
+       [ [ "camera", 1 ], [ "camera_pro", 1 ], [ "wearable_camera", 1 ], [ "wearable_camera_pro", 1 ], [ "omnicamera", 1 ] ],
+       [ [ "warptoken", 5 ] ],
+       [ [ "scrap_aluminum", 12 ] ],
+-      [ [ "superglue", 1 ], [ "bone_glue", 1 ] ],
++      [ [ "super_glue", 10 ], [ "bone_glue", 1 ] ],
+       [ [ "medium_battery_cell", 2 ], [ "medium_plus_battery_cell", 4 ], [ "medium_disposable_cell", 6 ] ],
+       [ [ "extension_cable", 1 ], [ "long_extension_cable", 1 ], [ "jumper_cable", 1 ] ]
+     ]
+@@ -2354,7 +2354,7 @@
+       [ [ "2x4", 4 ] ],
+       [ [ "glass_shard", 150 ] ],
+       [ [ "chunk_rubber", 5 ] ],
+-      [ [ "superglue", 2 ] ],
++      [ [ "super_glue", 20 ] ],
+       [ [ "cordage", 5, "LIST" ] ]
+     ]
+   },
+@@ -2417,7 +2417,7 @@
+       [ [ "aquamarine", 4 ], [ "citrine", 4 ], [ "garnet", 4 ], [ "peridot", 4 ], [ "tourmaline", 4 ], [ "blue_topaz", 4 ] ],
+       [ [ "glass_sheet", 3 ] ],
+       [ [ "mirror", 1 ] ],
+-      [ [ "superglue", 5 ] ],
++      [ [ "super_glue", 40 ] ],
+       [ [ "frame_wood", 2 ] ],
+       [ [ "cordage", 1, "LIST" ] ]
+     ]
+diff --git a/data/mods/Xedra_Evolved/recipes/meds.json b/data/mods/Xedra_Evolved/recipes/meds.json
+index 4c9570ea84..be8ff46a40 100644
+--- a/data/mods/Xedra_Evolved/recipes/meds.json
++++ b/data/mods/Xedra_Evolved/recipes/meds.json
+@@ -73,7 +73,7 @@
+     "qualities": [ { "id": "COOK", "level": 2 } ],
+     "tools": [ [ [ "paint_brush", -1 ] ], [ [ "surface_heat", 10, "LIST" ] ] ],
+     "using": [ [ "paint", 2 ] ],
+-    "components": [ [ [ "superglue", 1 ] ], [ [ "scrap_dreamdross", 1 ] ] ]
++    "components": [ [ [ "super_glue", 5 ] ], [ [ "scrap_dreamdross", 1 ] ] ]
+   },
+   {
+     "type": "recipe",
+diff --git a/data/mods/innawood/items/misc.json b/data/mods/innawood/items/misc.json
+index f68c031b26..6262179a50 100644
+--- a/data/mods/innawood/items/misc.json
++++ b/data/mods/innawood/items/misc.json
+@@ -51,5 +51,12 @@
+     "symbol": "=",
+     "color": "light_gray",
+     "looks_like": "battery"
++  },
++  {
++    "id": "super_glue",
++    "type": "AMMO",
++    "copy-from": "super_glue",
++    "name": { "str": "glue" },
++    "description": "A thick, goopy glue that cures fast."
+   }
+ ]
+diff --git a/data/mods/innawood/migration_items.json b/data/mods/innawood/migration_items.json
+index 98dbc2a0a6..d4eda38aa9 100644
+--- a/data/mods/innawood/migration_items.json
++++ b/data/mods/innawood/migration_items.json
+@@ -1,7 +1,7 @@
+ [
+   {
+-    "id": "superglue",
++    "id": "small_squeeze_tube",
+     "type": "MIGRATION",
+-    "replace": "bone_glue"
++    "replace": "clay_canister"
+   }
+ ]
+diff --git a/data/mods/innawood/recipes/armor/head.json b/data/mods/innawood/recipes/armor/head.json
+index 050929eb1c..f1cf7fd2c6 100644
+--- a/data/mods/innawood/recipes/armor/head.json
++++ b/data/mods/innawood/recipes/armor/head.json
+@@ -14,7 +14,7 @@
+     "components": [
+       [ [ "goggles_ski", 1 ], [ "goggles_swim", 1 ], [ "glasses_safety", 1 ], [ "glass_goggles", 1 ] ],
+       [ [ "eclipse_glasses", 1 ], [ "glass_tinted", 3 ] ],
+-      [ [ "duct_tape", 40 ], [ "medical_tape", 40 ], [ "superglue", 2 ] ]
++      [ [ "duct_tape", 40 ], [ "medical_tape", 40 ], [ "super_glue", 2 ] ]
+     ],
+     "proficiencies": [ { "proficiency": "prof_plasticworking" } ]
+   }
+diff --git a/data/mods/innawood/recipes/chem_other.json b/data/mods/innawood/recipes/chem_other.json
+index 17ddb20412..14f32d6d2b 100644
+--- a/data/mods/innawood/recipes/chem_other.json
++++ b/data/mods/innawood/recipes/chem_other.json
+@@ -54,5 +54,31 @@
+         [ "neoprene", 1 ]
+       ]
+     ]
++  },
++  {
++    "result": "super_glue",
++    "type": "recipe",
++    "activity_level": "LIGHT_EXERCISE",
++    "category": "CC_CHEM",
++    "subcategory": "CSC_CHEM_OTHER",
++    "skill_used": "chemistry",
++    "difficulty": 3,
++    "time": "12 m",
++    "autolearn": true,
++    "qualities": [ { "id": "CHEM", "level": 1 } ],
++    "tools": [ [ [ "surface_heat", 5, "LIST" ] ] ],
++    "components": [
++      [ [ "water", 1 ], [ "water_clean", 1 ] ],
++      [
++        [ "bone_any", 20, "LIST" ],
++        [ "skewer_bone", 1000 ],
++        [ "cured_hide", 2 ],
++        [ "pine_bough", 10 ],
++        [ "raw_dandelion", 20 ],
++        [ "biollante_bud", 1 ],
++        [ "ant_egg", 1 ],
++        [ "slime_scrap", 1 ]
++      ]
++    ]
+   }
+ ]
+diff --git a/data/mods/innawood/recipes/recipe_others.json b/data/mods/innawood/recipes/recipe_others.json
+index c170be294e..b0e2dff616 100644
+--- a/data/mods/innawood/recipes/recipe_others.json
++++ b/data/mods/innawood/recipes/recipe_others.json
+@@ -48,7 +48,7 @@
+     "qualities": [ { "id": "CUT", "level": 2 }, { "id": "COOK", "level": 2 } ],
+     "tools": [ [ [ "surface_heat", 5, "LIST" ] ] ],
+     "components": [
+-      [ [ "superglue", 1 ] ],
++      [ [ "super_glue", 1 ] ],
+       [ [ "cotton_patchwork", 8 ], [ "fibercloth_patchwork", 8 ], [ "sheet_cotton", 1 ], [ "sheet_fibercloth", 1 ] ],
+       [ [ "plastic_chunk", 1 ] ]
+     ]
+diff --git a/data/mods/innawood/recipes/tool.json b/data/mods/innawood/recipes/tool.json
+index aa454579a2..3cb36f5b97 100644
+--- a/data/mods/innawood/recipes/tool.json
++++ b/data/mods/innawood/recipes/tool.json
+@@ -17,7 +17,7 @@
+     "components": [
+       [ [ "pot", 1 ], [ "pot_copper", 1 ], [ "pot_makeshift_copper", 1 ] ],
+       [ [ "cu_pipe", 1 ] ],
+-      [ [ "bone_glue", 1 ], [ "superglue", 1 ] ],
++      [ [ "bone_glue", 1 ], [ "super_glue", 1 ] ],
+       [ [ "duct_tape", 10 ] ]
+     ]
+   },
+diff --git a/data/mods/innawood/recipes/tools_electronic.json b/data/mods/innawood/recipes/tools_electronic.json
+index 42ef12b49f..a934bbd3b5 100644
+--- a/data/mods/innawood/recipes/tools_electronic.json
++++ b/data/mods/innawood/recipes/tools_electronic.json
+@@ -185,7 +185,7 @@
+       [ [ "scrap", 4 ] ],
+       [ [ "plastic_chunk", 2 ] ],
+       [ [ "motor_micro", 1 ] ],
+-      [ [ "superglue", 2 ] ],
++      [ [ "super_glue", 2 ] ],
+       [ [ "element", 2 ], [ "crude_heating_element", 2 ] ],
+       [ [ "hose", 1 ], [ "makeshift_hose", 1 ] ],
+       [ [ "power_supply", 1 ] ]
+diff --git a/data/mods/innawood/recipes/tools_lights.json b/data/mods/innawood/recipes/tools_lights.json
+index 959c19b6a9..71e522be07 100644
+--- a/data/mods/innawood/recipes/tools_lights.json
++++ b/data/mods/innawood/recipes/tools_lights.json
+@@ -14,7 +14,7 @@
+     "qualities": [ { "id": "SCREW", "level": 1 } ],
+     "components": [
+       [ [ "plastic_chunk", 1 ] ],
+-      [ [ "superglue", 1 ] ],
++      [ [ "super_glue", 1 ] ],
+       [ [ "power_supply", 1 ] ],
+       [ [ "cable", 1 ] ],
+       [ [ "light_bulb", 1 ], [ "e_scrap", 1 ] ]
+-- 
+2.45.2
+

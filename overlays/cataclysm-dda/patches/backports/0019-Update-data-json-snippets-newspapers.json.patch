@@ -1,0 +1,25 @@
+From d2cb59c07d1cc822fd838ba63e690e3a974d76fd Mon Sep 17 00:00:00 2001
+From: Kevin Granade <kevin.granade@gmail.com>
+Date: Sat, 15 Jan 2022 14:05:32 -0800
+Subject: [PATCH 019/125] Update data/json/snippets/newspapers.json
+
+---
+ data/json/snippets/newspapers.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/json/snippets/newspapers.json b/data/json/snippets/newspapers.json
+index 067c495d23..11069caabe 100644
+--- a/data/json/snippets/newspapers.json
++++ b/data/json/snippets/newspapers.json
+@@ -25,7 +25,7 @@
+       },
+       {
+         "id": "many_years_old_news_7",
+-        "text": "ALIENS AMONG US!  Janine Galfrizowich, of Martha's Vineyard, wrote in to our Paranormal Investigation Staff with this cryptic gem.  \"They're always watching, always watching from the shadows.  Stealing my avocados and watching!  They took my neighbor and made him into one of them!\"  Our journalists are trying to track Mrs. Galfrizowich down, but it is clear enough that this ties into the well known Avocado Conspiracy (see issue 24, volume 7)."
++        "text": "ALIENS AMONG US!  Janine Galfrizowich, of Martha's Vineyard, wrote in to our Paranormal Investigation Staff with this cryptic gem.  \"They're always watching, always watching from the shadows.  Stealing my avocados and watching!  They took my neighbor and made him into one of them!\"  Our journalists are trying to track Mrs Galfrizowich down, but it is clear enough that this ties into the well known Avocado Conspiracy (see issue 24, volume 7)."
+       },
+       {
+         "id": "many_years_old_news_8",
+-- 
+2.45.2
+

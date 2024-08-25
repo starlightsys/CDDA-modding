@@ -1,0 +1,389 @@
+From 6205a8bfd61da3c9f928e49e59ca64408d9ad9da Mon Sep 17 00:00:00 2001
+From: RenechCDDA <84619419+RenechCDDA@users.noreply.github.com>
+Date: Mon, 5 Aug 2024 09:35:47 -0400
+Subject: [PATCH 072/125] Genericize vehicle handling for characters (no
+ special avatar stuff)
+
+---
+ src/vehicle.cpp      | 100 +++++++++++++++++++++++++++++--------------
+ src/vehicle.h        |  10 ++++-
+ src/vehicle_move.cpp |  29 ++++++-------
+ 3 files changed, 87 insertions(+), 52 deletions(-)
+
+diff --git a/src/vehicle.cpp b/src/vehicle.cpp
+index 122ce21abd..13665d5654 100644
+--- a/src/vehicle.cpp
++++ b/src/vehicle.cpp
+@@ -271,6 +271,23 @@ bool vehicle::player_in_control( const Character &p ) const
+     return remote_controlled( p );
+ }
+ 
++bool vehicle::player_is_driving_this_veh() const
++{
++    Character *driver = get_driver();
++    // Early out, nobody's driving
++    if( !driver ) {
++        return false;
++    }
++    Character &player_character = get_player_character();
++    // Another easy out, just check if the player is controlling any vehicle
++    if( !player_character.controlling_vehicle ) {
++        return false;
++    }
++
++    // Lastly check if the player is controlling *this* vehicle
++    return player_in_control( player_character );
++}
++
+ bool vehicle::remote_controlled( const Character &p ) const
+ {
+     vehicle *veh = g->remoteveh();
+@@ -3418,6 +3435,16 @@ Character *vehicle::get_passenger( int you ) const
+     return nullptr;
+ }
+ 
++bool vehicle::has_driver() const
++{
++    return get_driver();
++}
++
++Character *vehicle::get_driver() const
++{
++    return &get_player_character();
++}
++
+ monster *vehicle::get_monster( int p ) const
+ {
+     p = part_with_feature( p, VPFLAG_BOARDABLE, false );
+@@ -3570,21 +3597,21 @@ int64_t vehicle::fuel_left( const itype_id &ftype,
+ 
+     //muscle engines have infinite fuel
+     if( ftype == fuel_type_muscle ) {
+-        Character &player_character = get_player_character();
+-        // TODO: Allow NPCs to power those
+-        const optional_vpart_position vp = get_map().veh_at( player_character.pos_bub() );
+-        bool player_controlling = player_in_control( player_character );
++        Character *driver = get_driver();
++        const optional_vpart_position vp = get_map().veh_at( driver->pos_bub() );
+ 
+-        //if the engine in the player tile is a muscle engine, and player is controlling vehicle
+-        if( vp && &vp->vehicle() == this && player_controlling ) {
++        //if the engine in the tile is a muscle engine, and someone is ready to control this vehicle
++        // TODO: Allow NPCs to power those
++        // TODO: Revise this check to driver when get_driver() can return nullptr
++        if( vp && &vp->vehicle() == this && player_is_driving_this_veh() ) {
+             const int p = avail_part_with_feature( vp->part_index(), VPFLAG_ENGINE );
+             if( p >= 0 ) {
+                 const vehicle_part &vp = parts[p];
+                 const vpart_info &vpi = vp.info();
+                 if( vp.enabled && vpi.fuel_type == fuel_type_muscle ) {
+                     // intact limbs allow using muscle engines from working
+-                    if( ( vpi.has_flag( "MUSCLE_LEGS" ) && player_character.get_working_leg_count() >= 2 ) ||
+-                        ( vpi.has_flag( "MUSCLE_ARMS" ) && player_character.has_two_arms_lifting() ) ) {
++                    if( ( vpi.has_flag( "MUSCLE_LEGS" ) && driver->get_working_leg_count() >= 2 ) ||
++                        ( vpi.has_flag( "MUSCLE_ARMS" ) && driver->has_two_arms_lifting() ) ) {
+                         fl += 10;
+                     }
+                 }
+@@ -4415,7 +4442,7 @@ bool vehicle::has_sufficient_rotorlift() const
+ 
+ bool vehicle::is_rotorcraft() const
+ {
+-    return !rotors.empty() && player_in_control( get_player_character() ) &&
++    return !rotors.empty() && has_driver() &&
+            has_sufficient_rotorlift();
+ }
+ 
+@@ -4912,15 +4939,21 @@ void vehicle::consume_fuel( int load, bool idling )
+     if( idling ) {
+         return;
+     }
+-    Character &player_character = get_player_character();
++    Character *driver = get_driver();
++
++    // Only process muscle power and training things when someone is actually driving.
++    // Note that the vehicle can be moving even if nobody is driving it.
++    if( !driver ) {
++        return;
++    }
+ 
+     // if engine is under load, player is actively piloting a vehicle, so train appropriate vehicle proficiency
+     if( load > 0 ) {
+-        practice_pilot_proficiencies( player_character, in_deep_water );
++        practice_pilot_proficiencies( *driver, in_deep_water );
+     }
+ 
+     if( load > 0 && fuel_left( fuel_type_muscle ) > 0 &&
+-        player_character.has_effect( effect_winded ) ) {
++        driver->has_effect( effect_winded ) ) {
+         cruise_velocity = 0;
+         if( velocity == 0 ) {
+             stop();
+@@ -4928,7 +4961,7 @@ void vehicle::consume_fuel( int load, bool idling )
+     }
+     // we want this to update the activity level whenever we're using muscle power to move
+     if( load > 0 && fuel_left( fuel_type_muscle ) > 0 ) {
+-        player_character.set_activity_level( ACTIVE_EXERCISE );
++        driver->set_activity_level( ACTIVE_EXERCISE );
+         //do this as a function of current load
+         // But only if the player is actually there!
+         int eff_load = load / 10;
+@@ -4936,39 +4969,39 @@ void vehicle::consume_fuel( int load, bool idling )
+         const int base_staminaRegen = static_cast<int>
+                                       ( get_option<float>( "PLAYER_BASE_STAMINA_REGEN_RATE" ) );
+         const int actual_staminaRegen = static_cast<int>( base_staminaRegen *
+-                                        player_character.get_cardiofit() / player_character.get_cardio_acc_base() );
++                                        driver->get_cardiofit() / driver->get_cardio_acc_base() );
+         int base_burn = actual_staminaRegen - 3;
+         base_burn = std::max( eff_load / 3, base_burn );
+         //charge bionics when using muscle engine
+         const item muscle( "muscle" );
+-        for( const bionic_id &bid : player_character.get_bionic_fueled_with_muscle() ) {
+-            if( player_character.has_active_bionic( bid ) ) { // active power gen
++        for( const bionic_id &bid : driver->get_bionic_fueled_with_muscle() ) {
++            if( driver->has_active_bionic( bid ) ) { // active power gen
+                 // more pedaling = more power
+-                player_character.mod_power_level( muscle.fuel_energy() *
+-                                                  bid->fuel_efficiency *
+-                                                  load / 1000 );
++                driver->mod_power_level( muscle.fuel_energy() *
++                                         bid->fuel_efficiency *
++                                         load / 1000 );
+                 mod += eff_load / 5;
+             } else { // passive power gen
+-                player_character.mod_power_level( muscle.fuel_energy() *
+-                                                  bid->passive_fuel_efficiency *
+-                                                  load / 1000 );
++                driver->mod_power_level( muscle.fuel_energy() *
++                                         bid->passive_fuel_efficiency *
++                                         load / 1000 );
+                 mod += eff_load / 10;
+             }
+         }
+         // decreased stamina burn scalable with load
+-        if( player_character.has_active_bionic( bio_jointservo ) ) {
+-            player_character.mod_power_level( units::from_kilojoule( static_cast<std::int64_t>( -std::max(
+-                                                  eff_load / 20, 1 ) ) ) );
++        if( driver->has_active_bionic( bio_jointservo ) ) {
++            driver->mod_power_level( units::from_kilojoule( static_cast<std::int64_t>( -std::max(
++                                         eff_load / 20, 1 ) ) ) );
+             mod -= std::max( eff_load / 5, 5 );
+         }
+ 
+-        player_character.mod_stamina( -( base_burn + mod ) );
++        driver->mod_stamina( -( base_burn + mod ) );
+         add_msg_debug( debugmode::DF_VEHICLE, "Load: %d", load );
+         add_msg_debug( debugmode::DF_VEHICLE, "Mod: %d", mod );
+         add_msg_debug( debugmode::DF_VEHICLE, "Burn: %d", -( base_burn + mod ) );
+ 
+-        // player is actively powering a muscle engine, so train cycling proficiency
+-        practice_athletic_proficiency( player_character );
++        // character is actively powering a muscle engine, so train cycling proficiency
++        practice_athletic_proficiency( *driver );
+     }
+ }
+ 
+@@ -5318,7 +5351,7 @@ void vehicle::power_parts()
+                 for( int elem : reactors ) {
+                     parts[ elem ].enabled = false;
+                 }
+-                if( player_in_control( player_character ) || player_character.sees( global_pos3() ) ) {
++                if( player_is_driving_this_veh() || player_character.sees( global_pos3() ) ) {
+                     add_msg( _( "The %s's reactor dies!" ), name );
+                 }
+             }
+@@ -5353,13 +5386,13 @@ void vehicle::power_parts()
+ 
+         is_alarm_on = false;
+         camera_on = false;
+-        if( player_in_control( player_character ) || player_character.sees( global_pos3() ) ) {
++        if( player_is_driving_this_veh() || player_character.sees( global_pos3() ) ) {
+             add_msg( _( "The %s's battery dies!" ), name );
+         }
+         if( engine_epower < 0_W ) {
+             // Not enough epower to run gas engine ignition system
+             engine_on = false;
+-            if( player_in_control( player_character ) || player_character.sees( global_pos3() ) ) {
++            if( player_is_driving_this_veh() || player_character.sees( global_pos3() ) ) {
+                 add_msg( _( "The %s's engine dies!" ), name );
+             }
+         }
+@@ -5796,8 +5829,9 @@ void vehicle::on_move()
+     }
+ 
+     Character &pc = get_player_character();
++    // TODO: Send ID of driver
+     get_event_bus().send<event_type::vehicle_moves>(
+-        is_passenger( pc ), player_in_control( pc ), remote_controlled( pc ),
++        is_passenger( pc ), player_is_driving_this_veh(), remote_controlled( pc ),
+         is_flying_in_air(), is_watercraft() && can_float(), can_use_rails(),
+         is_falling, is_in_water( true ) && !can_float(),
+         skidding, velocity, sm_pos.z
+@@ -6109,7 +6143,7 @@ void vehicle::gain_moves()
+ {
+     fuel_used_last_turn.clear();
+     check_falling_or_floating();
+-    const bool pl_control = player_in_control( get_player_character() );
++    const bool pl_control = player_is_driving_this_veh();
+     if( is_moving() || is_falling ) {
+         if( !loose_parts.empty() ) {
+             shed_loose_parts();
+diff --git a/src/vehicle.h b/src/vehicle.h
+index bf4cddd771..dfd5b55f36 100644
+--- a/src/vehicle.h
++++ b/src/vehicle.h
+@@ -928,9 +928,11 @@ class vehicle
+          */
+         bool mod_hp( vehicle_part &pt, int qty );
+ 
+-        // check if given player controls this vehicle
++        // check if given character controls this vehicle
+         bool player_in_control( const Character &p ) const;
+-        // check if player controls this vehicle remotely
++        // check if the *player* character controls this vehicle
++        bool player_is_driving_this_veh() const;
++        // check if the given character controls this vehicle remotely
+         bool remote_controlled( const Character &p ) const;
+ 
+         // initializes parts and fuel state for randomly generated vehicle and calls refresh()
+@@ -1394,6 +1396,10 @@ class vehicle
+         bool is_passenger( Character &c ) const;
+         // get passenger at part p
+         Character *get_passenger( int you ) const;
++        bool has_driver() const;
++        // get character that is currently controlling the vehicle's motion
++        // TODO: Currently always returns player!
++        Character *get_driver() const;
+         // get monster on a boardable part at p
+         monster *get_monster( int p ) const;
+ 
+diff --git a/src/vehicle_move.cpp b/src/vehicle_move.cpp
+index a67f8ee31b..c79d16e433 100644
+--- a/src/vehicle_move.cpp
++++ b/src/vehicle_move.cpp
+@@ -176,8 +176,6 @@ void vehicle::smart_controller_handle_turn( const std::optional<float> &k_tracti
+ 
+     bool rotorcraft = is_flying && is_rotorcraft();
+ 
+-    Character &player_character = get_player_character();
+-
+     // bail and shut down
+     if( rotorcraft || c_engines.empty() || ( has_electric_engine && c_engines.size() == 1 ) ||
+         c_engines.size() > 5 ) {
+@@ -185,7 +183,7 @@ void vehicle::smart_controller_handle_turn( const std::optional<float> &k_tracti
+             vp.part().enabled = false;
+         }
+ 
+-        if( player_in_control( player_character ) ) {
++        if( player_is_driving_this_veh() ) {
+             if( rotorcraft ) {
+                 add_msg( _( "Smart controller does not support flying vehicles." ) );
+             } else if( c_engines.empty() ) {
+@@ -305,7 +303,7 @@ void vehicle::smart_controller_handle_turn( const std::optional<float> &k_tracti
+     if( !has_electric_engine ) {
+         Character &player_character = get_player_character();
+         if( !discharge_forbidden_soft && is_stationary && engine_on && !autopilot_on &&
+-            !player_in_control( player_character ) ) {
++            !player_is_driving_this_veh() ) {
+             stop_engines();
+             sfx::do_vehicle_engine_sfx();
+             // temporary solution
+@@ -416,7 +414,7 @@ void vehicle::smart_controller_handle_turn( const std::optional<float> &k_tracti
+             for( const vpart_reference &vp : get_avail_parts( "SMART_ENGINE_CONTROLLER" ) ) {
+                 vp.part().enabled = false;
+             }
+-            if( player_in_control( player_character ) ) {
++            if( player_is_driving_this_veh() ) {
+                 add_msg( m_bad, _( "Smart controller failed to start an engine." ) );
+                 add_msg( m_bad, _( "Smart controller is shutting down." ) );
+             }
+@@ -435,7 +433,7 @@ void vehicle::smart_controller_handle_turn( const std::optional<float> &k_tracti
+             }
+             smart_controller_state = cur_state;
+ 
+-            if( player_in_control( player_character ) ) {
++            if( player_is_driving_this_veh() ) {
+                 add_msg_debug( debugmode::DF_VEHICLE_MOVE, "Smart controller optimizes engine state." );
+             }
+         }
+@@ -454,7 +452,7 @@ void vehicle::thrust( int thd, int z )
+         turn_dir = face.dir();
+         stop();
+     }
+-    bool pl_ctrl = player_in_control( get_player_character() );
++    bool pl_ctrl = player_is_driving_this_veh();
+ 
+     // No need to change velocity if there are no wheels
+     if( ( is_watercraft() && can_float() ) || ( is_rotorcraft() && ( z != 0 || is_flying ) ) ) {
+@@ -837,12 +835,10 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
+     // Vertical collisions need to be handled differently
+     // All collisions have to be either fully vertical or fully horizontal for now
+     const bool vert_coll = bash_floor || p.z != sm_pos.z;
+-    Character &player_character = get_player_character();
+-    const bool pl_ctrl = player_in_control( player_character );
+     Creature *critter = get_creature_tracker().creature_at( p, true );
+     Character *ph = dynamic_cast<Character *>( critter );
+ 
+-    Creature *driver = pl_ctrl ? &player_character : nullptr;
++    Character *driver = get_driver();
+ 
+     // If in a vehicle assume it's this one
+     if( ph != nullptr && ph->in_vehicle ) {
+@@ -1160,7 +1156,7 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
+     // Apply special effects from collision.
+     if( critter != nullptr ) {
+         if( !critter->is_hallucination() ) {
+-            if( pl_ctrl ) {
++            if( player_is_driving_this_veh() ) {
+                 if( time_stunned > 0_turns ) {
+                     //~ 1$s - vehicle name, 2$s - part name, 3$s - NPC or monster
+                     add_msg( m_warning, _( "Your %1$s's %2$s rams into %3$s and stuns it!" ),
+@@ -1179,7 +1175,7 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
+             }
+         }
+     } else {
+-        if( pl_ctrl ) {
++        if( player_is_driving_this_veh() ) {
+             if( !snd.empty() ) {
+                 //~ 1$s - vehicle name, 2$s - part name, 3$s - collision object name, 4$s - sound message
+                 add_msg( m_warning, _( "Your %1$s's %2$s rams into %3$s with a %4$s" ),
+@@ -1240,6 +1236,7 @@ void vehicle::handle_trap( const tripoint &p, vehicle_part &vp_wheel )
+     }
+ 
+     Character &player_character = get_player_character();
++    const Character *driver = get_driver();
+     const bool seen = player_character.sees( p );
+     const bool known = tr.can_see( p, player_character );
+     const bool damage_done = vp_wheel.info().durability <= veh_data.damage;
+@@ -1258,8 +1255,7 @@ void vehicle::handle_trap( const tripoint &p, vehicle_part &vp_wheel )
+                            veh_data.sound_type, veh_data.sound_variant );
+         }
+         if( veh_data.do_explosion ) {
+-            const Creature *source = player_in_control( player_character ) ? &player_character : nullptr;
+-            explosion_handler::explosion( source, p, veh_data.damage, 0.5f, false, veh_data.shrapnel );
++            explosion_handler::explosion( driver, p, veh_data.damage, 0.5f, false, veh_data.shrapnel );
+             // Don't damage wheels with very high durability, such as roller drums or rail wheels
+         } else if( damage_done ) {
+             // Hit the wheel directly since it ran right over the trap.
+@@ -1280,7 +1276,7 @@ void vehicle::handle_trap( const tripoint &p, vehicle_part &vp_wheel )
+             here.trap_set( p, veh_data.set_trap.id() );
+             still_has_trap = true;
+         }
+-        if( still_has_trap ) {
++        if( still_has_trap && player_is_driving_this_veh() ) {
+             const trap &tr = here.tr_at( p );
+             if( seen || known ) {
+                 // known status has been reset by map::trap_set()
+@@ -1830,8 +1826,7 @@ vehicle *vehicle::act_on_map()
+     if( decrement_summon_timer() ) {
+         return nullptr;
+     }
+-    Character &player_character = get_player_character();
+-    const bool pl_ctrl = player_in_control( player_character );
++    const bool pl_ctrl = player_is_driving_this_veh();
+     // TODO: Remove this hack, have vehicle sink a z-level
+     if( in_deep_water && !can_float() ) {
+         add_msg( m_bad, _( "Your %s sank." ), name );
+-- 
+2.45.2
+

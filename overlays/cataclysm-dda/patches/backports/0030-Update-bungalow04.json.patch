@@ -1,0 +1,25 @@
+From 626dfc9ebd0e62813adb9ab00038d6b33d816dcb Mon Sep 17 00:00:00 2001
+From: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+Date: Thu, 15 Aug 2024 21:00:55 +0200
+Subject: [PATCH 030/125] Update bungalow04.json
+
+---
+ data/json/mapgen/house/bungalow04.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/json/mapgen/house/bungalow04.json b/data/json/mapgen/house/bungalow04.json
+index b0ccde4165..94f6a42bdf 100644
+--- a/data/json/mapgen/house/bungalow04.json
++++ b/data/json/mapgen/house/bungalow04.json
+@@ -23,7 +23,7 @@
+         ".%..&#R~~l!!$~T!!#......",
+         ".&&&&#s~~H~~~~~~~#...%..",
+         ".##o##x~~H~~RRR~~#......",
+-        ".#@@C|s~~H~~|||++#......",
++        ".#@@d|s~~H~~|||++#......",
+         ".#@@ |R~~l~~+L|zz#///...",
+         ".o   +~~~~~~|||||#///...",
+         ".o   |b~~~~~+----o///...",
+-- 
+2.45.2
+

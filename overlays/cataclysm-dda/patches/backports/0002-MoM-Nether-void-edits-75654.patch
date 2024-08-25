@@ -1,0 +1,204 @@
+From af0631af49587ecc3c3e4a73711d5534ed7cde0a Mon Sep 17 00:00:00 2001
+From: Standing-Storm <120433252+Standing-Storm@users.noreply.github.com>
+Date: Wed, 14 Aug 2024 21:11:08 -0500
+Subject: [PATCH 002/125] [MoM] Nether-void edits (#75654)
+
+* Initial commit
+
+* Extend Nether only to zombie null
+---
+ .../effectoncondition/eoc_misc.json           |  7 +++-
+ .../effects/effects_penalty.json              |  8 +++++
+ data/mods/MindOverMatter/emits.json           |  7 ++++
+ data/mods/MindOverMatter/fields.json          | 33 +++++++++++++++++++
+ .../mods/MindOverMatter/monsters/zombies.json | 14 +++++---
+ .../ter_transform/ter_transform.json          |  2 +-
+ 6 files changed, 65 insertions(+), 6 deletions(-)
+
+diff --git a/data/mods/MindOverMatter/effectoncondition/eoc_misc.json b/data/mods/MindOverMatter/effectoncondition/eoc_misc.json
+index e2e0763874..61164935d5 100644
+--- a/data/mods/MindOverMatter/effectoncondition/eoc_misc.json
++++ b/data/mods/MindOverMatter/effectoncondition/eoc_misc.json
+@@ -65,7 +65,12 @@
+     "id": "EOC_PSIONICS_PSI_NEUTRALIZED_ENDS_ALL_POWERS",
+     "eoc_type": "EVENT",
+     "required_event": "character_gains_effect",
+-    "condition": { "compare_string": [ "effect_psi_neutralized", { "context_val": "effect" } ] },
++    "condition": {
++      "or": [
++        { "compare_string": [ "effect_psi_neutralized", { "context_val": "effect" } ] },
++        { "compare_string": [ "effect_psi_turn_off_powers", { "context_val": "effect" } ] }
++      ]
++    },
+     "effect": [ { "run_eocs": [ "EOC_END_PSI_POWERS" ] } ]
+   },
+   {
+diff --git a/data/mods/MindOverMatter/effects/effects_penalty.json b/data/mods/MindOverMatter/effects/effects_penalty.json
+index 824168fd8b..c4052bc8b4 100644
+--- a/data/mods/MindOverMatter/effects/effects_penalty.json
++++ b/data/mods/MindOverMatter/effects/effects_penalty.json
+@@ -126,6 +126,14 @@
+     "rating": "bad",
+     "flags": [ "NO_PSIONICS" ]
+   },
++  {
++    "type": "effect_type",
++    "id": "effect_psi_turn_off_powers",
++    "//": "This exists to trigger EoCs or as a rider on other psi effects",
++    "name": [ "" ],
++    "desc": [ "" ],
++    "flags": [ "NO_PSIONICS" ]
++  },
+   {
+     "type": "effect_type",
+     "id": "effect_psi_neutralized",
+diff --git a/data/mods/MindOverMatter/emits.json b/data/mods/MindOverMatter/emits.json
+index ac66aaf255..f4f6d7bc0e 100644
+--- a/data/mods/MindOverMatter/emits.json
++++ b/data/mods/MindOverMatter/emits.json
+@@ -71,6 +71,13 @@
+     "intensity": 3,
+     "qty": 120
+   },
++  {
++    "id": "emit_anti_psi_void",
++    "type": "emit",
++    "field": "fd_neutralizing_field",
++    "intensity": 3,
++    "qty": 120
++  },
+   {
+     "id": "emit_shock_burst_electrokin_overload",
+     "type": "emit",
+diff --git a/data/mods/MindOverMatter/fields.json b/data/mods/MindOverMatter/fields.json
+index 801f9da8a1..bcd9272fd7 100644
+--- a/data/mods/MindOverMatter/fields.json
++++ b/data/mods/MindOverMatter/fields.json
+@@ -151,6 +151,39 @@
+     "half_life": "1 minutes",
+     "phase": "gas"
+   },
++  {
++    "id": "fd_neutralizing_field",
++    "type": "field_type",
++    "intensity_levels": [
++      {
++        "name": "droning hum",
++        "effects": [
++          {
++            "effect_id": "effect_psi_null",
++            "intensity": 10,
++            "min_duration": "100 seconds",
++            "max_duration": "350 seconds",
++            "immune_inside_vehicle": false
++          },
++          {
++            "effect_id": "effect_psi_turn_off_powers",
++            "intensity": 1,
++            "min_duration": "1 seconds",
++            "max_duration": "1 seconds",
++            "immune_inside_vehicle": false
++          }
++        ]
++      },
++      { "//": "repeat last entry" },
++      { "//": "repeat last entry" }
++    ],
++    "decay_amount_factor": 5,
++    "gas_absorption_factor": 15,
++    "percent_spread": 5,
++    "priority": 8,
++    "half_life": "1 minutes",
++    "phase": "gas"
++  },
+   {
+     "id": "fd_photokin_light_1",
+     "type": "field_type",
+diff --git a/data/mods/MindOverMatter/monsters/zombies.json b/data/mods/MindOverMatter/monsters/zombies.json
+index ec2bdffe48..d05fb6752e 100644
+--- a/data/mods/MindOverMatter/monsters/zombies.json
++++ b/data/mods/MindOverMatter/monsters/zombies.json
+@@ -66,6 +66,7 @@
+         "cooldown": { "math": [ "7 + rand(19)" ] },
+         "damage_max_instance": [ { "damage_type": "bash", "amount": 6, "armor_multiplier": 0.8 } ],
+         "effects": [ { "id": "effect_psi_neutralized", "duration": 15 } ],
++        "effects_require_dmg": false,
+         "hit_dmg_u": "%1$s strikes at your %2$s!",
+         "hit_dmg_npc": "%1$s strikes at <npcname>!",
+         "miss_msg_u": "%1$s strikes at you, but you dodge!",
+@@ -85,6 +86,7 @@
+         "id": "zombie_null_nether_banish_monster",
+         "type": "spell",
+         "spell_data": { "id": "nether_banish_monster" },
++        "condition": { "npc_has_species": "NETHER" },
+         "cooldown": { "math": [ "10 + rand(25)" ] },
+         "monster_message": "%1$s looks at %3$s and the static on the edge of your vision flickers."
+       }
+@@ -124,7 +126,7 @@
+     "grab_strength": 30,
+     "special_attacks": [
+       { "id": "grab" },
+-      { "id": "bite_humanoid", "cooldown": 5 },
++      { "id": "bite_humanoid", "cooldown": { "math": [ "2 + rand(5)" ] } },
+       {
+         "id": "scratch",
+         "cooldown": { "math": [ "5 + rand(13)" ] },
+@@ -140,7 +142,8 @@
+         "id": "zombie_anti_concentration_spell",
+         "type": "spell",
+         "spell_data": { "id": "null_break_concentration_spell" },
+-        "cooldown": { "math": [ "7 + rand(19)" ] },
++        "condition": "npc_is_character",
++        "cooldown": { "math": [ "5 + rand(13)" ] },
+         "monster_message": "%1$s looks at %3$s and the static on the edge of your vision flickers."
+       }
+     ],
+@@ -173,13 +176,14 @@
+     "melee_dice_sides": 5,
+     "melee_damage": [ { "damage_type": "bash", "amount": 2 } ],
+     "dodge": 5,
++    "attack_effs": [ { "id": "effect_psi_neutralized", "duration": 5 } ],
+     "bleed_rate": 50,
+     "vision_day": 35,
+     "vision_night": 5,
+-    "emit_fields": [ { "emit_id": "emit_anti_psi", "delay": "1 s" } ],
++    "emit_fields": [ { "emit_id": "emit_anti_psi_void", "delay": "1 s" } ],
+     "grab_strength": 50,
+     "special_attacks": [
+-      { "id": "ranged_pull", "range": 3 },
++      { "id": "ranged_pull", "range": 3, "no_adjacent": true },
+       { "id": "grab_drag", "cooldown": { "math": [ "2 + rand(3)" ] } },
+       { "id": "drag_followup" },
+       { "id": "bite_humanoid", "cooldown": { "math": [ "2 + rand(5)" ] } },
+@@ -188,6 +192,7 @@
+         "cooldown": { "math": [ "6 + rand(15)" ] },
+         "damage_max_instance": [ { "damage_type": "bash", "amount": 6, "armor_multiplier": 0.8 } ],
+         "effects": [ { "id": "effect_psi_neutralized", "duration": 30 } ],
++        "effects_require_dmg": false,
+         "hit_dmg_u": "%1$s strikes at your %2$s!",
+         "hit_dmg_npc": "%1$s strikes at <npcname>!",
+         "miss_msg_u": "%1$s strikes at you, but you dodge!",
+@@ -207,6 +212,7 @@
+         "id": "zombie_void_nether_banish_monster",
+         "type": "spell",
+         "spell_data": { "id": "nether_banish_monster_greater" },
++        "condition": { "npc_has_species": "NETHER" },
+         "cooldown": { "math": [ "7 + rand(19)" ] },
+         "monster_message": "%1$s looks at %3$s and the static on the edge of your vision creeps inward for a moment."
+       }
+diff --git a/data/mods/MindOverMatter/ter_transform/ter_transform.json b/data/mods/MindOverMatter/ter_transform/ter_transform.json
+index f27c2db159..b8a40abf95 100644
+--- a/data/mods/MindOverMatter/ter_transform/ter_transform.json
++++ b/data/mods/MindOverMatter/ter_transform/ter_transform.json
+@@ -7,7 +7,7 @@
+   {
+     "type": "ter_furn_transform",
+     "id": "ter_null_zombie_delete_fields",
+-    "field": [ { "result": "fd_null", "valid_field": [ "fd_nullifying_field" ] } ]
++    "field": [ { "result": "fd_null", "valid_field": [ "fd_nullifying_field", "fd_neutralizing_field" ] } ]
+   },
+   {
+     "type": "ter_furn_transform",
+-- 
+2.45.2
+

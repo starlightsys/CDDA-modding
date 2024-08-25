@@ -1,0 +1,25 @@
+From 3a57e8e4f1684d4eec0ea253bc6dbe750231640d Mon Sep 17 00:00:00 2001
+From: RenechCDDA <84619419+RenechCDDA@users.noreply.github.com>
+Date: Wed, 14 Aug 2024 09:31:58 -0400
+Subject: [PATCH 001/125] Active grenades don't spawn as duds
+
+Co-authored-by: andrei <a12l+git@runbox.com>
+---
+ data/json/items/tool/explosives.json | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/data/json/items/tool/explosives.json b/data/json/items/tool/explosives.json
+index c0ef8517ce..3081861cd3 100644
+--- a/data/json/items/tool/explosives.json
++++ b/data/json/items/tool/explosives.json
+@@ -408,6 +408,7 @@
+     "color": "green",
+     "use_action": { "type": "message", "message": "You've already pulled the %s's pin, try throwing it instead.", "name": "Pull pin" },
+     "countdown_action": { "type": "explosion", "explosion": { "power": 240, "shrapnel": { "casing_mass": 217, "fragment_mass": 0.02 } } },
++    "countdown_interval": "5 seconds",
+     "flags": [ "BOMB", "TRADER_AVOID", "DANGEROUS" ],
+     "melee_damage": { "bash": 6 }
+   },
+-- 
+2.45.2
+

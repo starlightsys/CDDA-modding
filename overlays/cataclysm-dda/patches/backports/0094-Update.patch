@@ -1,0 +1,33 @@
+From 9eb89b4ce59714eb2c71d2e0c7559d07cea3bdc4 Mon Sep 17 00:00:00 2001
+From: "Standing-StormStanding-Storm git config --global user.name
+ Standing-Storm git config --global user.name Standing-Storm"
+ <dorchadas@gmail.com>
+Date: Mon, 19 Aug 2024 10:09:46 -0500
+Subject: [PATCH 094/125] Update
+
+---
+ data/mods/Sky_Island/EOCs.json | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/data/mods/Sky_Island/EOCs.json b/data/mods/Sky_Island/EOCs.json
+index 006c809a68..0e681d7160 100644
+--- a/data/mods/Sky_Island/EOCs.json
++++ b/data/mods/Sky_Island/EOCs.json
+@@ -936,7 +936,13 @@
+           "message": "Select nearby water source"
+         },
+         "then": {
+-          "if": { "map_terrain_with_flag": "LIQUID", "loc": { "context_val": "warped_pond_location" } },
++          "if": {
++            "or": [
++              { "map_terrain_with_flag": "LIQUID", "loc": { "context_val": "warped_pond_location" } },
++              { "map_terrain_id": "t_wooden_well", "loc": { "context_val": "warped_pond_location" } },
++              { "map_terrain_id": "t_water_pump", "loc": { "context_val": "warped_pond_location" } }
++            ]
++          },
+           "then": {
+             "run_eoc_selector": [
+               "EOC_WARPED_POND_CREATION_NW",
+-- 
+2.45.2
+

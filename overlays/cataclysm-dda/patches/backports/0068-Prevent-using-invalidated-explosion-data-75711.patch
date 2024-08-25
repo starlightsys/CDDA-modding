@@ -1,0 +1,111 @@
+From 790dbb2b7f5914a1002aee71d7243788a74c67e6 Mon Sep 17 00:00:00 2001
+From: inogenous <123803852+inogenous@users.noreply.github.com>
+Date: Mon, 19 Aug 2024 00:43:45 +0200
+Subject: [PATCH 068/125] Prevent using invalidated explosion data (#75711)
+
+Prevents crashes that previously happened from using references to
+`explosion_data` that had been invalidated.
+
+The problem before happened when killing "unfolded impossibility" in
+LIXA facility with a grenade, since this monster runs an eoc that
+switches maps. That led to `explosion_handler::process_explosions` being
+called twice recursively. First invocation iterates references, and the
+second invocation might append to the vector, and most certaily will
+clear the vector, thus invalidating references for the first invocation.
+
+Example crash being fixed by this commit, notice how
+`explosion_handler::process_explosions` occurs twice in the callstack:
+
+```
+Thread 1 "cataclysm-tiles" received signal SIGABRT, Aborted.
+__pthread_kill_implementation (threadid=<optimized out>, signo=signo@entry=6, no_tid=no_tid@entry=0) at ./nptl/pthread_kill.c:44
+
+(gdb) bt
+ #0  __pthread_kill_implementation (threadid=<optimized out>, signo=signo@entry=6, no_tid=no_tid@entry=0) at ./nptl/pthread_kill.c:44
+ #1  0x00007ffff787840f in __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+ #2  0x00007ffff78294f2 in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+ #3  0x00007ffff78124ed in __GI_abort () at ./stdlib/abort.c:79
+ #4  0x00007ffff7ad501e in std::__glibcxx_assert_fail(char const*, int, char const*, char const*) () from /lib/x86_64-linux-gnu/libstdc++.so.6
+ #5  0x000055555688b471 in std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const*, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const*> >::operator[] (this=<optimized out>, __n=1967424379) at /usr/include/c++/14/bits/stl_vector.h:1128
+ #6  std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const*, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const*> >::operator[] (this=<optimized out>, __n=1967424379) at /usr/include/c++/14/bits/stl_vector.h:1128
+ #7  string_identity_static::get_interned_string[abi:cxx11](int) (id=1967424379) at src/string_id.cpp:51
+ #8  0x0000555555fffed7 in string_identity_static::str[abi:cxx11]() const (this=<optimized out>) at src/string_id.h:140
+ #9  0x0000555556057423 in string_id<itype>::c_str (this=this@entry=0x5555a126a718) at src/string_id.h:253
+ #10 0x00005555560be56a in Item_factory::find_template (this=0x55555751cad0, id=...) at src/item_factory.cpp:2563
+ #11 0x0000555555e4b0c5 in explosion_handler::_make_explosion (source=<optimized out>, p=..., ex=...) at /usr/include/c++/14/bits/unique_ptr.h:193
+ #12 0x0000555555e4b704 in explosion_handler::process_explosions () at src/explosion.cpp:923
+ #13 0x0000555556246e97 in map::actualize (this=this@entry=0x5555a12bf890, grid=...) at src/map.cpp:9168
+ #14 0x00005555562472c0 in map::load (this=this@entry=0x5555a12bf890, w=..., update_vehicle=update_vehicle@entry=true, pump_events=pump_events@entry=false) at src/map.cpp:8387
+ #15 0x0000555555de2546 in tinymap::load (this=this@entry=0x5555a12bf890, w=..., update_vehicles=update_vehicles@entry=true, pump_events=pump_events@entry=false) at src/map.h:2765
+ #16 0x00005555562a7e6f in update_mapgen_function_json::update_map (this=0x55555a8ce8f0, omt_pos=..., args=..., offset=..., miss=miss@entry=0x0, verify=verify@entry=true, mirror_horizontal=false, mirror_vertical=false, rotation=0) at src/mapgen.cpp:8015
+ #17 0x00005555562a81e3 in run_mapgen_update_func (update_mapgen_id=..., omt_pos=..., args=..., miss=miss@entry=0x0, cancel_on_collision=cancel_on_collision@entry=true, mirror_horizontal=mirror_horizontal@entry=false, mirror_vertical=false, rotation=0) at src/mapgen.cpp:8117
+ #18 0x00005555565a0250 in operator() (__closure=<optimized out>, d=...) at src/npctalk.cpp:3964
+ #19 0x000055555659c7a4 in talk_effect_t::apply (this=this@entry=0x55555d5211d8, d=...) at src/npctalk.cpp:6526
+ #20 0x0000555555e0c9ba in effect_on_condition::activate (this=0x55555d521160, d=..., require_callstack_check=require_callstack_check@entry=true) at src/effect_on_condition.cpp:329
+ #21 0x00005555561f9693 in spell_effect::effect_on_condition (sp=..., caster=..., target=...) at src/magic_spell_effect.cpp:1806
+ #22 0x00005555561d101e in spell::cast_all_effects (this=0x7fffffffc788, source=..., target=...) at src/magic.cpp:1907
+ #23 0x0000555556463bec in monster::die (this=0x55559c7fc0a0, nkiller=0x0) at src/monster.cpp:2941
+ #24 0x0000555555d33386 in Creature::deal_projectile_attack (this=0x55559c7fc0a0, source=0x0, attack=..., print_messages=<optimized out>, wp_attack=...) at src/creature.cpp:1311
+ #25 0x0000555556465049 in monster::deal_projectile_attack (this=this@entry=0x55559c7fc0a0, source=source@entry=0x0, attack=..., print_messages=print_messages@entry=false, wp_attack=...) at src/monster.cpp:2212
+ #26 0x0000555555e4a9d9 in explosion_handler::shrapnel (range=-1, source=<optimized out>, src=..., power=<optimized out>, casing_mass=<optimized out>, per_fragment_mass=<optimized out>) at src/explosion.cpp:463
+ #27 explosion_handler::_make_explosion (source=<optimized out>, p=..., ex=...) at src/explosion.cpp:536
+ #28 0x0000555555e4b704 in explosion_handler::process_explosions () at src/explosion.cpp:923
+ #29 0x0000555555dcf46f in do_turn () at src/do_turn.cpp:648
+ #30 0x00005555557a1227 in main (argc=<optimized out>, argv=<optimized out>) at src/main.cpp:873
+```
+
+In the crash above, the `explosion_data` has been invalidated:
+```
+(gdb) frame 11
+193           pointer    _M_ptr() const noexcept { return std::get<0>(_M_t); }
+
+(gdb) print ex
+$1 = (const explosion_data &) @0x5555a126a6f8: {power = 1.75295132e+25, distance_factor = 2.76847299e+20, max_noise = 1667855474, fire = 117, shrapnel = {casing_mass = 1936026889, fragment_mass = 6.82915174e+22, recovery = -1584519120, drop = {_version = 13059389229367304, _cid = 2019155690, _id = {
+        _id = 1967424379}}}}
+
+(gdb) print ex.shrapnel.drop
+$2 = {_version = 13059389229367304, _cid = 2019155690, _id = {_id = 1967424379}}
+```
+---
+ src/explosion.cpp | 18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/src/explosion.cpp b/src/explosion.cpp
+index 906fef90b1..da09dcf001 100644
+--- a/src/explosion.cpp
++++ b/src/explosion.cpp
+@@ -911,7 +911,22 @@ void resonance_cascade( const tripoint &p )
+ 
+ void process_explosions()
+ {
+-    for( const queued_explosion &ex : _explosions ) {
++    if( _explosions.empty() ) {
++        return;
++    }
++
++    // Need to copy and clear this vector before processing the explosions.
++    // Part of processing in `_make_explosion` is handing out shrapnel damage,
++    // which might kill monsters. That might have all sorts of consequences,
++    // such as running eocs, loading new maps (via eoc) or other explosions
++    // being added. There is therefore a chance that we might recursively
++    // enter this function again during explosion processing, and we need to
++    // guard against references becoming invalidated either by items being
++    // added to the vector, or us clearing it here.
++    std::vector<queued_explosion> explosions_copy( _explosions );
++    _explosions.clear();
++
++    for( const queued_explosion &ex : explosions_copy ) {
+         const tripoint p = get_map().getlocal( ex.pos );
+         if( p.x < 0 || p.x >= MAPSIZE_X || p.y < 0 || p.y >= MAPSIZE_Y ) {
+             debugmsg( "Explosion origin (%d, %d, %d) is out-of-bounds", p.x, p.y, p.z );
+@@ -919,7 +934,6 @@ void process_explosions()
+         }
+         _make_explosion( ex.source, p, ex.data );
+     }
+-    _explosions.clear();
+ }
+ 
+ } // namespace explosion_handler
+-- 
+2.45.2
+

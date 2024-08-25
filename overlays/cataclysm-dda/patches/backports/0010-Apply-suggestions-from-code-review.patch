@@ -1,0 +1,53 @@
+From 39c25a30fe35884d53ccbbe1bb663358b4a54ecb Mon Sep 17 00:00:00 2001
+From: ZhilkinSerg <ZhilkinSerg@users.noreply.github.com>
+Date: Wed, 17 Jun 2020 19:51:04 +0300
+Subject: [PATCH 010/125] Apply suggestions from code review
+
+---
+ data/json/monsters/turrets.json                  | 2 +-
+ data/mods/Aftershock/items/items.json            | 2 +-
+ data/mods/Aftershock/mobs/uplifted_monsters.json | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/data/json/monsters/turrets.json b/data/json/monsters/turrets.json
+index b032bc9bcc..00af339a58 100644
+--- a/data/json/monsters/turrets.json
++++ b/data/json/monsters/turrets.json
+@@ -26,7 +26,7 @@
+         "cooldown": 1,
+         "move_cost": 150,
+         "gun_type": "hk_mp5",
+-        "ammo_type": [ "9mm" ],
++        "ammo_type": "9mm",
+         "fake_skills": [ [ "gun", 5 ], [ "smg", 5 ] ],
+         "fake_dex": 12,
+         "ranges": [ [ 0, 14, "DEFAULT" ] ],
+diff --git a/data/mods/Aftershock/items/items.json b/data/mods/Aftershock/items/items.json
+index 3beca11600..46f9953123 100644
+--- a/data/mods/Aftershock/items/items.json
++++ b/data/mods/Aftershock/items/items.json
+@@ -162,7 +162,7 @@
+     "looks_like": "silver_small",
+     "symbol": "/",
+     "color": "light_gray",
+-    "ammo_type": [ "components" ]
++    "ammo_type": "components"
+   },
+   {
+     "id": "afs_titanium_implant",
+diff --git a/data/mods/Aftershock/mobs/uplifted_monsters.json b/data/mods/Aftershock/mobs/uplifted_monsters.json
+index 3a69e394a7..4a98ca1824 100644
+--- a/data/mods/Aftershock/mobs/uplifted_monsters.json
++++ b/data/mods/Aftershock/mobs/uplifted_monsters.json
+@@ -29,7 +29,7 @@
+         "cooldown": 1,
+         "move_cost": 150,
+         "gun_type": "hk_mp5",
+-        "ammo_type": [ "9mm" ],
++        "ammo_type": "9mm",
+         "fake_skills": [ [ "gun", 5 ], [ "smg", 5 ] ],
+         "fake_dex": 9,
+         "ranges": [ [ 0, 14, "DEFAULT" ] ],
+-- 
+2.45.2
+

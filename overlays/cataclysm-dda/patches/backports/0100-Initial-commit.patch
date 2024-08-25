@@ -1,0 +1,27 @@
+From 22062035d1bc531093a0a06043ebea692d012dbb Mon Sep 17 00:00:00 2001
+From: "Standing-StormStanding-Storm git config --global user.name
+ Standing-Storm git config --global user.name Standing-Storm"
+ <dorchadas@gmail.com>
+Date: Thu, 22 Aug 2024 00:25:13 -0500
+Subject: [PATCH 100/125] Initial commit
+
+---
+ data/mods/Xedra_Evolved/mutations/mutations.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/mods/Xedra_Evolved/mutations/mutations.json b/data/mods/Xedra_Evolved/mutations/mutations.json
+index ddb75f3b57..8fd2935c6d 100644
+--- a/data/mods/Xedra_Evolved/mutations/mutations.json
++++ b/data/mods/Xedra_Evolved/mutations/mutations.json
+@@ -677,7 +677,7 @@
+         "values": [ { "value": "MELEE_DAMAGE", "multiply": -1 }, { "value": "RANGE", "multiply": -1 } ]
+       }
+     ],
+-    "flags": [ "PRED3", "QUADRUPED_CROUCH", "QUADRUPED_RUN", "TEMPORARY_SHAPESHIFT" ],
++    "flags": [ "MUTE", "PRED3", "QUADRUPED_CROUCH", "QUADRUPED_RUN", "TEMPORARY_SHAPESHIFT" ],
+     "override_look": { "id": "mon_wolf", "tile_category": "monster" },
+     "integrated_armor": [ "integrated_fangs", "integrated_lupine_fur" ]
+   },
+-- 
+2.45.2
+

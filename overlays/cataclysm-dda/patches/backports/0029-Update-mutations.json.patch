@@ -1,0 +1,33 @@
+From 072a9f926a113e163f654965d076080df1e3ddd5 Mon Sep 17 00:00:00 2001
+From: Terrorforge <terrorforge@gmail.com>
+Date: Fri, 16 Aug 2024 01:02:33 +0200
+Subject: [PATCH 029/125] Update mutations.json
+
+---
+ data/json/mutations/mutations.json | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/data/json/mutations/mutations.json b/data/json/mutations/mutations.json
+index b9b15bf149..106b400dc7 100644
+--- a/data/json/mutations/mutations.json
++++ b/data/json/mutations/mutations.json
+@@ -2636,7 +2636,7 @@
+     "id": "FROG_EYES",
+     "//": "Currently without the NV from URSINE_EYE",
+     "name": { "str": "Frog Eyes" },
+-    "points": 1,
++    "points": 0,
+     "vitamin_cost": 60,
+     "visibility": 8,
+     "ugliness": 4,
+@@ -6651,6 +6651,7 @@
+     "vitamin_cost": 60,
+     "visibility": 8,
+     "ugliness": 4,
++    "mixed_effect": true,
+     "types": [ "EYES" ],
+     "description": "Your eyes bulge out several inches from your skull.  This does not affect your vision in any way.",
+     "leads_to": [ "MEMBRANE" ],
+-- 
+2.45.2
+

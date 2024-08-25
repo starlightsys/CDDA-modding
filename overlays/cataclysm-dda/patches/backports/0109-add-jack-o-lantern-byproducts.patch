@@ -1,0 +1,24 @@
+From 39e7320b21ad49c5f3c52102c8504e3c7b30f365 Mon Sep 17 00:00:00 2001
+From: bloodbowel <177868717+bloodbowel@users.noreply.github.com>
+Date: Thu, 22 Aug 2024 23:10:54 -0500
+Subject: [PATCH 109/125] add jack-o'-lantern byproducts
+
+---
+ data/json/recipes/recipes_holiday.json | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/data/json/recipes/recipes_holiday.json b/data/json/recipes/recipes_holiday.json
+index 4a54095f14..cd12a955d9 100644
+--- a/data/json/recipes/recipes_holiday.json
++++ b/data/json/recipes/recipes_holiday.json
+@@ -37,6 +37,7 @@
+     "type": "recipe",
+     "activity_level": "LIGHT_EXERCISE",
+     "result": "jackolantern",
++    "byproducts": [ [ "pumpkin_cut", 1 ], [ "seed_pumpkin", 6 ] ],
+     "category": "CC_OTHER",
+     "subcategory": "CSC_OTHER_TOOLS",
+     "skill_used": "fabrication",
+-- 
+2.45.2
+

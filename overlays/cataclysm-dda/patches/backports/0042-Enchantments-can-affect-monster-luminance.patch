@@ -1,0 +1,67 @@
+From 5d2f3cc60857d59811292161030b63520058dc6e Mon Sep 17 00:00:00 2001
+From: GuardianDll <antisim009@gmail.com>
+Date: Sat, 17 Aug 2024 11:53:00 +0200
+Subject: [PATCH 042/125] Enchantments can affect monster luminance
+
+---
+ doc/MAGIC.md              | 1 +
+ src/lightmap.cpp          | 6 ++++--
+ src/magic_enchantment.cpp | 6 ++++--
+ 3 files changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/doc/MAGIC.md b/doc/MAGIC.md
+index 48dd8ff4f5..2e693724c9 100644
+--- a/doc/MAGIC.md
++++ b/doc/MAGIC.md
+@@ -957,6 +957,7 @@ Character status value  | Description
+ `ARMOR_STAB`            | 
+ `REGEN_HP`              | Affects the rate the monster recovers hp.
+ `SPEED`                 | Affects the base speed of the monster.
++`LUMINATION`            | Affects monster luminance
+ 
+ ### Enchantment value examples
+ 
+diff --git a/src/lightmap.cpp b/src/lightmap.cpp
+index 40f24d5d2d..b1181d08d2 100644
+--- a/src/lightmap.cpp
++++ b/src/lightmap.cpp
+@@ -508,8 +508,10 @@ void map::generate_lightmap( const int zlev )
+             // TODO: [lightmap] Attach natural light brightness to creatures
+             // TODO: [lightmap] Allow creatures to have light attacks (i.e.: eyebot)
+             // TODO: [lightmap] Allow creatures to have facing and arc lights
+-            if( critter.type->luminance > 0 ) {
+-                apply_light_source( mp, critter.type->luminance );
++            float critter_luminance = critter.calculate_by_enchantment( critter.type->luminance,
++                                      enchant_vals::mod::LUMINATION, true );
++            if( critter_luminance > 0 ) {
++                apply_light_source( mp, critter_luminance );
+             }
+         }
+     }
+diff --git a/src/magic_enchantment.cpp b/src/magic_enchantment.cpp
+index 36bd9f8bc5..dd9c0d90f6 100644
+--- a/src/magic_enchantment.cpp
++++ b/src/magic_enchantment.cpp
+@@ -324,7 +324,8 @@ bool enchantment::is_monster_relevant() const
+             pair_values.first == enchant_vals::mod::ARMOR_HEAT ||
+             pair_values.first == enchant_vals::mod::ARMOR_STAB ||
+             pair_values.first == enchant_vals::mod::REGEN_HP ||
+-            pair_values.first == enchant_vals::mod::SPEED ) {
++            pair_values.first == enchant_vals::mod::SPEED ||
++            pair_values.first == enchant_vals::mod::LUMINATION ) {
+             return true;
+         }
+     }
+@@ -343,7 +344,8 @@ bool enchantment::is_monster_relevant() const
+             pair_values.first == enchant_vals::mod::ARMOR_HEAT ||
+             pair_values.first == enchant_vals::mod::ARMOR_STAB ||
+             pair_values.first == enchant_vals::mod::REGEN_HP ||
+-            pair_values.first == enchant_vals::mod::SPEED ) {
++            pair_values.first == enchant_vals::mod::SPEED ||
++            pair_values.first == enchant_vals::mod::LUMINATION ) {
+             return true;
+         }
+     }
+-- 
+2.45.2
+

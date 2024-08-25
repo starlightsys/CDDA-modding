@@ -1,0 +1,26 @@
+From 8005ecde2ec501871af41d9d6ce2a899958b7f56 Mon Sep 17 00:00:00 2001
+From: Standing-Storm <120433252+Standing-Storm@users.noreply.github.com>
+Date: Wed, 21 Aug 2024 22:38:27 -0500
+Subject: [PATCH 099/125] Update mutations.json
+
+---
+ data/mods/MindOverMatter/obsolete/mutations.json | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/data/mods/MindOverMatter/obsolete/mutations.json b/data/mods/MindOverMatter/obsolete/mutations.json
+index d12a443836..3467d2b8d8 100644
+--- a/data/mods/MindOverMatter/obsolete/mutations.json
++++ b/data/mods/MindOverMatter/obsolete/mutations.json
+@@ -23,7 +23,8 @@
+       },
+       {
+         "math": [ "u_spell_level('telekinetic_lifting_field')", "=", "(u_spell_level_sum('school': 'TELEKINETIC') / 8) + 1" ]
+-      }
++      },
++      { "math": [ "u_telekinesis_lifting_field_updated", "=", "1" ] }
+     ]
+   }
+ ]
+-- 
+2.45.2
+

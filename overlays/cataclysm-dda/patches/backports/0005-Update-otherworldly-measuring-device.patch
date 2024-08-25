@@ -1,0 +1,25 @@
+From 9dbee6aa0ea8418ec411c0ad9c9e5dd55ee03cb0 Mon Sep 17 00:00:00 2001
+From: RenechCDDA <84619419+RenechCDDA@users.noreply.github.com>
+Date: Wed, 14 Aug 2024 15:45:33 -0400
+Subject: [PATCH 005/125] Update otherworldly measuring device
+
+---
+ data/json/items/tool/electronics.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/json/items/tool/electronics.json b/data/json/items/tool/electronics.json
+index ada34d8eb8..89d032b58b 100644
+--- a/data/json/items/tool/electronics.json
++++ b/data/json/items/tool/electronics.json
+@@ -296,7 +296,7 @@
+     "color": "green",
+     "ammo": [ "battery" ],
+     "flags": [ "WATER_BREAK" ],
+-    "charges_per_use": 5000,
++    "charges_per_use": 2400,
+     "use_action": [ "MEASURE_RESONANCE" ],
+     "//": "Battery only, intentionally. Meant for field expeditions to other dimensions where grid power is unavailable. Too advanced for the player to make grid-useable.",
+     "pocket_data": [
+-- 
+2.45.2
+

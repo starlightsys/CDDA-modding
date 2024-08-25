@@ -1,0 +1,54 @@
+From 38e8c061610426e01c4010815f6a54e9dd5dff3d Mon Sep 17 00:00:00 2001
+From: NetSysFire <59517351+NetSysFire@users.noreply.github.com>
+Date: Sun, 18 Aug 2024 17:09:29 +0200
+Subject: [PATCH 050/125] desert_region: fix too high weight, blacklist meadow
+ and stream (#75747)
+
+* desert_region: fix weight of bodies of water
+
+* blacklist stream_mutable
+
+* blacklist meadow mutable
+---
+ data/mods/desert_region/mapgen/waterbody.json        |  2 +-
+ .../desert_region/overmap/location_blacklist.json    | 12 ++++++++++++
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/data/mods/desert_region/mapgen/waterbody.json b/data/mods/desert_region/mapgen/waterbody.json
+index 37aa93dd9c..1c69b33601 100644
+--- a/data/mods/desert_region/mapgen/waterbody.json
++++ b/data/mods/desert_region/mapgen/waterbody.json
+@@ -17,7 +17,7 @@
+       "river_c_not_sw"
+     ],
+     "//": "Weight should be removed if/when lake_shore and river (or their weights) are unhardcoded",
+-    "weight": 100000000000,
++    "weight": 1000000000,
+     "object": {
+       "fill_ter": "t_mudcrack",
+       "place_nested": [
+diff --git a/data/mods/desert_region/overmap/location_blacklist.json b/data/mods/desert_region/overmap/location_blacklist.json
+index 56f0a43bb8..1ad2a7a47f 100644
+--- a/data/mods/desert_region/overmap/location_blacklist.json
++++ b/data/mods/desert_region/overmap/location_blacklist.json
+@@ -130,5 +130,17 @@
+     "id": "Lumbermill",
+     "overmaps": [  ],
+     "occurrences": [ 0, 0 ]
++  },
++  {
++    "type": "overmap_special",
++    "id": "meadow_mutable",
++    "overmaps": [  ],
++    "occurrences": [ 0, 0 ]
++  },
++  {
++    "type": "overmap_special",
++    "id": "stream_mutable",
++    "overmaps": [  ],
++    "occurrences": [ 0, 0 ]
+   }
+ ]
+-- 
+2.45.2
+

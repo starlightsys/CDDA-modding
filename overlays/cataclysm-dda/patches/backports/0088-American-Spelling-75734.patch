@@ -1,0 +1,796 @@
+From b8cf0035e864ad553032dccdf419482cf576d473 Mon Sep 17 00:00:00 2001
+From: klorpa <30924131+klorpa@users.noreply.github.com>
+Date: Wed, 21 Aug 2024 14:08:45 -0500
+Subject: [PATCH 088/125] American Spelling (#75734)
+
+* AmericanSpelling
+
+* Apply suggestions from code review
+
+---------
+
+Co-authored-by: Maleclypse <54345792+Maleclypse@users.noreply.github.com>
+---
+ data/json/achievements.json                   |  2 +-
+ data/json/faults/faults_vehicles.json         |  4 +--
+ data/json/faults/fixes_vehicles.json          |  4 +--
+ data/json/hobbies.json                        |  4 +--
+ .../json/itemgroups/collections_domestic.json |  6 ++---
+ data/json/items/ammo.json                     |  2 +-
+ data/json/items/ammo/84x246mm.json            |  4 +--
+ data/json/items/armor/coats.json              |  2 +-
+ data/json/items/bionics.json                  |  2 +-
+ data/json/items/containers/containers.json    |  2 +-
+ data/json/items/containers/military.json      |  4 +--
+ data/json/items/fluff.json                    |  2 +-
+ data/json/items/gun/44.json                   | 12 ++++-----
+ data/json/items/gun/50.json                   | 10 +++----
+ data/json/items/gun/545x39.json               |  2 +-
+ data/json/items/magazine/filter.json          |  2 +-
+ .../house_general_palette.json                |  2 +-
+ data/json/materials.json                      |  4 +--
+ .../npcs/Kindred/NPC_Brigitte_LaCroix.json    |  4 +--
+ data/json/npcs/Kindred/NPC_Darren_Cooper.json |  4 +--
+ .../npcs/exodii/exodii_merchant_itemlist.json |  2 +-
+ .../npcs/exodii/exodii_merchant_talk.json     |  8 +++---
+ .../isherwood_farm/NPC_Eddie_Isherwood.json   |  2 +-
+ .../NPC_Boris_Borichenko.json                 |  4 +--
+ .../NPC_visiting_scavenger.json               |  2 +-
+ data/json/npcs/talk_tags.json                 |  2 +-
+ data/json/recipes/armor/torso.json            |  2 +-
+ data/json/snippets/e_logs.json                |  2 +-
+ data/json/snippets/home_pictures.json         |  2 +-
+ data/json/snippets/lab.json                   |  2 +-
+ data/json/snippets/missing_posters.json       |  2 +-
+ data/json/statistics.json                     | 26 +++++++++----------
+ .../items/armor/exosuit/exosuit_manual.json   |  2 +-
+ .../effects_on_condition/wave_eocs.json       |  2 +-
+ .../classic_zombies/monsters/weakpoints.json  |  2 +-
+ doc/USER_INTERFACE_AND_ACCESSIBILITY.md       |  2 +-
+ 36 files changed, 71 insertions(+), 71 deletions(-)
+
+diff --git a/data/json/achievements.json b/data/json/achievements.json
+index 2a13374f61..c2889f0f08 100644
+--- a/data/json/achievements.json
++++ b/data/json/achievements.json
+@@ -1999,7 +1999,7 @@
+         "is": "==",
+         "target": [ "overmap_special_id", "New England Church Retreat" ],
+         "visible": "when_achievement_completed",
+-        "description": "Do you have a few minutes to talk about our lord and saviour Jesus Christ?"
++        "description": "Do you have a few minutes to talk about our lord and savior Jesus Christ?"
+       }
+     ]
+   },
+diff --git a/data/json/faults/faults_vehicles.json b/data/json/faults/faults_vehicles.json
+index 3419a4716a..d49a3db9c9 100644
+--- a/data/json/faults/faults_vehicles.json
++++ b/data/json/faults/faults_vehicles.json
+@@ -20,8 +20,8 @@
+   {
+     "id": "fault_engine_immobiliser",
+     "type": "fault",
+-    "name": { "str": "Active immobiliser" },
+-    "description": "An immobiliser device prevents starting of the vehicle without the appropriate key.",
++    "name": { "str": "Active immobilizer" },
++    "description": "An immobilizer device prevents starting of the vehicle without the appropriate key.",
+     "item_prefix": "faulty",
+     "price_modifier": 0.25,
+     "flags": [ "IMMOBILIZER" ]
+diff --git a/data/json/faults/fixes_vehicles.json b/data/json/faults/fixes_vehicles.json
+index 176e3ae627..4a8f86baf5 100644
+--- a/data/json/faults/fixes_vehicles.json
++++ b/data/json/faults/fixes_vehicles.json
+@@ -27,8 +27,8 @@
+   {
+     "type": "fault_fix",
+     "id": "mend_fault_engine_immobiliser_deactivate",
+-    "name": "Deactivate immobiliser",
+-    "success_msg": "You successfully deactivate the immobiliser of the %s.",
++    "name": "Deactivate immobilizer",
++    "success_msg": "You successfully deactivate the immobilizer of the %s.",
+     "time": "5 m",
+     "faults_removed": [ "fault_engine_immobiliser" ],
+     "skills": { "mechanics": 2, "electronics": 5 },
+diff --git a/data/json/hobbies.json b/data/json/hobbies.json
+index 44b3c62a9d..a341cd90bb 100644
+--- a/data/json/hobbies.json
++++ b/data/json/hobbies.json
+@@ -892,8 +892,8 @@
+     "type": "profession",
+     "subtype": "hobby",
+     "id": "modelling",
+-    "name": "Modelling",
+-    "description": "You were deep into the fashion scene, keeping up on the latest trends and even modelling clothes yourself.  Having style and good looks is just as, if not more, important to you than practicality.",
++    "name": "Modeling",
++    "description": "You were deep into the fashion scene, keeping up on the latest trends and even modeling clothes yourself.  Having style and good looks is just as, if not more, important to you than practicality.",
+     "points": 2,
+     "skills": [ { "level": 2, "name": "speech" }, { "level": 1, "name": "tailor" } ],
+     "traits": [ "STYLISH" ],
+diff --git a/data/json/itemgroups/collections_domestic.json b/data/json/itemgroups/collections_domestic.json
+index b2da0ae2ce..8e402a0b27 100644
+--- a/data/json/itemgroups/collections_domestic.json
++++ b/data/json/itemgroups/collections_domestic.json
+@@ -1414,7 +1414,7 @@
+   },
+   {
+     "id": "untidy_floor_clutter",
+-    "//": "Items you might find on the floor in a disorganised house.",
++    "//": "Items you might find on the floor in a disorganized house.",
+     "type": "item_group",
+     "subtype": "distribution",
+     "items": [
+@@ -1449,7 +1449,7 @@
+   },
+   {
+     "id": "messy_floor_clutter",
+-    "//": "Items you might find on the floor in a disorganised and dirty house.",
++    "//": "Items you might find on the floor in a disorganized and dirty house.",
+     "type": "item_group",
+     "subtype": "distribution",
+     "items": [
+@@ -1468,7 +1468,7 @@
+   },
+   {
+     "id": "untidy_workbench_clutter",
+-    "//": "Items you might find on the floor in a disorganised house.",
++    "//": "Items you might find on the floor in a disorganized house.",
+     "type": "item_group",
+     "subtype": "distribution",
+     "items": [ { "item": "splinter", "prob": 10 }, { "item": "nail", "prob": 10, "charges": [ 1, 3 ] } ]
+diff --git a/data/json/items/ammo.json b/data/json/items/ammo.json
+index cc8059ec23..d41bed7616 100644
+--- a/data/json/items/ammo.json
++++ b/data/json/items/ammo.json
+@@ -1183,7 +1183,7 @@
+     "id": "gasfilter_m",
+     "category": "tool_magazine",
+     "name": { "str_sp": "activated carbon" },
+-    "description": "A small amount of coal-derived carbon material with many small pores, used for the adsorption of harmful chemicals.  Most commonly employed within respirator filters, it traps and retains chemical gases and vapour contaminants while allowing filtered air to pass unhindered.  Once all the carbon has been bonded to intruding chemicals, the filter is expired and must be replaced.",
++    "description": "A small amount of coal-derived carbon material with many small pores, used for the adsorption of harmful chemicals.  Most commonly employed within respirator filters, it traps and retains chemical gases and vapor contaminants while allowing filtered air to pass unhindered.  Once all the carbon has been bonded to intruding chemicals, the filter is expired and must be replaced.",
+     "volume": "1 ml",
+     "price": "1 cent",
+     "price_postapoc": "1 cent",
+diff --git a/data/json/items/ammo/84x246mm.json b/data/json/items/ammo/84x246mm.json
+index c9be36f752..1140e1d79e 100644
+--- a/data/json/items/ammo/84x246mm.json
++++ b/data/json/items/ammo/84x246mm.json
+@@ -2,7 +2,7 @@
+   {
+     "type": "AMMO",
+     "id": "84x246mm_he",
+-    "//": "84mm HE 441D RS. Ref:TC 3-22.84.  35494gr projectile travelling at 787.4fps.",
++    "//": "84mm HE 441D RS. Ref:TC 3-22.84.  35494gr projectile traveling at 787.4fps.",
+     "price": "700 USD",
+     "price_postapoc": "120 USD",
+     "flags": [ "IRREPLACEABLE_CONSUMABLE" ],
+@@ -47,7 +47,7 @@
+     "type": "AMMO",
+     "id": "84x246mm_smoke",
+     "copy-from": "84x246mm_he",
+-    "//": "84mm SMOKE 469C.  35340gr projectile travelling at 787.4 fps.",
++    "//": "84mm SMOKE 469C.  35340gr projectile traveling at 787.4 fps.",
+     "price": "450 USD",
+     "price_postapoc": "120 USD",
+     "name": { "str_sp": "84x245mm smoke" },
+diff --git a/data/json/items/armor/coats.json b/data/json/items/armor/coats.json
+index f649f632b7..5490ea6ebf 100644
+--- a/data/json/items/armor/coats.json
++++ b/data/json/items/armor/coats.json
+@@ -888,7 +888,7 @@
+   },
+   {
+     "id": "jacket_army",
+-    "//": "Intended to be, and modelled off of, an M65 combat jacket.",
++    "//": "Intended to be, and modeled off of, an M65 combat jacket.",
+     "//2": "Considering that this is a stand-in for both original and reproduction M65 jackets, we're basing our overall dimensions and price on: https://www.helikon-tex.com/en_eur/ku-c65-dc-covert-m-65-jacket.html",
+     "type": "ARMOR",
+     "looks_like": "coat_winter",
+diff --git a/data/json/items/bionics.json b/data/json/items/bionics.json
+index 3979dc56f5..87abd709d1 100644
+--- a/data/json/items/bionics.json
++++ b/data/json/items/bionics.json
+@@ -1400,7 +1400,7 @@
+     "type": "BIONIC_ITEM",
+     "name": { "str": "Throwing Assist CBM" },
+     "looks_like": "bio_int_enhancer",
+-    "description": "The culmination of decades of research into hominid palaeoanthropology and biomechanical modelling, the throwing assist CBM was brought to market to revolutionize Beqball tournaments, soon becoming exhibitions of cybernetic human effort and engineering.  A network of neurostimulators and sensors, mostly in the arms and hands, work in tandem with the eyes for a significant increase in throwing accuracy and precision.  When the Exodii came upon this cybernetic enhancement suite, they found it to be an economical way to ensure precise grenade placement in partial cyborgs.",
++    "description": "The culmination of decades of research into hominid palaeoanthropology and biomechanical modeling, the throwing assist CBM was brought to market to revolutionize Beqball tournaments, soon becoming exhibitions of cybernetic human effort and engineering.  A network of neurostimulators and sensors, mostly in the arms and hands, work in tandem with the eyes for a significant increase in throwing accuracy and precision.  When the Exodii came upon this cybernetic enhancement suite, they found it to be an economical way to ensure precise grenade placement in partial cyborgs.",
+     "price": "2 kUSD 200 USD",
+     "weight": "1000 g",
+     "difficulty": 3
+diff --git a/data/json/items/containers/containers.json b/data/json/items/containers/containers.json
+index 3901cf2221..6df6a92caa 100644
+--- a/data/json/items/containers/containers.json
++++ b/data/json/items/containers/containers.json
+@@ -4137,7 +4137,7 @@
+     "type": "GENERIC",
+     "category": "container",
+     "name": { "str": "maker kit box", "str_pl": "maker kit boxes" },
+-    "description": "A small box with an image of children building things.  It's labelled 'Makerspace Learner Kit'.",
++    "description": "A small box with an image of children building things.  It's labeled 'Makerspace Learner Kit'.",
+     "ascii_picture": "maker_kit_box",
+     "weight": "400 g",
+     "volume": "3200 ml",
+diff --git a/data/json/items/containers/military.json b/data/json/items/containers/military.json
+index 150bda2380..19612463c2 100644
+--- a/data/json/items/containers/military.json
++++ b/data/json/items/containers/military.json
+@@ -505,7 +505,7 @@
+     "type": "GENERIC",
+     "name": { "str": "ammo box", "str_pl": "ammo boxes" },
+     "//": "20x308mm, 100x9mm, ex ammunition_box_308",
+-    "description": "A lightweight box, labelled with a big, shiny image of an ammunition cartridge.",
++    "description": "A lightweight box, labeled with a big, shiny image of an ammunition cartridge.",
+     "category": "container",
+     "symbol": "#",
+     "color": "brown",
+@@ -658,7 +658,7 @@
+     "type": "GENERIC",
+     "name": { "str": "small ammo box", "str_pl": "small ammo boxes" },
+     "//": "10x50bmg, 20x12 gauge, ex ammunition_box_50bmg",
+-    "description": "A lightweight box, labelled with a big, shiny image of an ammunition cartridge.",
++    "description": "A lightweight box, labeled with a big, shiny image of an ammunition cartridge.",
+     "category": "container",
+     "symbol": "#",
+     "color": "brown",
+diff --git a/data/json/items/fluff.json b/data/json/items/fluff.json
+index 84a50c85ec..196b43894f 100644
+--- a/data/json/items/fluff.json
++++ b/data/json/items/fluff.json
+@@ -828,7 +828,7 @@
+     "type": "GENERIC",
+     "category": "other",
+     "name": { "str": "Knight Mage", "str_pl": "sets of Knight Mage" },
+-    "description": "A highly strategic board game that combines elements of role-playing games with deck-building and traditional board game mechanics.  Players (or a solo player) take on the roles of powerful Knights Mages who explore the land, conquer cities, and engage in epic battles against various enemies.  The game features an intricate levelling system where players can enhance their characters' abilities and acquire new skills as they progress through the game.",
++    "description": "A highly strategic board game that combines elements of role-playing games with deck-building and traditional board game mechanics.  Players (or a solo player) take on the roles of powerful Knights Mages who explore the land, conquer cities, and engage in epic battles against various enemies.  The game features an intricate leveling system where players can enhance their characters' abilities and acquire new skills as they progress through the game.",
+     "weight": "1120 g",
+     "volume": "1850 ml",
+     "price": "70 USD 50 cent",
+diff --git a/data/json/items/gun/44.json b/data/json/items/gun/44.json
+index 1e2ddee15d..32aafa1309 100644
+--- a/data/json/items/gun/44.json
++++ b/data/json/items/gun/44.json
+@@ -174,13 +174,13 @@
+     "looks_like": "sw_619",
+     "type": "GUN",
+     "name": { "str": ".44 long barrel hunting revolver" },
+-    "description": "A large-frame revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for the manufacturer deemed it to be the most accurate .44-calibre revolver in their line.  This one has an extended 8-inch barrel.",
++    "description": "A large-frame revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for the manufacturer deemed it to be the most accurate .44-caliber revolver in their line.  This one has an extended 8-inch barrel.",
+     "variant_type": "gun",
+     "variants": [
+       {
+         "id": "colt_anaconda_8",
+         "name": { "str": "Colt Anaconda" },
+-        "description": "A large-frame double-action revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for Colt deemed it to be the most accurate .44-calibre revolver in their line.  This one has an extended 8-inch barrel."
++        "description": "A large-frame double-action revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for Colt deemed it to be the most accurate .44-caliber revolver in their line.  This one has an extended 8-inch barrel."
+       }
+     ],
+     "weight": "1672 g",
+@@ -222,13 +222,13 @@
+     "copy-from": "colt_anaconda_8",
+     "type": "GUN",
+     "name": { "str": ".44 hunting revolver" },
+-    "description": "A large-frame revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for the manufacturer deemed it to be the most accurate .44-calibre revolver in their line.  This one has a 6-inch barrel.",
++    "description": "A large-frame revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for the manufacturer deemed it to be the most accurate .44-caliber revolver in their line.  This one has a 6-inch barrel.",
+     "variant_type": "gun",
+     "variants": [
+       {
+         "id": "colt_anaconda",
+         "name": { "str": "Colt Anaconda" },
+-        "description": "A large-frame double-action revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for Colt deemed it to be the most accurate .44-calibre revolver in their line.  This one has a 6-inch barrel."
++        "description": "A large-frame double-action revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for Colt deemed it to be the most accurate .44-caliber revolver in their line.  This one has a 6-inch barrel."
+       }
+     ],
+     "weight": "1499 g",
+@@ -245,13 +245,13 @@
+     "copy-from": "colt_anaconda_8",
+     "type": "GUN",
+     "name": { "str": ".44 short barrel hunting revolver" },
+-    "description": "A large-frame revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for the manufacturer deemed it to be the most accurate .44-calibre revolver in their line.  This one has a shortened 4-inch barrel.",
++    "description": "A large-frame revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for the manufacturer deemed it to be the most accurate .44-caliber revolver in their line.  This one has a shortened 4-inch barrel.",
+     "variant_type": "gun",
+     "variants": [
+       {
+         "id": "colt_anaconda",
+         "name": { "str": "Colt Anaconda" },
+-        "description": "A large-frame double-action revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for Colt deemed it to be the most accurate .44-calibre revolver in their line.  This one has a shortened 4-inch barrel."
++        "description": "A large-frame double-action revolver with a modern plastic handle.  Too large for law enforcement, it was mostly used by sport shooters and hunters, for Colt deemed it to be the most accurate .44-caliber revolver in their line.  This one has a shortened 4-inch barrel."
+       }
+     ],
+     "weight": "1499 g",
+diff --git a/data/json/items/gun/50.json b/data/json/items/gun/50.json
+index d3bbe090b9..7ccf9d2bb2 100644
+--- a/data/json/items/gun/50.json
++++ b/data/json/items/gun/50.json
+@@ -5,7 +5,7 @@
+     "looks_like": "modular_ar15",
+     "type": "GUN",
+     "name": { "str": "semi-automatic anti-materiel rifle" },
+-    "description": "A mahoosive rifle of military pedigree, fitted with a telescopic gun scope peeking over its giant cocking mechanism and resting upon a bipod to control recoil from the equally big .50-calibre munitions it is designed for.  Originally employed for detonating unexploded ordnance in combat conditions and defeating light vehicular and structural targets, in the post-Cataclysm it serves as an admirable conduit of kinetic energy to the biggest and baddest of the new world's critters.",
++    "description": "A mahoosive rifle of military pedigree, fitted with a telescopic gun scope peeking over its giant cocking mechanism and resting upon a bipod to control recoil from the equally big .50-caliber munitions it is designed for.  Originally employed for detonating unexploded ordnance in combat conditions and defeating light vehicular and structural targets, in the post-Cataclysm it serves as an admirable conduit of kinetic energy to the biggest and baddest of the new world's critters.",
+     "variant_type": "gun",
+     "variants": [
+       {
+@@ -40,7 +40,7 @@
+     "looks_like": "m107a1",
+     "type": "GUN",
+     "name": { "str_sp": ".50-caliber heavy machine gun" },
+-    "description": "Essentially a giant steel box with a long barrel peering from one end and dual spade grips mounted upon the other, this venerable machine gun design served the United States military since the First World War, mounted on everything from tanks to patrol boats to aircraft, and even tripod-mounted for stand-alone use.  Part and parcel with its size and munition payload of .50-calibre ammo belts, however, is the fact that, to operate it, one must mount it upon suitable furniture, terrain features, or vehicles.",
++    "description": "Essentially a giant steel box with a long barrel peering from one end and dual spade grips mounted upon the other, this venerable machine gun design served the United States military since the First World War, mounted on everything from tanks to patrol boats to aircraft, and even tripod-mounted for stand-alone use.  Part and parcel with its size and munition payload of .50-caliber ammo belts, however, is the fact that, to operate it, one must mount it upon suitable furniture, terrain features, or vehicles.",
+     "variant_type": "gun",
+     "variants": [
+       {
+@@ -84,7 +84,7 @@
+     "looks_like": "m107a1",
+     "type": "GUN",
+     "name": { "str": ".50-caliber precision rifle" },
+-    "description": "Pin-point accurate out to one and a half kilometres and cycling its .50-calibre feed from detachable, 10-round magazines, this combat sniper's weapon provides users with a comfortable window to engage targets at a distance.  Its imposing bullets ensure that it is more than capable of delivering an adequate account of itself at such ranges.",
++    "description": "Pin-point accurate out to one and a half kilometers and cycling its .50-caliber feed from detachable, 10-round magazines, this combat sniper's weapon provides users with a comfortable window to engage targets at a distance.  Its imposing bullets ensure that it is more than capable of delivering an adequate account of itself at such ranges.",
+     "variant_type": "gun",
+     "variants": [
+       {
+@@ -120,7 +120,7 @@
+     "looks_like": "m107a1",
+     "type": "GUN",
+     "name": { "str": "bolt-action anti-materiel rifle" },
+-    "description": "Serving both anti-materiel and high-priority sniping roles in their service with various militaries, bolt-action rifles, such as this one, were known for their long ranges of engagement, recoil, and armour-defeating ordinance.  Essentially a step below light cannonry, as far as shoulder-arms are concerned, this weapon's mix of power and accuracy meet hands to ensure that, before the cataclysm, one shot was synonymous with one very, very dead target.",
++    "description": "Serving both anti-materiel and high-priority sniping roles in their service with various militaries, bolt-action rifles, such as this one, were known for their long ranges of engagement, recoil, and armor-defeating ordinance.  Essentially a step below light cannonry, as far as shoulder-arms are concerned, this weapon's mix of power and accuracy meet hands to ensure that, before the Cataclysm, one shot was synonymous with one very, very dead target.",
+     "variant_type": "gun",
+     "variants": [
+       {
+@@ -156,7 +156,7 @@
+     "looks_like": "m107a1",
+     "type": "GUN",
+     "name": { "str": "single-shot .50-caliber rifle" },
+-    "description": "Relatively trim as far as .50-calibre rifles go, this single-shot firearm was a reasonably affordable entry-level gun for civilians wishing to play with some very large, very punchy toys.  Now, at the world's Armageddon, it would be wise to make that singular round-capacity count on some high-priority craniums.",
++    "description": "Relatively trim as far as .50-caliber rifles go, this single-shot firearm was a reasonably affordable entry-level gun for civilians wishing to play with some very large, very punchy toys.  Now, at the world's Armageddon, it would be wise to make that singular round-capacity count on some high-priority craniums.",
+     "variant_type": "gun",
+     "variants": [
+       {
+diff --git a/data/json/items/gun/545x39.json b/data/json/items/gun/545x39.json
+index 797300db84..b05a123cce 100644
+--- a/data/json/items/gun/545x39.json
++++ b/data/json/items/gun/545x39.json
+@@ -23,7 +23,7 @@
+     "volume": "2418 ml",
+     "longest_side": "895 mm",
+     "barrel_length": "413 mm",
+-    "//": "Based off of the Riley Defence RAK74-C and RAK74-C-SF, respectively.",
++    "//": "Based off of the Riley Defense RAK74-C and RAK74-C-SF, respectively.",
+     "price": "1 kUSD 115 USD",
+     "price_postapoc": "35 USD",
+     "to_hit": -1,
+diff --git a/data/json/items/magazine/filter.json b/data/json/items/magazine/filter.json
+index 4e6c3115a5..2a4182bf8a 100644
+--- a/data/json/items/magazine/filter.json
++++ b/data/json/items/magazine/filter.json
+@@ -22,7 +22,7 @@
+     "type": "MAGAZINE",
+     "category": "tool_magazine",
+     "name": { "str": "CBRN filter canister" },
+-    "description": "A cylindrical, black-finished filter canister packed with charcoal retained between dual particulate membranes, rated to protect against chemical weapons, nerve agents, biological contaminants, radioactive dust, and all manner of other unpleasant vapours or particles.  That is, though, only if you screw it into an appropriate respirator before hand and the charcoal isn't expired.",
++    "description": "A cylindrical, black-finished filter canister packed with charcoal retained between dual particulate membranes, rated to protect against chemical weapons, nerve agents, biological contaminants, radioactive dust, and all manner of other unpleasant vapors or particles.  That is, though, only if you screw it into an appropriate respirator before hand and the charcoal isn't expired.",
+     "weight": "365 g",
+     "volume": "910 ml",
+     "longest_side": "111 mm",
+diff --git a/data/json/mapgen_palettes/house_general_palette.json b/data/json/mapgen_palettes/house_general_palette.json
+index ead3c76bc1..9e51cfe991 100644
+--- a/data/json/mapgen_palettes/house_general_palette.json
++++ b/data/json/mapgen_palettes/house_general_palette.json
+@@ -515,7 +515,7 @@
+   {
+     "type": "palette",
+     "id": "standard_domestic_untidy_palette",
+-    "//": "A disorganised but clean variant of the standard_domestic_palette. Adds out-of-place item spawns, such as dining items on desks and laundry on the floor. Intended to be used in conjunction with standard_domestic_palette. Load the domestic palette first, then this one to overwrite certain common symbols with ones that generate an untidy look.  Symbols still open for use: ! $ % & _ = ~ - ? / , and more",
++    "//": "A disorganized but clean variant of the standard_domestic_palette. Adds out-of-place item spawns, such as dining items on desks and laundry on the floor. Intended to be used in conjunction with standard_domestic_palette. Load the domestic palette first, then this one to overwrite certain common symbols with ones that generate an untidy look.  Symbols still open for use: ! $ % & _ = ~ - ? / , and more",
+     "items": {
+       "f": [
+         { "item": "dishes_dining", "chance": 50, "repeat": [ 2, 3 ] },
+diff --git a/data/json/materials.json b/data/json/materials.json
+index 1ba0eb6af8..48b059c0e0 100644
+--- a/data/json/materials.json
++++ b/data/json/materials.json
+@@ -2257,7 +2257,7 @@
+     "specific_heat_solid": 0.52,
+     "latent_heat": 5200,
+     "chip_resist": 100,
+-    "dmg_adj": [ "resonating", "cascading", "unravelling", "fractal" ],
++    "dmg_adj": [ "resonating", "cascading", "unraveling", "fractal" ],
+     "bash_dmg_verb": "agitated",
+     "cut_dmg_verb": "agitated",
+     "resist": { "bash": 160, "cut": 200, "acid": 100, "heat": 100, "bullet": 160 }
+@@ -2271,7 +2271,7 @@
+     "specific_heat_solid": 0.52,
+     "latent_heat": 5200,
+     "chip_resist": 100,
+-    "dmg_adj": [ "resonating", "cascading", "unravelling", "fractal" ],
++    "dmg_adj": [ "resonating", "cascading", "unraveling", "fractal" ],
+     "bash_dmg_verb": "agitated",
+     "cut_dmg_verb": "agitated",
+     "burn_products": [ [ "pebble", 1 ] ],
+diff --git a/data/json/npcs/Kindred/NPC_Brigitte_LaCroix.json b/data/json/npcs/Kindred/NPC_Brigitte_LaCroix.json
+index 811949c875..7c034aeb2c 100644
+--- a/data/json/npcs/Kindred/NPC_Brigitte_LaCroix.json
++++ b/data/json/npcs/Kindred/NPC_Brigitte_LaCroix.json
+@@ -109,7 +109,7 @@
+         "no": { "gendered_line": "You're back.  Have you come to listen to the song?", "relevant_genders": [ "u" ] },
+         "yes": {
+           "u_has_trait": "seer_mark",
+-          "no": { "gendered_line": "Traveller.", "relevant_genders": [ "u" ] },
++          "no": { "gendered_line": "Traveler.", "relevant_genders": [ "u" ] },
+           "yes": { "u_female": true, "yes": "Greetings, sister.", "no": "Greetings, brother." }
+         }
+       }
+@@ -274,7 +274,7 @@
+     "type": "talk_topic",
+     "id": "TALK_BONE_SEER_POSITIVE",
+     "dynamic_line": {
+-      "gendered_line": "Your mind is open.  More than most.  Perhaps one day, you too will feel the power of the song and become Kindred.  For now, traveller, listen, listen and feel the song.",
++      "gendered_line": "Your mind is open.  More than most.  Perhaps one day, you too will feel the power of the song and become Kindred.  For now, traveler, listen, listen and feel the song.",
+       "relevant_genders": [ "u" ]
+     },
+     "responses": [ { "text": "I… thank you.", "topic": "TALK_BONE_SEER" } ]
+diff --git a/data/json/npcs/Kindred/NPC_Darren_Cooper.json b/data/json/npcs/Kindred/NPC_Darren_Cooper.json
+index 2bf13755b7..139247a2ac 100644
+--- a/data/json/npcs/Kindred/NPC_Darren_Cooper.json
++++ b/data/json/npcs/Kindred/NPC_Darren_Cooper.json
+@@ -106,7 +106,7 @@
+       },
+       "yes": {
+         "u_has_trait": "seer_mark",
+-        "no": { "u_has_var": "dialogue_cooper_cooper_friendly", "value": "yes", "yes": "Hello again, traveller.", "no": "Yes?" },
++        "no": { "u_has_var": "dialogue_cooper_cooper_friendly", "value": "yes", "yes": "Hello again, traveler.", "no": "Yes?" },
+         "yes": {
+           "u_has_var": "dialogue_cooper_cooper_friendly",
+           "value": "yes",
+@@ -166,7 +166,7 @@
+         }
+       },
+       {
+-        "text": "Just a traveller, trying to survive.  What about you?  Scavenging?",
++        "text": "Just a traveler, trying to survive.  What about you?  Scavenging?",
+         "topic": "TALK_COOPER_INTRODUCTION",
+         "condition": {
+           "and": [
+diff --git a/data/json/npcs/exodii/exodii_merchant_itemlist.json b/data/json/npcs/exodii/exodii_merchant_itemlist.json
+index 700e5057fd..4301074158 100644
+--- a/data/json/npcs/exodii/exodii_merchant_itemlist.json
++++ b/data/json/npcs/exodii/exodii_merchant_itemlist.json
+@@ -191,7 +191,7 @@
+   {
+     "type": "item_group",
+     "id": "EXODII_Shop_OldArmour",
+-    "//": "This stuff should be available in the Exodii store from the start.  Old Thessalonian armour the Exodii brought with them.",
++    "//": "This stuff should be available in the Exodii store from the start.  Old Thessalonian armor the Exodii brought with them.",
+     "//2": "Ideally, the spear should be sold as a spearhead and the player crafts it by getting their own pole.",
+     "subtype": "collection",
+     "items": [
+diff --git a/data/json/npcs/exodii/exodii_merchant_talk.json b/data/json/npcs/exodii/exodii_merchant_talk.json
+index f7afc4bd7f..c31979f9a0 100644
+--- a/data/json/npcs/exodii/exodii_merchant_talk.json
++++ b/data/json/npcs/exodii/exodii_merchant_talk.json
+@@ -269,7 +269,7 @@
+     "id": "TALK_EXODII_MERCHANT_Stock_Medieval",
+     "type": "talk_topic",
+     "dynamic_line": {
+-      "//~": "It's a bit of a surprise, isn't it?  Before we came here, we were in a place about 600 years earlier in time, or so.  We landed in the middle of a war that turned wrong when the dead started joining back in.  Truth be told, not a very unusual situation.  The Enemy makes us fight.  By and by, we came in, and by then the killing fields were ready for us to harvest their bronze.  It's no steel-of-the-lake, but it's a good strong metal for stopping a nibbling mouth, so we kept some of their armour and weapons to trade.",
++      "//~": "It's a bit of a surprise, isn't it?  Before we came here, we were in a place about 600 years earlier in time, or so.  We landed in the middle of a war that turned wrong when the dead started joining back in.  Truth be told, not a very unusual situation.  The Enemy makes us fight.  By and by, we came in, and by then the killing fields were ready for us to harvest their bronze.  It's no steel-of-the-lake, but it's a good strong metal for stopping a nibbling mouth, so we kept some of their armor and weapons to trade.",
+       "str": "That be a right welcher, eh?  Afore us'n were to this land, the preface were on a half-score century by the reckonin'.  Landed us in amidst of a war'd turned wrong, for an' as the dead had come back in.  By the butcher's block, not much an unusual case, really.  The Enemy makes us fight.  By an' by, we came in, an' by then the killin' fields were plump and ready to harvest the bronze.  'Tain't no steel-of-the-lake, but 'tis a good dross metal for holdin' off a nibblin' mouth, so we kept a few o' their vestments an' stickers for to trade."
+     },
+     "responses": [
+@@ -285,7 +285,7 @@
+     "id": "TALK_EXODII_MERCHANT_Stock_Nomad",
+     "type": "talk_topic",
+     "dynamic_line": {
+-      "//~": "Ah, you've got a discerning eye.  They're the result of many years of work.  We've been fighting the Enemy for a long time, and over the years we've worked out some armour for the job.  Keeps you going a bit longer in the field, if you ask me.  I keep some of the parts in stock, but you'll have to put it together yourself.",
++      "//~": "Ah, you've got a discerning eye.  They're the result of many years of work.  We've been fighting the Enemy for a long time, and over the years we've worked out some armor for the job.  Keeps you going a bit longer in the field, if you ask me.  I keep some of the parts in stock, but you'll have to put it together yourself.",
+       "str": "Ah, a real monger's eye, ye be.  Them's the mettle o' many a year of trials.  Us'n've been clashin wi' the Enemy for a long an' then, an' o'er the turns us've worked out some vestments for the job.  Keep's a walker walkin' longer, an I'm ken.  This'n keeps some o' the parst in an' around, but ye'd be tassed to make the vestment with the grease o' your own brow."
+     },
+     "responses": [
+@@ -300,7 +300,7 @@
+     "id": "TALK_EXODII_MERCHANT_Stock_Nomad2",
+     "type": "talk_topic",
+     "dynamic_line": {
+-      "//~": "This and that, you know.  It's made for a travelling scavenger, you see.  What I mean is, it's well suited to carry around whatever you pick up in the wastelands, without making it too hard to get around nor giving any easy handholds for scrambling arms.  That, and I'd say it's as tough as nails.",
++      "//~": "This and that, you know.  It's made for a traveling scavenger, you see.  What I mean is, it's well suited to carry around whatever you pick up in the wastelands, without making it too hard to get around nor giving any easy handholds for scrambling arms.  That, and I'd say it's as tough as nails.",
+       "str": "This 'n that, an I'm ken.  It be made for a fine wander, beladen with the goods o' the hunt, y'see.  By which I'm to say, 'tis well suited to carry all ye can wrest from the cold arms o' the deadlands, without troublin' your gait nor makin' it easy for the cold clutch o' the scrabblin' arm.  Be an' it is tough as a tarket's nut, I'd razz."
+     },
+     "responses": [
+@@ -1254,7 +1254,7 @@
+     "//": "The probes don't return variable is not yet used but we should store it for when players might be offered the option to try going to previous deadlands, so they can object if they want.",
+     "responses": [
+       {
+-        "text": "So travelling off-world is definitely an option.  Or getting to the ISS, maybe stepping off from there.",
++        "text": "So traveling off-world is definitely an option.  Or getting to the ISS, maybe stepping off from there.",
+         "topic": "TALK_EXODII_MERCHANT_Talk_CataclysmTimeline3"
+       },
+       {
+diff --git a/data/json/npcs/isherwood_farm/NPC_Eddie_Isherwood.json b/data/json/npcs/isherwood_farm/NPC_Eddie_Isherwood.json
+index 87908e2d55..6baf300a23 100644
+--- a/data/json/npcs/isherwood_farm/NPC_Eddie_Isherwood.json
++++ b/data/json/npcs/isherwood_farm/NPC_Eddie_Isherwood.json
+@@ -149,7 +149,7 @@
+     },
+     "responses": [
+       {
+-        "text": "<color_green>[Social 3]</color> I swear, I'm not here to cause trouble.  I just volunteer with those guys to help travellers, things like that.  I don't speak for them.",
++        "text": "<color_green>[Social 3]</color> I swear, I'm not here to cause trouble.  I just volunteer with those guys to help travelers, things like that.  I don't speak for them.",
+         "topic": "TALK_ISHERWOOD_EDDIE_MarshalOff_Convince",
+         "condition": { "and": [ { "not": { "u_is_wearing": "badge_marshal" } }, { "math": [ "u_skill('speech')", ">=", "3" ] } ] }
+       },
+diff --git a/data/json/npcs/refugee_center/surface_refugees/NPC_Boris_Borichenko.json b/data/json/npcs/refugee_center/surface_refugees/NPC_Boris_Borichenko.json
+index d4ca1fcf46..e2e5aff11e 100644
+--- a/data/json/npcs/refugee_center/surface_refugees/NPC_Boris_Borichenko.json
++++ b/data/json/npcs/refugee_center/surface_refugees/NPC_Boris_Borichenko.json
+@@ -435,8 +435,8 @@
+     "type": "talk_topic",
+     "id": "TALK_REFUGEE_Boris_ReadLaptop2",
+     "dynamic_line": [
+-      "&Boris boots up the laptop and opens a folder labelled 'ART'.  He shows you simple digital paintings, clearly done by an adolescent.  There's nothing terribly remarkable about them except the number: Ash was a prolific creator.  Boris goes through several, proudly showing how his son learned little lighting tricks, or reminiscing on the time his son showed him the art.  After a while, he stops commenting and just continues quietly clicking through photos.  He seems different in the glow of the screen, like several years dropped away from his face, despite the deep sadness still etched there.",
+-      "&Boris boots up the laptop and opens a folder labelled 'STORY 1'.  In it are numerous text files containing smatterings of stream-of-conscious notes, copy-and-pasted bits of fanfictions, notes about how to write a novel, and more.  The story itself is a handful of poorly fleshed out chapters written with the quality level you'd expect from a grade schooler.  Nonetheless it's quite impressive that there's this much stuff on a single topic.  Boris talks for a while about dinner conversations for weeks that would focus on Ash's ideas for his stories.  After a while, he trails off and just continues flipping through the files, reading silently.",
++      "&Boris boots up the laptop and opens a folder labeled 'ART'.  He shows you simple digital paintings, clearly done by an adolescent.  There's nothing terribly remarkable about them except the number: Ash was a prolific creator.  Boris goes through several, proudly showing how his son learned little lighting tricks, or reminiscing on the time his son showed him the art.  After a while, he stops commenting and just continues quietly clicking through photos.  He seems different in the glow of the screen, like several years dropped away from his face, despite the deep sadness still etched there.",
++      "&Boris boots up the laptop and opens a folder labeled 'STORY 1'.  In it are numerous text files containing smatterings of stream-of-conscious notes, copy-and-pasted bits of fanfictions, notes about how to write a novel, and more.  The story itself is a handful of poorly fleshed out chapters written with the quality level you'd expect from a grade schooler.  Nonetheless it's quite impressive that there's this much stuff on a single topic.  Boris talks for a while about dinner conversations for weeks that would focus on Ash's ideas for his stories.  After a while, he trails off and just continues flipping through the files, reading silently.",
+       "&Boris boots up the laptop and opens the videos folder.  He shows you several self-made videos that follow a loose blog style, of an awkward young man talking about his favorite games, interspersed with comments about art and writing.  Boris comments on little events and laughs a few times, before becoming engrossed in his reminiscence."
+     ],
+     "//": "I would like a specialized effect here that reduces the 'guilty about killing' morale penalty while also adding a small morale penalty of its own.",
+diff --git a/data/json/npcs/refugee_center/surface_visitors/NPC_visiting_scavenger.json b/data/json/npcs/refugee_center/surface_visitors/NPC_visiting_scavenger.json
+index 6b3c5600f5..95628680b5 100644
+--- a/data/json/npcs/refugee_center/surface_visitors/NPC_visiting_scavenger.json
++++ b/data/json/npcs/refugee_center/surface_visitors/NPC_visiting_scavenger.json
+@@ -41,7 +41,7 @@
+     },
+     "responses": [
+       {
+-        "text": "You looking for a travelling companion?  I could use someone to watch my back.",
++        "text": "You looking for a traveling companion?  I could use someone to watch my back.",
+         "topic": "TALK_RC_SURVIVOR_Join"
+       },
+       { "text": "You seen anything interesting out there?", "topic": "TALK_RC_SURVIVOR_Tips" },
+diff --git a/data/json/npcs/talk_tags.json b/data/json/npcs/talk_tags.json
+index d97ffb91cc..cc139748de 100644
+--- a/data/json/npcs/talk_tags.json
++++ b/data/json/npcs/talk_tags.json
+@@ -11,7 +11,7 @@
+       "Spiiiraals!",
+       "Ha!  Spirals.",
+       "Spi…rals.  <spirals>",
+-      "Spiralling spirals.",
++      "Spiraling spirals.",
+       "Hmm, spirals.",
+       "Ah!  Spirals.",
+       "Uhh… Spirals?",
+diff --git a/data/json/recipes/armor/torso.json b/data/json/recipes/armor/torso.json
+index 6558bdd4a4..4599729600 100644
+--- a/data/json/recipes/armor/torso.json
++++ b/data/json/recipes/armor/torso.json
+@@ -291,7 +291,7 @@
+     "//1": "Average ichcahuipilli was around 1 inch (~2.5 cm) thick. As cotton padding constituted the majority of its protective qualities, I'll consider the quilted part 0.5 cm thick.",
+     "//2": "This leaves us with 20 layers of cotton sheets, taking the thickness of a cotton sheet as 0.25 mm.",
+     "//3": "Average length of a human male is around 170 cm. Average weight of a human (in North America) is 80 kg. BSA calculation and rule of the nines gives us about 0,68 m^2 or 7,3 sq feet.",
+-    "//3.5": "I'll round that down to 7 for ease, as well as compensating for average woman being shorter and thinner and americans being exceptionally fat.",
++    "//3.5": "I'll round that down to 7 for ease, as well as compensating for average woman being shorter and thinner and Americans being exceptionally fat.",
+     "//4": "Our cotton sheets are 1x2 feet. 20 layers x 7 sq ft / 2 sq ft of the sheets = 70 sheets. I know the outer layer of quilting would require more sheets because of the padding inbetween but I won't bother doing the maths for it",
+     "//5": "Cotton padding inbetween would make 0.065 ft (2 cm of cotton) x 7 sq ft of torso = 0,455 cube ft which is about 12,88 liters of cotton. Once again this calculation is off but again, I can't do the maths.",
+     "//5.5": "That's about… a lot of cotton, 1288 patches or 429 balls or 257 sheets to be precise. Byproducts I made up.",
+diff --git a/data/json/snippets/e_logs.json b/data/json/snippets/e_logs.json
+index 20279bd4cb..2305ab2c32 100644
+--- a/data/json/snippets/e_logs.json
++++ b/data/json/snippets/e_logs.json
+@@ -38,7 +38,7 @@
+       },
+       {
+         "id": "local_files_simple_9",
+-        "text": "An image of a man labelled \"Trends this year\" is gawking at a woman labelled \"Prepping\".  An obviously jealous girlfriend right next to him is labelled \"Hoverboarding\"."
++        "text": "An image of a man labeled \"Trends this year\" is gawking at a woman labeled \"Prepping\".  An obviously jealous girlfriend right next to him is labeled \"Hoverboarding\"."
+       },
+       {
+         "id": "local_files_simple_10",
+diff --git a/data/json/snippets/home_pictures.json b/data/json/snippets/home_pictures.json
+index 0a0f667f6e..45ab361b14 100644
+--- a/data/json/snippets/home_pictures.json
++++ b/data/json/snippets/home_pictures.json
+@@ -38,7 +38,7 @@
+       },
+       {
+         "id": "home_picture_9",
+-        "text": "A smiling young woman wearing a band t-shirt is in the driver seat of a car, with an older man sitting in the passenger seat next to her, sweating profusely.  Written in colorful sharpie at the bottom of the frame is, 'Dad teaching me how to drive a manual for my drivers licence'."
++        "text": "A smiling young woman wearing a band t-shirt is in the driver seat of a car, with an older man sitting in the passenger seat next to her, sweating profusely.  Written in colorful sharpie at the bottom of the frame is, 'Dad teaching me how to drive a manual for my drivers license'."
+       },
+       {
+         "id": "home_picture_10",
+diff --git a/data/json/snippets/lab.json b/data/json/snippets/lab.json
+index 57146348d1..4b8b51c00a 100644
+--- a/data/json/snippets/lab.json
++++ b/data/json/snippets/lab.json
+@@ -17,7 +17,7 @@
+       },
+       {
+         "id": "mutant_kid_boss_4",
+-        "text": "A faded crayon drawing on the back of a bureaucratic form.  It shows a small child sitting on a chair surrounded by many adults.  Most of them are only indistinct blobs of white and black, but a single figure stands out by being lovingly colored - and labelled with a large \"T\".",
++        "text": "A faded crayon drawing on the back of a bureaucratic form.  It shows a small child sitting on a chair surrounded by many adults.  Most of them are only indistinct blobs of white and black, but a single figure stands out by being lovingly colored - and labeled with a large \"T\".",
+         "//": "TODO: when descriptions allow nesting snippets replace with a random monogram."
+       },
+       {
+diff --git a/data/json/snippets/missing_posters.json b/data/json/snippets/missing_posters.json
+index 54a378029d..d16c6d94aa 100644
+--- a/data/json/snippets/missing_posters.json
++++ b/data/json/snippets/missing_posters.json
+@@ -27,7 +27,7 @@
+       {
+         "id": "male_4",
+         "text": {
+-          "str": "MISSING\nCan you help?\n\nClarence Richards\n\n[Photograph: a middle-aged man in orange fishing overalls holding a large bass with both hands.]\n\nDate of Birth: April 21, 1978\nAge: 44 years old\nSex: male\nRace: black\nEyes: brown\nHair: short, black\nHeight: 5'8\"\nWeight: 166 lbs\nWearing: black long sleeve shirt, winter camo pants, red bucket hat, white running shoes\nIdentifying Characteristics: scar on forehead\n\nLAST SEEN:\nMissing person, Clarence Richards, was last seen on May 7 around 12 am on Leverton Road, Springfield.  Mr. Richards was last seen driving a gray 2017 Honda Civic with a Massachusetts Licence Plate number of 218 B31.\n\nIF YOU HAVE ANY INFORMATION ABOUT CLARENCE PLEASE CONTACT:\n781-555-0799",
++          "str": "MISSING\nCan you help?\n\nClarence Richards\n\n[Photograph: a middle-aged man in orange fishing overalls holding a large bass with both hands.]\n\nDate of Birth: April 21, 1978\nAge: 44 years old\nSex: male\nRace: black\nEyes: brown\nHair: short, black\nHeight: 5'8\"\nWeight: 166 lbs\nWearing: black long sleeve shirt, winter camo pants, red bucket hat, white running shoes\nIdentifying Characteristics: scar on forehead\n\nLAST SEEN:\nMissing person, Clarence Richards, was last seen on May 7 around 12 am on Leverton Road, Springfield.  Mr. Richards was last seen driving a gray 2017 Honda Civic with a Massachusetts License Plate number of 218 B31.\n\nIF YOU HAVE ANY INFORMATION ABOUT CLARENCE PLEASE CONTACT:\n781-555-0799",
+           "//~": "Please replace the fictitious phone number with one of your local equivalent when translating"
+         }
+       },
+diff --git a/data/json/statistics.json b/data/json/statistics.json
+index 7ecb1cc226..72c4d2a0ab 100644
+--- a/data/json/statistics.json
++++ b/data/json/statistics.json
+@@ -415,7 +415,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_veh_onboard",
+-    "description": { "str": "square travelled on board vehicles", "str_pl": "squares travelled on board vehicles" }
++    "description": { "str": "square traveled on board vehicles", "str_pl": "squares traveled on board vehicles" }
+   },
+   {
+     "id": "min_move_veh_onboard_z",
+@@ -445,7 +445,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_veh_ctrl_direct",
+-    "description": { "str": "square travelled while controlling vehicle", "str_pl": "squares travelled while controlling vehicle" }
++    "description": { "str": "square traveled while controlling vehicle", "str_pl": "squares traveled while controlling vehicle" }
+   },
+   {
+     "id": "moves_veh_ctrl_remote",
+@@ -474,8 +474,8 @@
+     "stat_type": "count",
+     "event_transformation": "moves_veh_onboard_ctrl_remote",
+     "description": {
+-      "str": "square travelled on board remote controlled vehicle",
+-      "str_pl": "squares travelled on board remote controlled vehicle"
++      "str": "square traveled on board remote controlled vehicle",
++      "str_pl": "squares traveled on board remote controlled vehicle"
+     }
+   },
+   {
+@@ -490,7 +490,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_veh_onboard_ctrl_none",
+-    "description": { "str": "square travelled as vehicle passenger", "str_pl": "squares travelled as vehicle passenger" }
++    "description": { "str": "square traveled as vehicle passenger", "str_pl": "squares traveled as vehicle passenger" }
+   },
+   {
+     "id": "moves_acft_onboard",
+@@ -504,7 +504,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_acft_onboard",
+-    "description": { "str": "square travelled on board aircraft", "str_pl": "squares travelled on board aircraft" }
++    "description": { "str": "square traveled on board aircraft", "str_pl": "squares traveled on board aircraft" }
+   },
+   {
+     "id": "moves_acft_ctrl_direct",
+@@ -518,7 +518,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_acft_ctrl_direct",
+-    "description": { "str": "square travelled while piloting aircraft", "str_pl": "squares travelled while piloting aircraft" }
++    "description": { "str": "square traveled while piloting aircraft", "str_pl": "squares traveled while piloting aircraft" }
+   },
+   {
+     "id": "max_velocity_acft",
+@@ -548,7 +548,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_boat_onboard",
+-    "description": { "str": "square travelled on board watercraft", "str_pl": "squares travelled on board watercraft" }
++    "description": { "str": "square traveled on board watercraft", "str_pl": "squares traveled on board watercraft" }
+   },
+   {
+     "id": "moves_boat_ctrl_direct",
+@@ -562,7 +562,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_boat_ctrl_direct",
+-    "description": { "str": "square travelled while sailing watercraft", "str_pl": "squares travelled while sailing watercraft" }
++    "description": { "str": "square traveled while sailing watercraft", "str_pl": "squares traveled while sailing watercraft" }
+   },
+   {
+     "id": "max_velocity_boat",
+@@ -584,7 +584,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_rail_onboard",
+-    "description": { "str": "square travelled on board rail vehicles", "str_pl": "squares travelled on board rail vehicles" }
++    "description": { "str": "square traveled on board rail vehicles", "str_pl": "squares traveled on board rail vehicles" }
+   },
+   {
+     "id": "moves_rail_ctrl_direct",
+@@ -598,7 +598,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_rail_ctrl_direct",
+-    "description": { "str": "square travelled while driving rail vehicles", "str_pl": "squares travelled while driving rail vehicles" }
++    "description": { "str": "square traveled while driving rail vehicles", "str_pl": "squares traveled while driving rail vehicles" }
+   },
+   {
+     "id": "max_velocity_rail",
+@@ -624,7 +624,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_gndv_onboard",
+-    "description": { "str": "square travelled on board land vehicles", "str_pl": "squares travelled on board land vehicles" }
++    "description": { "str": "square traveled on board land vehicles", "str_pl": "squares traveled on board land vehicles" }
+   },
+   {
+     "id": "moves_gndv_ctrl_direct",
+@@ -642,7 +642,7 @@
+     "type": "event_statistic",
+     "stat_type": "count",
+     "event_transformation": "moves_gndv_ctrl_direct",
+-    "description": { "str": "square travelled while driving land vehicles", "str_pl": "squares travelled while driving land vehicles" }
++    "description": { "str": "square traveled while driving land vehicles", "str_pl": "squares traveled while driving land vehicles" }
+   },
+   {
+     "id": "max_velocity_gndv",
+diff --git a/data/mods/Aftershock/items/armor/exosuit/exosuit_manual.json b/data/mods/Aftershock/items/armor/exosuit/exosuit_manual.json
+index 2f7ce1a0c2..0809700314 100644
+--- a/data/mods/Aftershock/items/armor/exosuit/exosuit_manual.json
++++ b/data/mods/Aftershock/items/armor/exosuit/exosuit_manual.json
+@@ -5,7 +5,7 @@
+     "text": [
+       {
+         "id": "exosuit_guide_introduction",
+-        "text": "\"Welcome to your Exosuit Piloting and Maintenance Manual.  This manual will walk you through the basic operations of an exosuit.  Before proceeding, please ensure you have completed the UCIA Exosuit Piloting course.  Any operation without a valid UCIA Exosuit Pilot Licence is considered a violation of safety standards.  <this is followed by twenty pages of disclaimers>\""
++        "text": "\"Welcome to your Exosuit Piloting and Maintenance Manual.  This manual will walk you through the basic operations of an exosuit.  Before proceeding, please ensure you have completed the UCIA Exosuit Piloting course.  Any operation without a valid UCIA Exosuit Pilot License is considered a violation of safety standards.  <this is followed by twenty pages of disclaimers>\""
+       },
+       {
+         "id": "exosuit_guide_underlayer",
+diff --git a/data/mods/Defense_Mode/effects_on_condition/wave_eocs.json b/data/mods/Defense_Mode/effects_on_condition/wave_eocs.json
+index 3b1f4a1142..8e1c2b6ad9 100644
+--- a/data/mods/Defense_Mode/effects_on_condition/wave_eocs.json
++++ b/data/mods/Defense_Mode/effects_on_condition/wave_eocs.json
+@@ -200,7 +200,7 @@
+         "max_radius": 40
+       },
+       {
+-        "u_message": "Squeaking and chittering can be heard nearby, with the pattering of many feet, like a swarm of rats travelling quickly.  However, this sounds more, organized?  Almost like they're all walking in formation.",
++        "u_message": "Squeaking and chittering can be heard nearby, with the pattering of many feet, like a swarm of rats traveling quickly.  However, this sounds more, organized?  Almost like they're all walking in formation.",
+         "type": "bad",
+         "popup": true
+       }
+diff --git a/data/mods/classic_zombies/monsters/weakpoints.json b/data/mods/classic_zombies/monsters/weakpoints.json
+index a9092c7190..a85fbccdc2 100644
+--- a/data/mods/classic_zombies/monsters/weakpoints.json
++++ b/data/mods/classic_zombies/monsters/weakpoints.json
+@@ -484,7 +484,7 @@
+       {
+         "id": "head_coup",
+         "name": "the head",
+-        "//": "If a zombie is downed, it's way easier to get a headshot.  The armour still applies though.",
++        "//": "If a zombie is downed, it's way easier to get a headshot.  The armor still applies though.",
+         "coverage": 25,
+         "crit_mult": { "all": 1.5 },
+         "difficulty": { "ranged": 7 },
+diff --git a/doc/USER_INTERFACE_AND_ACCESSIBILITY.md b/doc/USER_INTERFACE_AND_ACCESSIBILITY.md
+index b621e717ec..1a864348cc 100644
+--- a/doc/USER_INTERFACE_AND_ACCESSIBILITY.md
++++ b/doc/USER_INTERFACE_AND_ACCESSIBILITY.md
+@@ -143,7 +143,7 @@ XStrength: 9
+ The screen reader will start reading at "weak" even though that's above the
+ terminal cursor.
+ 
+-Behaviour like this means that screen readers struggle with certain common UI
++Behavior like this means that screen readers struggle with certain common UI
+ layouts.  Some examples are listed below.  Examples of how to implement theses
+ changes can be found in `src/newcharacter.cpp`.
+ 
+-- 
+2.45.2
+

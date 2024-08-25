@@ -1,0 +1,26 @@
+From 91f20e9c99d55e3eb23a4ce93059dac1dd652816 Mon Sep 17 00:00:00 2001
+From: George Kightly <kightlygeorge@gmail.com>
+Date: Fri, 23 Aug 2024 10:03:15 +0100
+Subject: [PATCH 110/125] Prevent automatic assignment of invlets to passive
+ mutations
+
+---
+ src/mutation_ui.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mutation_ui.cpp b/src/mutation_ui.cpp
+index 6b63ddd20c..a41e7f1eae 100644
+--- a/src/mutation_ui.cpp
++++ b/src/mutation_ui.cpp
+@@ -110,7 +110,7 @@ void avatar::power_mutations()
+         // New mutations are initialized with no key at all, so we have to do this here.
+         if( mut.second.key == ' ' ) {
+             for( const char &letter : mutation_chars ) {
+-                if( trait_by_invlet( letter ).is_null() ) {
++                if( trait_by_invlet( letter ).is_null() && mut.first->activated ) {
+                     mut.second.key = letter;
+                     break;
+                 }
+-- 
+2.45.2
+

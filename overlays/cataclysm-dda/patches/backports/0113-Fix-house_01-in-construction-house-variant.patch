@@ -1,0 +1,29 @@
+From 2343846209228288d10f6b59a8885f3c9fd9a07a Mon Sep 17 00:00:00 2001
+From: HadeanLake <HadeanLake@i.ua>
+Date: Fri, 23 Aug 2024 15:50:24 +0300
+Subject: [PATCH 113/125] Fix house_01 in-construction house - variant
+
+---
+ data/json/mapgen/house/house01.json | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/data/json/mapgen/house/house01.json b/data/json/mapgen/house/house01.json
+index 15c81fd7c7..7ca000fa7c 100644
+--- a/data/json/mapgen/house/house01.json
++++ b/data/json/mapgen/house/house01.json
+@@ -75,9 +75,9 @@
+     "object": {
+       "fill_ter": "t_floor",
+       "rows": [
+-        "...::::::M..............",
+-        "...::::::cccccc.........",
+-        "...::::::CC.CCcCC..CC...",
++        "...ccccccM..............",
++        "...cccccccccccc.........",
++        "...ccccccCC.CCcCC..CC...",
+         ".C#``````##o##*##oo##...",
+         ".C#``````|X,,|,|,,,,#...",
+         ".C#``````|,,,|,+,,,,o...",
+-- 
+2.45.2
+

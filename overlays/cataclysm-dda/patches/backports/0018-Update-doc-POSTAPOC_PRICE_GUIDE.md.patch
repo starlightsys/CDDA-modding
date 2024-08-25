@@ -1,0 +1,25 @@
+From bc04596c700e0b3d2ca916ae78eef5d5dea7b092 Mon Sep 17 00:00:00 2001
+From: Kevin Granade <kevin.granade@gmail.com>
+Date: Fri, 14 Jan 2022 10:38:11 -0800
+Subject: [PATCH 018/125] Update doc/POSTAPOC_PRICE_GUIDE.md
+
+---
+ doc/POSTAPOC_PRICE_GUIDE.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/doc/POSTAPOC_PRICE_GUIDE.md b/doc/POSTAPOC_PRICE_GUIDE.md
+index 27ccfe887a..9826ebb28f 100644
+--- a/doc/POSTAPOC_PRICE_GUIDE.md
++++ b/doc/POSTAPOC_PRICE_GUIDE.md
+@@ -104,7 +104,7 @@ pretty much the most anyone will be willing to spend on any one thing, no matter
+ ```
+ 
+ #### Food pricing
+-Food is priced mostly for a combination of calories, how perservable they are, and how nutritious they are.
++Food is priced mostly for a combination of calories, how preservable they are, and how nutritious they are.
+ 
+ Meat jerky is 250.
+ 
+-- 
+2.45.2
+

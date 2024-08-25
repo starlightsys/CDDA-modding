@@ -1,0 +1,25 @@
+From bdc42355786e2778465e78ce3a658d5c50fc5db2 Mon Sep 17 00:00:00 2001
+From: Son Phan Trung <phantrungson17@gmail.com>
+Date: Thu, 15 Aug 2024 17:28:44 +0700
+Subject: [PATCH 024/125] Make debug Mjollnir unbreakable
+
+---
+ data/json/items/melee/bludgeons.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/json/items/melee/bludgeons.json b/data/json/items/melee/bludgeons.json
+index cf8b3750e1..d3694967ba 100644
+--- a/data/json/items/melee/bludgeons.json
++++ b/data/json/items/melee/bludgeons.json
+@@ -1513,7 +1513,7 @@
+     "symbol": "/",
+     "material": [ "wood", "steel" ],
+     "techniques": [ "WBLOCK_1", "BRUTAL", "WIDE", "SWEEP" ],
+-    "flags": [ "NONCONDUCTIVE" ],
++    "flags": [ "NONCONDUCTIVE", "UNBREAKABLE_MELEE" ],
+     "volume": "2500 ml",
+     "longest_side": "60 cm",
+     "to_hit": { "grip": "solid", "length": "short", "surface": "any", "balance": "neutral" },
+-- 
+2.45.2
+

@@ -1,0 +1,84 @@
+From 36ce511ea945c9daf5b3d4727520d748be7e2a12 Mon Sep 17 00:00:00 2001
+From: ZhilkinSerg <ZhilkinSerg@users.noreply.github.com>
+Date: Wed, 17 Jun 2020 22:23:14 +0300
+Subject: [PATCH 013/125] Apply suggestions from code review
+
+---
+ data/mods/Aftershock/mobs/robots.json          | 2 +-
+ data/mods/Generic_Guns/robots/active_bots.json | 6 +++---
+ data/mods/Magiclysm/items/archery.json         | 2 +-
+ data/mods/TEST_DATA/metal.json                 | 2 +-
+ 4 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/data/mods/Aftershock/mobs/robots.json b/data/mods/Aftershock/mobs/robots.json
+index d1ae8961b9..5111c55bd2 100644
+--- a/data/mods/Aftershock/mobs/robots.json
++++ b/data/mods/Aftershock/mobs/robots.json
+@@ -225,7 +225,7 @@
+         "type": "gun",
+         "cooldown": 1,
+         "gun_type": "rm451_flamethrower",
+-        "ammo_type": [ "napalm" ],
++        "ammo_type": "napalm",
+         "fake_skills": [ [ "gun", 4 ], [ "launcher", 5 ] ],
+         "fake_dex": 10,
+         "no_ammo_sound": "hiss!",
+diff --git a/data/mods/Generic_Guns/robots/active_bots.json b/data/mods/Generic_Guns/robots/active_bots.json
+index 0498e6d412..b33eedcc0d 100644
+--- a/data/mods/Generic_Guns/robots/active_bots.json
++++ b/data/mods/Generic_Guns/robots/active_bots.json
+@@ -70,7 +70,7 @@
+         "cooldown": 1,
+         "move_cost": 150,
+         "gun_type": "rifle_lmg",
+-        "ammo_type": [ "rifle_ball" ],
++        "ammo_type": "rifle_ball",
+         "fake_skills": [ [ "gun", 8 ], [ "rifle", 8 ] ],
+         "fake_dex": 12,
+         "ranges": [ [ 0, 60, "DEFAULT" ] ],
+@@ -104,7 +104,7 @@
+         "cooldown": 1,
+         "move_cost": 150,
+         "gun_type": "rifle_assault",
+-        "ammo_type": [ "rifle_ball" ],
++        "ammo_type": "rifle_ball",
+         "fake_skills": [ [ "gun", 8 ], [ "rifle", 8 ] ],
+         "fake_dex": 12,
+         "ranges": [ [ 0, 30, "DEFAULT" ] ],
+@@ -133,7 +133,7 @@
+         "cooldown": 1,
+         "move_cost": 150,
+         "gun_type": "grenade_revolver",
+-        "ammo_type": [ "grenade_ammo_hedp" ],
++        "ammo_type": "grenade_ammo_hedp",
+         "fake_skills": [ [ "gun", 8 ], [ "launcher", 8 ] ],
+         "fake_dex": 12,
+         "ranges": [ [ 0, 20, "DEFAULT" ] ],
+diff --git a/data/mods/Magiclysm/items/archery.json b/data/mods/Magiclysm/items/archery.json
+index 58b87b53cc..6a14bbb4fd 100644
+--- a/data/mods/Magiclysm/items/archery.json
++++ b/data/mods/Magiclysm/items/archery.json
+@@ -64,7 +64,7 @@
+     "looks_like": "arrow_fire_hardened_fletched",
+     "description": "An arrow composed of a sliver of orichalcum.  The arrow has a mysterious glow.  Has a very high chance of staying intact when fired, however can only be fired from Ichaival.",
+     "material": [ "wood", "orichalcum_metal" ],
+-    "ammo_type": [ "arrow_orichalcum" ],
++    "ammo_type": "arrow_orichalcum",
+     "volume": "145 ml",
+     "weight": "30 g",
+     "damage": { "damage_type": "stab", "constant_damage_multiplier": 1.95, "armor_penetration": 20 },
+diff --git a/data/mods/TEST_DATA/metal.json b/data/mods/TEST_DATA/metal.json
+index 7b65b85416..8ebe194fc6 100644
+--- a/data/mods/TEST_DATA/metal.json
++++ b/data/mods/TEST_DATA/metal.json
+@@ -15,6 +15,6 @@
+     "material": [ "platinum" ],
+     "symbol": "/",
+     "color": "light_gray",
+-    "ammo_type": [ "components" ]
++    "ammo_type": "components"
+   }
+ ]
+-- 
+2.45.2
+

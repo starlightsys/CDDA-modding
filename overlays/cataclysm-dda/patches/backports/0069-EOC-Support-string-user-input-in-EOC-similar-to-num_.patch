@@ -1,0 +1,218 @@
+From f4f641968f55b2f2c99839850341fe303217b239 Mon Sep 17 00:00:00 2001
+From: Pipeyume <81861009+PipeYume@users.noreply.github.com>
+Date: Mon, 19 Aug 2024 06:52:37 +0800
+Subject: [PATCH 069/125] [EOC] Support string user input in EOC (similar to
+ num_input in `math`) (#75675)
+
+* Support user-input string in EOC
+
+* Update EFFECT_ON_CONDITION.md
+
+* fix a bug
+
+* clang-tidy
+
+* Update EFFECT_ON_CONDITION.md
+---
+ doc/EFFECT_ON_CONDITION.md              | 30 +++++++++++++++++++++++
+ lang/string_extractor/parsers/effect.py | 16 +++++++++++++
+ src/npctalk.cpp                         | 32 ++++++++++++++++++++++++-
+ src/string_input_popup.cpp              | 23 ++++++++++++++++++
+ src/string_input_popup.h                | 11 ++++++++-
+ 5 files changed, 110 insertions(+), 2 deletions(-)
+
+diff --git a/doc/EFFECT_ON_CONDITION.md b/doc/EFFECT_ON_CONDITION.md
+index deb782c559..2707366100 100644
+--- a/doc/EFFECT_ON_CONDITION.md
++++ b/doc/EFFECT_ON_CONDITION.md
+@@ -2942,7 +2942,17 @@ Store string from `set_string_var` in the variable object `target_var`
+ | "target_var" | **mandatory** | [variable object](##variable-object) | variable, that accept the value; usually `context_val` | 
+ | "parse_tags" | optional | boolean | Allo if parse [custom entries](NPCs.md#customizing-npc-speech) in string before storing | 
+ | "i18n"       | optional | boolean | Whether the string values should be localized | 
++| "string_input" | optional | object | Accepts user input. When using `string_input`, the user will input a string and assign it to `target_var`. If the input is canceled, the value in `set_string_var` will be assigned as the default value. See details in the table below. |
+ 
++##### String Input Details
++
++| Property | Optionality | Type | Description |
++| --- | --- | --- | --- |
++| "title" | **mandatory** | string, [variable object](##variable-object) | The title of the input popup window, can be localized (e.g., `"title": { "i18n": true, "str": "Input a value:" }`). |
++| "description" | **mandatory** | string, [variable object](##variable-object) | The description of the input popup window, can be localized. |
++| "width" | optional | integer | The character length of the input box. Default is 20. |
++| "identifier" | optional | string | Input boxes with the same identifier share input history. Default is `""`. |
++| "only_digits" | optional | boolean | Whether the input is purely numeric. Default is false. |
+ 
+ ##### Valid talkers:
+ 
+@@ -2974,6 +2984,26 @@ Concatenate string of variable `foo` and `bar`
+ { "set_string_var": "<global_val:foo><global_val:bar>", "target_var": { "global_val": "new" }, "parse_tags": true }
+ ```
+ 
++Get the user input
++```json
++{
++  "id": "EOC_string_input_test",
++  "type": "effect_on_condition",
++  "effect": [
++    {
++      "set_string_var": "",
++      "string_input": {
++        "title": { "i18n": true, "str": "Input a value:" },
++        "description": { "i18n": true, "str": "Just say something" },
++        "width": 30
++      },
++      "target_var": { "context_val": "str" }
++    },
++    { "u_message": "You said: <context_val:str>" }
++  ]
++}
++```
++
+ 
+ #### `set_condition`
+ Create a context value with condition, that you can pass down the next topic or EoC, using `get_condition`. Used, if you need to have dozens of EoCs, and you don't want to copy-paste it's conditions every time (also it's easier to maintain or edit one condition, comparing to two dozens)
+diff --git a/lang/string_extractor/parsers/effect.py b/lang/string_extractor/parsers/effect.py
+index e60ea89dcd..01448e82fe 100644
+--- a/lang/string_extractor/parsers/effect.py
++++ b/lang/string_extractor/parsers/effect.py
+@@ -71,6 +71,22 @@ def parse_effect(effects, origin, comment=""):
+                     write_translation_or_var(val, origin,
+                                              comment="Text variable value in "
+                                              "{}".format(comment))
++            if "set_string_var" in eff and "string_input" in eff:
++                string_input = eff["string_input"]
++                if "title" in string_input:
++                    write_translation_or_var(
++                        string_input["title"],
++                        origin,
++                        comment="String input window's title in {}"
++                        .format(comment)
++                    )
++                if "description" in string_input:
++                    write_translation_or_var(
++                        string_input["description"],
++                        origin,
++                        comment="String input window's description in {}"
++                        .format(comment)
++                    )
+             if ("u_spawn_monster" in eff or "npc_spawn_monster" in eff or
+                     "u_spawn_npc" in eff or "npc_spawn_npc" in eff):
+                 if "u_spawn_monster" in eff or "npc_spawn_monster" in eff:
+diff --git a/src/npctalk.cpp b/src/npctalk.cpp
+index 0707bc9ceb..018be822b3 100644
+--- a/src/npctalk.cpp
++++ b/src/npctalk.cpp
+@@ -4717,6 +4717,12 @@ talk_effect_fun_t::func f_set_string_var( const JsonObject &jo, std::string_view
+         const std::string_view )
+ {
+     const bool i18n = jo.get_bool( "i18n", false );
++    std::optional<string_input_params> input_params;
++    if( jo.has_object( "string_input" ) ) {
++        JsonObject input_obj = jo.get_object( "string_input" );
++        input_params = string_input_params::parse_string_input_params( input_obj );
++    }
++
+     std::vector<str_or_var> str_vals;
+     std::vector<translation_or_var> i18n_vals;
+     if( jo.has_array( member ) ) {
+@@ -4736,9 +4742,33 @@ talk_effect_fun_t::func f_set_string_var( const JsonObject &jo, std::string_view
+     }
+     bool parse = jo.get_bool( "parse_tags", false );
+     var_info var = read_var_info( jo.get_member( "target_var" ) );
+-    return [i18n, str_vals, i18n_vals, var, parse]( dialogue & d ) {
++    return [i18n, input_params, str_vals, i18n_vals, var, parse]( dialogue & d ) {
+         int index = rng( 0, ( i18n ? i18n_vals.size() : str_vals.size() ) - 1 );
+         std::string str = i18n ? i18n_vals[index].evaluate( d ) : str_vals[index].evaluate( d );
++
++        if( input_params.has_value() ) {
++            string_input_popup popup;
++            popup
++            .title( input_params.value().title.evaluate( d ) )
++            .description( input_params.value().description.evaluate( d ) )
++            .width( input_params.value().width )
++            .identifier( input_params.value().identifier );
++
++            if( input_params.value().only_digits ) {
++                int num_temp;
++                popup.edit( num_temp );
++                if( !popup.canceled() ) {
++                    str = std::to_string( num_temp );
++                }
++            } else {
++                std::string str_temp;
++                popup.edit( str_temp );
++                if( !popup.canceled() ) {
++                    str = str_temp;
++                }
++            }
++        }
++
+         if( parse ) {
+             std::unique_ptr<talker> default_talker = get_talker_for( get_player_character() );
+             talker &alpha = d.has_alpha ? *d.actor( false ) : *default_talker;
+diff --git a/src/string_input_popup.cpp b/src/string_input_popup.cpp
+index d75c95ddbb..ea1044b41e 100644
+--- a/src/string_input_popup.cpp
++++ b/src/string_input_popup.cpp
+@@ -684,3 +684,26 @@ void string_input_popup::add_callback( int input, const std::function<bool()> &c
+ {
+     callbacks.emplace_back( "", input, callback_func );
+ }
++
++string_input_params string_input_params::parse_string_input_params( const JsonObject &jo )
++{
++    string_input_params p;
++    if( jo.has_member( "title" ) ) {
++        const JsonValue &jv_title = jo.get_member( "title" );
++        p.title = get_str_translation_or_var( jv_title, "" );
++    }
++    if( jo.has_member( "description" ) ) {
++        const JsonValue &jv_description = jo.get_member( "description" );
++        p.description = get_str_translation_or_var( jv_description, "" );
++    }
++    if( jo.has_int( "width" ) ) {
++        p.width = jo.get_int( "width" );
++    }
++    if( jo.has_string( "identifier" ) ) {
++        p.identifier = jo.get_string( "identifier" );
++    }
++    if( jo.has_bool( "only_digits" ) ) {
++        p.only_digits = jo.get_bool( "only_digits" );
++    }
++    return p;
++}
+diff --git a/src/string_input_popup.h b/src/string_input_popup.h
+index c606f35668..c6bc22dec1 100644
+--- a/src/string_input_popup.h
++++ b/src/string_input_popup.h
+@@ -12,13 +12,14 @@
+ 
+ #include "color.h"
+ #include "cursesdef.h"
++#include "condition.h"
+ 
+ class input_context;
+ class scrolling_text_view;
+ class ui_adaptor;
+ class utf8_wrapper;
+ struct point;
+-
++class JsonObject;
+ /**
+  * Shows a window querying the user for input.
+  *
+@@ -292,4 +293,12 @@ class string_input_popup // NOLINT(cata-xy)
+         std::vector<std::pair<std::string, translation>> custom_actions;
+ };
+ 
++struct string_input_params {
++    str_translation_or_var title;
++    str_translation_or_var description;
++    int width = 20;
++    std::string identifier;
++    bool only_digits = false;
++    static string_input_params parse_string_input_params( const JsonObject &jo );
++};
+ #endif // CATA_SRC_STRING_INPUT_POPUP_H
+-- 
+2.45.2
+

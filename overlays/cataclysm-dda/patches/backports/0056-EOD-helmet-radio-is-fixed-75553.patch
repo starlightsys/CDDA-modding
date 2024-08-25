@@ -1,0 +1,36 @@
+From fdafe4756d17719ddfe7730f1ddd27ce5c82f643 Mon Sep 17 00:00:00 2001
+From: Maleclypse <54345792+Maleclypse@users.noreply.github.com>
+Date: Sun, 18 Aug 2024 17:20:45 -0500
+Subject: [PATCH 056/125]  EOD helmet radio is fixed (#75553)
+
+* Bionic still doesn't work but the EOD helmet is fixed
+
+* Update data/json/bionics.json
+---
+ data/json/items/tool_armor.json | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/data/json/items/tool_armor.json b/data/json/items/tool_armor.json
+index 826c17af2a..469d46421b 100644
+--- a/data/json/items/tool_armor.json
++++ b/data/json/items/tool_armor.json
+@@ -1329,14 +1329,14 @@
+       "need_charges": 1,
+       "need_charges_msg": "\"Illumination disabled, low power.\""
+     },
+-    "flags": [ "STURDY", "OUTER", "RAINPROOF", "PADDED", "TWO_WAY_RADIO", "WATCH", "ALARMCLOCK" ]
++    "flags": [ "STURDY", "OUTER", "RAINPROOF", "PADDED", "WATCH", "ALARMCLOCK" ]
+   },
+   {
+     "id": "helmet_eod_on",
+     "type": "TOOL_ARMOR",
+     "copy-from": "helmet_eod",
+     "name": { "str": "EOD helmet (on)", "str_pl": "EOD helmets (on)" },
+-    "extend": { "flags": [ "LIGHT_350", "CHARGEDIM", "TRADER_AVOID" ] },
++    "extend": { "flags": [ "LIGHT_350", "CHARGEDIM", "TRADER_AVOID", "TWO_WAY_RADIO" ] },
+     "power_draw": "10 W",
+     "revert_to": "helmet_eod",
+     "use_action": { "type": "transform", "menu_text": "Turn off headlamps", "msg": "\"Disabling illumination.\"", "target": "helmet_eod" }
+-- 
+2.45.2
+

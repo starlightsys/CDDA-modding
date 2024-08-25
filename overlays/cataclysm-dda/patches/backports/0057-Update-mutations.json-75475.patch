@@ -1,0 +1,27 @@
+From 2f2c3c59ed9882063c28ccf7f4d0d78e492eeb20 Mon Sep 17 00:00:00 2001
+From: Maleclypse <54345792+Maleclypse@users.noreply.github.com>
+Date: Sun, 18 Aug 2024 17:21:11 -0500
+Subject: [PATCH 057/125] Update mutations.json (#75475)
+
+Update mutations.json
+---
+ data/mods/Xedra_Evolved/mutations/mutations.json | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/data/mods/Xedra_Evolved/mutations/mutations.json b/data/mods/Xedra_Evolved/mutations/mutations.json
+index 725d11d58e..ddb75f3b57 100644
+--- a/data/mods/Xedra_Evolved/mutations/mutations.json
++++ b/data/mods/Xedra_Evolved/mutations/mutations.json
+@@ -25,7 +25,8 @@
+     "type": "mutation",
+     "id": "DREAMLESS",
+     "name": { "str": "Dreamless" },
+-    "points": 0,
++    "points": -1,
++    "starting_trait": true,
+     "valid": false,
+     "description": "You live firmly in reality and never experience extremely vivid dreams about choices that have real world consequences.  ( You will be unable to gain Dream magicks from sleeping after strange events)"
+   },
+-- 
+2.45.2
+

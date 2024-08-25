@@ -1,0 +1,24 @@
+From 6ca3bfa01875c231996bc2b0d7727e69c1e6a3a8 Mon Sep 17 00:00:00 2001
+From: Termineitor244 <termineitor244@hotmail.com>
+Date: Thu, 15 Aug 2024 01:37:03 -0600
+Subject: [PATCH 026/125] Espadrilles are not armor
+
+---
+ data/json/items/armor/boots.json | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/data/json/items/armor/boots.json b/data/json/items/armor/boots.json
+index fafc60172f..0cbc99a7b7 100644
+--- a/data/json/items/armor/boots.json
++++ b/data/json/items/armor/boots.json
+@@ -3370,7 +3370,6 @@
+   },
+   {
+     "id": "espadrilles",
+-    "category": "armor",
+     "type": "ARMOR",
+     "name": { "str_sp": "espadrilles" },
+     "description": "Originating from the Pyrenees and made from a rope sole and cloth, these shoes are perfect for the hot weather, sipping Sangria and dodging tourists.",
+-- 
+2.45.2
+

@@ -1,0 +1,1700 @@
+From b1bb3bcba45e3d03211fb7677df71f5bbed08e2c Mon Sep 17 00:00:00 2001
+From: Standing-Storm <120433252+Standing-Storm@users.noreply.github.com>
+Date: Wed, 21 Aug 2024 22:27:13 -0500
+Subject: [PATCH 089/125] [MoM] Convert Lifting Hand to power, give
+ Telekinetics a new passive (#75816)
+
+* Initial commit
+
+* Finish upgrade EoCs, update professions
+
+* Add learning EoC
+
+* Add lifting field to possible vehicle lift prereqs
+
+* Add power JSON
+
+* Add concentration EoCs
+
+* Add lifting field effect
+
+* Add contemplation recipe
+
+* Obsolete old Lifting Field recipe
+
+* Add recipe fallback EoC
+
+* Remove old lifting field recipe references
+
+* Remove old lifting field recipe
+
+* Remove old Lifting Field handling
+
+* Linting
+
+* Further fixes
+
+* Update passive description
+
+* Adjust passive power
+
+* Correct spoiler power duration
+
+* fix spelling
+---
+ .../PowerDescriptionSpoilers.md               |  13 +-
+ .../effectoncondition/eoc_awakening.json      |   4 +-
+ .../effectoncondition/eoc_learn_recipes.json  |  11 +-
+ .../effectoncondition/eoc_mutations.json      | 287 ---------------
+ .../effectoncondition/eoc_power_effects.json  |   2 +
+ .../effects/effects_psionic.json              |  10 +
+ data/mods/MindOverMatter/hobbies.json         |   7 +-
+ .../mutations/psi_passives.json               | 336 +-----------------
+ .../MindOverMatter/mutations/temporary.json   | 330 +++++++++++++++++
+ .../MindOverMatter/obsolete/mutations.json    |  29 ++
+ .../recipes.json}                             |   6 +-
+ .../powers/learning_eocs/telekinesis.json     |  47 ++-
+ .../MindOverMatter/powers/telekinesis.json    |  40 ++-
+ .../powers/telekinesis_concentration_eoc.json | 143 +++++++-
+ data/mods/MindOverMatter/professions.json     |   2 +-
+ .../practice/telekinesis_practice.json        |  86 +++++
+ 16 files changed, 727 insertions(+), 626 deletions(-)
+ create mode 100644 data/mods/MindOverMatter/obsolete/mutations.json
+ rename data/mods/MindOverMatter/{recipes/power_improvements.json => obsolete/recipes.json} (52%)
+
+diff --git a/data/mods/MindOverMatter/PowerDescriptionSpoilers.md b/data/mods/MindOverMatter/PowerDescriptionSpoilers.md
+index 81f10bdee7..6c398d7939 100644
+--- a/data/mods/MindOverMatter/PowerDescriptionSpoilers.md
++++ b/data/mods/MindOverMatter/PowerDescriptionSpoilers.md
+@@ -735,7 +735,7 @@ Powers causing photokinetic damage have a 40% chance to blind the target for 3 s
+ 
+ # Telekinesis
+ 
+-**Passive Power: Lifting Hand**: The telekinetic may carry a single item next to them in a field of telekinetic force. The item's weight increases proportional to their total levels in their telekinetic powers, increasing by one rank per 8 total telekinetic levels, though they must use the recipe Contemplate Lifting Field to increase it.
++**Passive Power: Grasping Hand**: The telekinetic may bring items quickly to hand, reducing the time necessary to pull items from pockets or containers by 10%, plus 0.075% times the telekinetic's total levels in telekinesis powers.
+ 
+ Powers causing telekinetic damage have a 40% chance to stagger the target for 2 seconds and a 20% chance to down the target. Each of these is checked independently.
+ 
+@@ -802,6 +802,15 @@ Powers causing telekinetic damage have a 40% chance to stagger the target for 2
+ *Effects*: Unleash an indiscriminate wave of force, knocking back everything nearby by 2 to 6 squares, plus 1 square per 10 power levels to 1 square per four power levels. This power affects item and allies as well as enemies.<br />
+ *Prerequisites*: Force Shove 7, Knockdown 4 <br />
+ 
++## Lifting Field (C)
++*Difficulty*: 4<br />
++*Target*: Self<br />
++*Duration*: From 8 minutes and 14 seconds to 27 minutes and 54 seconds, plus 1 minute and 33 seconds to 4 minutes and 19 seconds per power level<br />
++*Stamina Cost*: 4500, minus 100 per level to a minimum of 2000<br />
++*Channeling Time*: 200 moves, minus 6.5 moves per level to a minimum of 55<br />
++*Effects*: Create a field to float a single object next to the psion, keeping it close at hand and preventing its weight or encumbrance from affecting them. The weight limit increases at each level of the power; there is no volume or length limit.<br />
++*Prerequisites*: Lift Vehicle 3 *or* Far Hand 7 AND Momentum Alteration 5<br />
++
+ ## Enhance Strength (C)
+ *Difficulty*: 5<br />
+ *Target*: Self<br />
+@@ -827,7 +836,7 @@ Powers causing telekinetic damage have a 40% chance to stagger the target for 2
+ *Stamina Cost*: 6500, minus 200 per level to a minimum of 3250<br />
+ *Channeling Time*: 250 moves, minus 8 moves per level to a minimum of 125<br />
+ *Effects*: Create a field to lift up a vehicle just enough to work on the wheels or undercarriage. This field requires more intense concentration and cannot be sustained in combat.<br />
+-*Prerequisites*: Enhance Strength 10 *or* Far Hand 8 AND Slowfall 8<br />
++*Prerequisites*: Enhance Strength 10 *or* Far Hand 8 AND Slowfall 8 *or* Lifting Field 12<br />
+ 
+ ## Inertial Barrier (C)
+ *Difficulty*: 6<br />
+diff --git a/data/mods/MindOverMatter/effectoncondition/eoc_awakening.json b/data/mods/MindOverMatter/effectoncondition/eoc_awakening.json
+index a497477ec8..58d9c91413 100644
+--- a/data/mods/MindOverMatter/effectoncondition/eoc_awakening.json
++++ b/data/mods/MindOverMatter/effectoncondition/eoc_awakening.json
+@@ -355,7 +355,7 @@
+         "popup": true
+       },
+       { "u_add_trait": "TELEKINETIC" },
+-      { "u_add_trait": "TELEKINETIC_LIFTER_1" },
++      { "u_add_trait": "TELEKINETIC_GRAB_POCKETS" },
+       { "u_add_effect": "effect_telekinetic_armor", "duration": "1 minutes" },
+       { "run_eocs": "EOC_TEACH_TELEKIN_CONTEMPLATE_RECIPES" },
+       { "math": [ "u_awakening_countup", "+=", "1" ] },
+@@ -879,7 +879,7 @@
+         "popup": true
+       },
+       { "u_add_trait": "TELEKINETIC" },
+-      { "u_add_trait": "TELEKINETIC_LIFTER_1" },
++      { "u_add_trait": "TELEKINETIC_GRAB_POCKETS" },
+       { "run_eocs": "EOC_TEACH_TELEKIN_CONTEMPLATE_RECIPES" },
+       { "u_add_effect": "psionic_awakened", "duration": { "math": [ "ps_str * time(' 2 h')" ] } },
+       { "math": [ "u_awakening_countup", "+=", "1" ] },
+diff --git a/data/mods/MindOverMatter/effectoncondition/eoc_learn_recipes.json b/data/mods/MindOverMatter/effectoncondition/eoc_learn_recipes.json
+index 05a6101c44..08a39b78aa 100644
+--- a/data/mods/MindOverMatter/effectoncondition/eoc_learn_recipes.json
++++ b/data/mods/MindOverMatter/effectoncondition/eoc_learn_recipes.json
+@@ -692,6 +692,7 @@
+           "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_MOMENTUM",
+           "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_SLOWFALL",
+           "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_WAVE",
++          "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_LIFTING_FIELD",
+           "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_STRENGTH",
+           "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_HAMMER",
+           "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_VEHICLE_LIFT",
+@@ -708,13 +709,13 @@
+     "type": "effect_on_condition",
+     "id": "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_PUSH",
+     "condition": { "and": [ { "u_has_trait": "TELEKINETIC" }, { "math": [ "u_spell_level('telekinetic_push')", ">=", "0" ] } ] },
+-    "effect": [ { "u_learn_recipe": "practice_telekinetic_push" }, { "u_learn_recipe": "improve_telekinesis_lifting_field" } ]
++    "effect": [ { "u_learn_recipe": "practice_telekinetic_push" } ]
+   },
+   {
+     "type": "effect_on_condition",
+     "id": "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_PULL",
+     "condition": { "and": [ { "u_has_trait": "TELEKINETIC" }, { "math": [ "u_spell_level('telekinetic_pull')", ">=", "0" ] } ] },
+-    "effect": [ { "u_learn_recipe": "practice_telekinetic_pull" }, { "u_learn_recipe": "improve_telekinesis_lifting_field" } ]
++    "effect": [ { "u_learn_recipe": "practice_telekinetic_pull" } ]
+   },
+   {
+     "type": "effect_on_condition",
+@@ -740,6 +741,12 @@
+     "condition": { "and": [ { "u_has_trait": "TELEKINETIC" }, { "math": [ "u_spell_level('telekinetic_wave')", ">=", "0" ] } ] },
+     "effect": [ { "u_learn_recipe": "practice_telekinetic_wave" } ]
+   },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_LIFTING_FIELD",
++    "condition": { "and": [ { "u_has_trait": "TELEKINETIC" }, { "math": [ "u_spell_level('telekinetic_lifting_field')", ">=", "0" ] } ] },
++    "effect": [ { "u_learn_recipe": "practice_telekinetic_lifting_field" } ]
++  },
+   {
+     "type": "effect_on_condition",
+     "id": "EOC_CHECK_GAMEBEGIN_TELEKIN_RECIPE_STRENGTH",
+diff --git a/data/mods/MindOverMatter/effectoncondition/eoc_mutations.json b/data/mods/MindOverMatter/effectoncondition/eoc_mutations.json
+index 06e8d3c9d4..026b9827b7 100644
+--- a/data/mods/MindOverMatter/effectoncondition/eoc_mutations.json
++++ b/data/mods/MindOverMatter/effectoncondition/eoc_mutations.json
+@@ -1,291 +1,4 @@
+ [
+-  {
+-    "type": "effect_on_condition",
+-    "id": "EOC_TELEKINETIC_LIFTER",
+-    "condition": { "u_has_trait": "TELEKINETIC" },
+-    "effect": {
+-      "switch": { "math": [ "u_spell_level_sum('school': 'TELEKINETIC') / 8" ] },
+-      "cases": [
+-        {
+-          "case": 0,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_1" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 1,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_2" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 2,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_3" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 3,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_4" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 4,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_5" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 5,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_6" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 6,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_7" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 7,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_8" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 8,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_9" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 9,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_10" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 10,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_11" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 11,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_12" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 12,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_13" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 13,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_14" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 14,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_15" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 15,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_16" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 16,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_17" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 17,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_18" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 18,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_19" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 19,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_20" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 20,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_21" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 21,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_22" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 22,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_23" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 23,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_24" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 24,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_25" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 25,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_26" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 26,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_27" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 27,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_28" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 28,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_29" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        },
+-        {
+-          "case": 29,
+-          "effect": [
+-            { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" },
+-            { "u_add_trait": "TELEKINETIC_LIFTER_30" },
+-            { "u_message": "You meditate on your lifting field.", "type": "good" }
+-          ]
+-        }
+-      ]
+-    }
+-  },
+-  {
+-    "type": "effect_on_condition",
+-    "id": "EOC_TELEKIN_REMOVE_LIFTING_FIELD",
+-    "condition": { "u_has_trait": "TELEKINETIC" },
+-    "effect": [
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_30" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_29" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_28" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_27" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_26" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_25" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_24" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_23" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_22" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_21" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_20" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_19" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_18" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_17" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_16" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_15" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_14" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_13" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_12" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_11" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_10" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_9" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_8" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_7" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_6" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_5" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_4" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_3" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_2" },
+-      { "u_lose_trait": "TELEKINETIC_LIFTER_1" }
+-    ]
+-  },
+   {
+     "type": "effect_on_condition",
+     "id": "EOC_PSI_EXTENDED_CHANNELING_ON",
+diff --git a/data/mods/MindOverMatter/effectoncondition/eoc_power_effects.json b/data/mods/MindOverMatter/effectoncondition/eoc_power_effects.json
+index b30609e314..ddb2d4619e 100644
+--- a/data/mods/MindOverMatter/effectoncondition/eoc_power_effects.json
++++ b/data/mods/MindOverMatter/effectoncondition/eoc_power_effects.json
+@@ -274,6 +274,7 @@
+           "EOC_PYRO_REMOVE_TORCH_WELD",
+           "EOC_PYROKIN_REMOVE_FLAME_IMMUNITY",
+           "EOC_TELEKIN_REMOVE_MOMENTUM",
++          "EOC_TELEKIN_REMOVE_LIFTING_FIELD",
+           "EOC_TELEKIN_REMOVE_TELEKINETIC_STRENGTH",
+           "EOC_TELEKIN_REMOVE_SHIELD",
+           "EOC_TELEKIN_REMOVE_JACKING_TOOL",
+@@ -353,6 +354,7 @@
+           "EOC_PYRO_REMOVE_TORCH_WELD",
+           "EOC_PYROKIN_REMOVE_FLAME_IMMUNITY",
+           "EOC_TELEKIN_REMOVE_MOMENTUM",
++          "EOC_TELEKIN_REMOVE_LIFTING_FIELD",
+           "EOC_TELEKIN_REMOVE_TELEKINETIC_STRENGTH",
+           "EOC_TELEKIN_REMOVE_SHIELD",
+           "EOC_TELEKIN_REMOVE_JACKING_TOOL",
+diff --git a/data/mods/MindOverMatter/effects/effects_psionic.json b/data/mods/MindOverMatter/effects/effects_psionic.json
+index 13e97fa0e2..3b2e99d878 100644
+--- a/data/mods/MindOverMatter/effects/effects_psionic.json
++++ b/data/mods/MindOverMatter/effects/effects_psionic.json
+@@ -1443,6 +1443,16 @@
+     "limb_score_mods": [ { "limb_score": "swim", "modifier": 3.0 } ],
+     "flags": [ "EFFECT_LIMB_SCORE_MOD" ]
+   },
++  {
++    "type": "effect_type",
++    "id": "effect_telekinetic_lifting_field",
++    "name": [ "Lifting Field" ],
++    "desc": [ "You can hover a single item nearby, at the ready." ],
++    "apply_message": "",
++    "remove_message": "Your lifting field dissipates.",
++    "rating": "good",
++    "max_duration": "7 days"
++  },
+   {
+     "type": "effect_type",
+     "id": "effect_telekinetic_strength",
+diff --git a/data/mods/MindOverMatter/hobbies.json b/data/mods/MindOverMatter/hobbies.json
+index 51e65d3f30..66c6201775 100644
+--- a/data/mods/MindOverMatter/hobbies.json
++++ b/data/mods/MindOverMatter/hobbies.json
+@@ -301,7 +301,7 @@
+     "name": "Newly-Awakened Telekinetic",
+     "description": "Something happened during the storms that raged during the Cataclysm, and now you can do things that would have once seemed impossible.  You can lift things with your mind.  Mostly just small things, but during the chaos a group of rioters jumped you and you hurled them off of you just by thinking about it.  This will definitely come in handy.",
+     "points": 4,
+-    "traits": [ "TELEKINETIC", "TELEKINETIC_LIFTER_1" ]
++    "traits": [ "TELEKINETIC", "TELEKINETIC_GRAB_POCKETS" ]
+   },
+   {
+     "type": "profession",
+@@ -310,7 +310,7 @@
+     "name": "Arising Telekinetic",
+     "description": "Something happened during the storms that raged during the Cataclysm, and now you can do things that would have once seemed impossible.  Moving things at a distance is child's play.  You can pick up zombies and fling them away from you, shatter doors with a thought, and jump from the fifth story and land with barely a bruise.  Nothing is going to get close to you now.",
+     "points": 8,
+-    "traits": [ "TELEKINETIC", "TELEKINETIC_LIFTER_9" ],
++    "traits": [ "TELEKINETIC", "TELEKINETIC_GRAB_POCKETS" ],
+     "skills": [ { "level": 6, "name": "metaphysics" } ],
+     "spells": [
+       { "id": "telekinetic_push", "level": 8 },
+@@ -329,7 +329,7 @@
+     "name": "Ascended Telekinetic",
+     "description": "Something happened during the storms that raged during the Cataclysm, and now you can do things that would have once seemed impossible.  One ton cars lift off the ground with merely a thought, bullets bounce off the air before they hit you, and you can smash whole groups of zombies to paste in seconds.  You can even fly from rooftop to rooftop, preventing gravity from affecting you by sheer force of will.",
+     "points": 12,
+-    "traits": [ "TELEKINETIC", "TELEKINETIC_LIFTER_10" ],
++    "traits": [ "TELEKINETIC", "TELEKINETIC_GRAB_POCKETS" ],
+     "skills": [ { "level": 11, "name": "metaphysics" } ],
+     "spells": [
+       { "id": "telekinetic_push", "level": 11 },
+@@ -338,6 +338,7 @@
+       { "id": "telekinetic_momentum", "level": 10 },
+       { "id": "telekinetic_slowfall", "level": 8 },
+       { "id": "telekinetic_wave", "level": 10 },
++      { "id": "telekinetic_lifting_field", "level": 7 },
+       { "id": "telekinetic_strength", "level": 5 },
+       { "id": "telekinetic_hammer", "level": 8 },
+       { "id": "telekinetic_vehicle_lift", "level": 6 },
+diff --git a/data/mods/MindOverMatter/mutations/psi_passives.json b/data/mods/MindOverMatter/mutations/psi_passives.json
+index e2ca49fcd6..dc14c96b8b 100644
+--- a/data/mods/MindOverMatter/mutations/psi_passives.json
++++ b/data/mods/MindOverMatter/mutations/psi_passives.json
+@@ -130,333 +130,23 @@
+   },
+   {
+     "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_1",
+-    "name": { "str": "Lifting Hand" },
++    "id": "TELEKINETIC_GRAB_POCKETS",
++    "name": { "str": "Grasping Hand" },
+     "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_1" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_2",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_2" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_3",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_3" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_4",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_4" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_5",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_5" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_6",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_6" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_7",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_7" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_8",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_8" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_9",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
++    "description": "Thanks to a minor application of telekinesis, the items you want to grab are always quick to hand.",
+     "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_9" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_10",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+     "valid": false,
+-    "player_display": true,
+     "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_10" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_11",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_11" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_12",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_12" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_13",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_13" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_14",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_14" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_15",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_15" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_16",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_16" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_17",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_17" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_18",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_18" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_19",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_19" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_20",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_20" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_21",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_21" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_22",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_22" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_23",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_23" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_24",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_24" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_25",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_25" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_26",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_26" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_27",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_27" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_28",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_28" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_29",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_29" ]
+-  },
+-  {
+-    "type": "mutation",
+-    "id": "TELEKINETIC_LIFTER_30",
+-    "name": { "str": "Lifting Hand" },
+-    "points": 0,
+-    "description": "With a modicum of concentration you can carry a single item with your powers.  As your powers increase, you may meditate on it to expand its capacity.",
+-    "valid": false,
+-    "player_display": true,
+-    "purifiable": false,
+-    "integrated_armor": [ "telekinetic_container_30" ]
++    "enchantments": [
++      {
++        "values": [
++          {
++            "value": "OBTAIN_COST_MULTIPLIER",
++            "multiply": { "math": [ "-0.1 + (u_spell_level_sum('school': 'TELEKINETIC') * -0.00075)" ] }
++          }
++        ]
++      }
++    ]
+   },
+   {
+     "type": "mutation",
+diff --git a/data/mods/MindOverMatter/mutations/temporary.json b/data/mods/MindOverMatter/mutations/temporary.json
+index 698ad31bef..b3a8f98af9 100644
+--- a/data/mods/MindOverMatter/mutations/temporary.json
++++ b/data/mods/MindOverMatter/mutations/temporary.json
+@@ -293,6 +293,336 @@
+     "player_display": false,
+     "valid": false
+   },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_1",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_1" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_2",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_2" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_3",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_3" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_4",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_4" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_5",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_5" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_6",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_6" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_7",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_7" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_8",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_8" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_9",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_9" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_10",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_10" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_11",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_11" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_12",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_12" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_13",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_13" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_14",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_14" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_15",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_15" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_16",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_16" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_17",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_17" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_18",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_18" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_19",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_19" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_20",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_20" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_21",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_21" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_22",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_22" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_23",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_23" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_24",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_24" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_25",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_25" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_26",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_26" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_27",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_27" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_28",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_28" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_29",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_29" ]
++  },
++  {
++    "type": "mutation",
++    "id": "TELEKINETIC_LIFTER_30",
++    "name": { "str": "Lifting Hand" },
++    "points": 0,
++    "description": "With a modicum of concentration you can carry a single item with your powers.",
++    "valid": false,
++    "player_display": true,
++    "purifiable": false,
++    "integrated_armor": [ "telekinetic_container_30" ]
++  },
+   {
+     "id": "TELELIXIRDOWN",
+     "type": "mutation",
+diff --git a/data/mods/MindOverMatter/obsolete/mutations.json b/data/mods/MindOverMatter/obsolete/mutations.json
+new file mode 100644
+index 0000000000..d12a443836
+--- /dev/null
++++ b/data/mods/MindOverMatter/obsolete/mutations.json
+@@ -0,0 +1,29 @@
++[
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_MOM_GAMESTART_TELEKINESIS_LIFTING_FIELD_UPDATE",
++    "eoc_type": "EVENT",
++    "required_event": "game_start",
++    "effect": [ { "math": [ "u_telekinesis_lifting_field_updated", "=", "1" ] } ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_MOM_GAMELOAD_TELEKINESIS_LIFTING_FIELD_UPDATE_TELEKINETIC",
++    "eoc_type": "EVENT",
++    "required_event": "game_load",
++    "condition": { "and": [ { "u_has_trait": "TELEKINETIC" }, { "math": [ "u_telekinesis_lifting_field_updated", "!=", "1" ] } ] },
++    "effect": [
++      { "run_eocs": "EOC_TELEKIN_LIFTING_FIELD_SWITCHER_REMOVE" },
++      { "u_add_trait": "TELEKINETIC_GRAB_POCKETS" },
++      { "u_forget_recipe": "improve_telekinesis_lifting_field" },
++      { "u_learn_recipe": "practice_telekinetic_lifting_field" },
++      {
++        "u_message": "Your Lifting Field has been updated to a power.  You now know the contemplation recipe and have an appropriate level of field for your previous prowess in the ability.",
++        "popup": true
++      },
++      {
++        "math": [ "u_spell_level('telekinetic_lifting_field')", "=", "(u_spell_level_sum('school': 'TELEKINETIC') / 8) + 1" ]
++      }
++    ]
++  }
++]
+diff --git a/data/mods/MindOverMatter/recipes/power_improvements.json b/data/mods/MindOverMatter/obsolete/recipes.json
+similarity index 52%
+rename from data/mods/MindOverMatter/recipes/power_improvements.json
+rename to data/mods/MindOverMatter/obsolete/recipes.json
+index 09987c7f2a..366468aa12 100644
+--- a/data/mods/MindOverMatter/recipes/power_improvements.json
++++ b/data/mods/MindOverMatter/obsolete/recipes.json
+@@ -4,17 +4,17 @@
+     "activity_level": "LIGHT_EXERCISE",
+     "name": "contemplation: lifting field",
+     "id": "improve_telekinesis_lifting_field",
+-    "description": "WARNING: DO NOT USE IF YOUR LIFTING FIELD CONTAINS ANYTHING.\n\nContemplate your powers and update your ability to carry objects for long periods of time to a level commensurate with your overall telekinetic mastery.  The capability of your lifting field is based on your total levels in telekinetic powers.\n\nWARNING: DO NOT USE IF YOUR LIFTING FIELD CONTAINS ANYTHING.",
++    "description": "This recipe is Obsolete and does nothing.",
+     "category": "CC_PSIONIC",
+     "subcategory": "CSC_PSIONIC_OTHER",
+     "skill_used": "metaphysics",
+     "difficulty": 0,
+-    "time": "1 h",
++    "time": "0 s",
+     "autolearn": false,
+     "tools": [
+       [ [ "matrix_crystal_drained", -1 ], [ "black_nether_crystal_pseudo_tool", -1 ], [ "matrix_crystal_telekinesis", -1 ] ]
+     ],
+     "flags": [ "SECRET", "BLIND_EASY" ],
+-    "result_eocs": [ "EOC_TELEKINETIC_LIFTER" ]
++    "result_eocs": [ "EOC_NULL" ]
+   }
+ ]
+diff --git a/data/mods/MindOverMatter/powers/learning_eocs/telekinesis.json b/data/mods/MindOverMatter/powers/learning_eocs/telekinesis.json
+index 30b218ecad..bc2d43b1e3 100644
+--- a/data/mods/MindOverMatter/powers/learning_eocs/telekinesis.json
++++ b/data/mods/MindOverMatter/powers/learning_eocs/telekinesis.json
+@@ -176,6 +176,50 @@
+       }
+     ]
+   },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEKIN_LEARNING_LIFTING_FIELD",
++    "recurrence": [
++      { "math": [ "jmath_telekinesis_learning_eocs_modifiers(global_tier_two_power_learning_time_low)" ] },
++      { "math": [ "jmath_telekinesis_learning_eocs_modifiers(global_tier_two_power_learning_time_high)" ] }
++    ],
++    "condition": {
++      "and": [
++        { "u_has_trait": "TELEKINETIC" },
++        { "math": [ "u_vitamin('vitamin_psi_learning_counter')", "==", "1" ] },
++        {
++          "or": [
++            { "test_eoc": "EOC_CONDITION_ODDS_OF_RANDOM_TIER_TWO_POWER_INSIGHT" },
++            {
++              "or": [
++                { "math": [ "u_spell_level('telekinetic_vehicle_lift')", ">=", "3" ] },
++                {
++                  "and": [
++                    { "math": [ "u_spell_level('telekinetic_pull')", ">=", "7" ] },
++                    { "math": [ "u_spell_level('telekinetic_momentum')", ">=", "5" ] }
++                  ]
++                }
++              ]
++            }
++          ]
++        },
++        { "test_eoc": "EOC_PSI_LEARNING_BANNED_EFFECTS" },
++        { "math": [ "u_spell_level('telekinetic_lifting_field')", "<=", "0" ] },
++        { "not": { "u_know_recipe": "practice_telekinetic_lifting_field" } }
++      ]
++    },
++    "deactivate_condition": {
++      "or": [ { "not": { "u_has_trait": "TELEKINETIC" } }, { "math": [ "u_spell_level('telekinetic_lifting_field')", ">=", "1" ] } ]
++    },
++    "effect": [
++      { "math": [ "u_vitamin('vitamin_psi_learning_counter')", "=", "0" ] },
++      { "u_learn_recipe": "practice_telekinetic_lifting_field" },
++      {
++        "u_message": "Use of your powers has led to an insight.  You could hold a single object in place, carrying it next to you without using your hands, if you can figure out the proper technique.",
++        "popup": true
++      }
++    ]
++  },
+   {
+     "type": "effect_on_condition",
+     "id": "EOC_TELEKIN_LEARNING_STRENGTH",
+@@ -286,7 +330,8 @@
+                     { "math": [ "u_spell_level('telekinetic_slowfall')", ">=", "8" ] }
+                   ]
+                 },
+-                { "math": [ "u_spell_level('telekinetic_strength')", ">=", "10" ] }
++                { "math": [ "u_spell_level('telekinetic_strength')", ">=", "10" ] },
++                { "math": [ "u_spell_level(' telekinetic_lifting_field')", ">=", "12" ] }
+               ]
+             }
+           ]
+diff --git a/data/mods/MindOverMatter/powers/telekinesis.json b/data/mods/MindOverMatter/powers/telekinesis.json
+index a8ad7797b0..d4ae98b479 100644
+--- a/data/mods/MindOverMatter/powers/telekinesis.json
++++ b/data/mods/MindOverMatter/powers/telekinesis.json
+@@ -310,7 +310,7 @@
+     "id": "telekinetic_momentum",
+     "type": "SPELL",
+     "name": "[Ψ]Momentum Alteration (C)",
+-    "description": "Edit the momentum of yourself and nearby objects to your benefit, slowing damaging force and slightly increasing your speed.\n\nThis power <color_yellow>is maintained by concentration</color> and <color_red>may fail</color> if <color_yellow>concentration is interrupted</color>.  It requires <color_yellow>even more concentration</color> than usual.",
++    "description": "Edit the momentum of yourself and nearby objects to your benefit, slowing damaging force and slightly increasing your speed.\n\nThis power <color_yellow>is maintained by concentration</color> and <color_red>may fail</color> if <color_yellow>concentration is interrupted</color>.",
+     "message": "",
+     "teachable": false,
+     "valid_targets": [ "self" ],
+@@ -447,6 +447,44 @@
+     "max_range": 1,
+     "ignored_monster_species": [ "PSI_NULL", "TELEKIN_PUSHPULL_NULL" ]
+   },
++  {
++    "id": "telekinetic_lifting_field",
++    "type": "SPELL",
++    "name": "[Ψ]Lifting Field (C)",
++    "description": "Hover a single object next to you, freeing your hands for other tasks and making it easy to access.\n\nThis power <color_yellow>is maintained by concentration</color> and <color_red>may fail</color> if <color_yellow>concentration is interrupted</color>.",
++    "message": "",
++    "teachable": false,
++    "valid_targets": [ "self" ],
++    "spell_class": "TELEKINETIC",
++    "skill": "metaphysics",
++    "flags": [ "PSIONIC", "CONCENTRATE", "SILENT", "NO_HANDS", "NO_LEGS", "RANDOM_DURATION" ],
++    "difficulty": 4,
++    "max_level": { "math": [ "int_to_level(1)" ] },
++    "effect": "effect_on_condition",
++    "effect_str": "EOC_TELEKIN_LIFTING_FIELD_INITIATE",
++    "shape": "blast",
++    "min_duration": {
++      "math": [
++        "( (u_spell_level('telekinetic_lifting_field') * 9300) + 49400) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++      ]
++    },
++    "max_duration": {
++      "math": [
++        "( (u_spell_level('telekinetic_lifting_field') * 25900) + 167400) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++      ]
++    },
++    "energy_source": "STAMINA",
++    "base_energy_cost": {
++      "math": [
++        "u_effect_intensity('effect_telekinetic_lifting_field') > -1 ? 0 : max((4500 - (u_spell_level('telekinetic_lifting_field') * 100)), 2000)"
++      ]
++    },
++    "base_casting_time": {
++      "math": [
++        "u_effect_intensity('effect_telekinetic_lifting_field') > -1 ? 10 : max((200 - (u_spell_level('telekinetic_lifting_field') * 6.5)), 55)"
++      ]
++    }
++  },
+   {
+     "id": "telekinetic_strength",
+     "type": "SPELL",
+diff --git a/data/mods/MindOverMatter/powers/telekinesis_concentration_eoc.json b/data/mods/MindOverMatter/powers/telekinesis_concentration_eoc.json
+index 489e85746e..d2a80f2f4a 100644
+--- a/data/mods/MindOverMatter/powers/telekinesis_concentration_eoc.json
++++ b/data/mods/MindOverMatter/powers/telekinesis_concentration_eoc.json
+@@ -59,6 +59,147 @@
+     ],
+     "false_effect": [  ]
+   },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEKIN_LIFTING_FIELD_INITIATE",
++    "condition": { "not": { "u_has_effect": "effect_telekinetic_lifting_field" } },
++    "effect": [
++      { "u_message": "You prepare to hover an item close to hand.", "type": "good" },
++      { "u_add_effect": "effect_telekinetic_lifting_field", "duration": "PERMANENT" },
++      { "run_eocs": [ "EOC_POWER_MAINTENANCE_PLUS_ONE", "EOC_TELEKIN_LIFTING_FIELD_SWITCHER" ] },
++      {
++        "queue_eocs": "EOC_TELEKIN_LIFTING_FIELD_DRAIN",
++        "time_in_future": [
++          {
++            "math": [
++              "( (u_spell_level('telekinetic_lifting_field') * 93) + 494) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++            ]
++          },
++          {
++            "math": [
++              "( (u_spell_level('telekinetic_lifting_field') * 259) + 1674) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++            ]
++          }
++        ]
++      }
++    ],
++    "false_effect": [ { "run_eocs": "EOC_TELEKIN_REMOVE_LIFTING_FIELD" } ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEKIN_LIFTING_FIELD_SWITCHER",
++    "//": "The below is sadly necessary until containers/pockets can set weight and volume dynamically.",
++    "condition": { "u_has_effect": "effect_telekinetic_lifting_field" },
++    "effect": {
++      "switch": { "math": [ "u_spell_level('telekinetic_lifting_field')" ] },
++      "cases": [
++        { "case": 1, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_1" } ] },
++        { "case": 2, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_2" } ] },
++        { "case": 3, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_3" } ] },
++        { "case": 4, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_4" } ] },
++        { "case": 5, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_5" } ] },
++        { "case": 6, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_6" } ] },
++        { "case": 7, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_7" } ] },
++        { "case": 8, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_8" } ] },
++        { "case": 9, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_9" } ] },
++        { "case": 10, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_10" } ] },
++        { "case": 11, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_11" } ] },
++        { "case": 12, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_12" } ] },
++        { "case": 13, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_13" } ] },
++        { "case": 14, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_14" } ] },
++        { "case": 15, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_15" } ] },
++        { "case": 16, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_16" } ] },
++        { "case": 17, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_17" } ] },
++        { "case": 18, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_18" } ] },
++        { "case": 19, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_19" } ] },
++        { "case": 20, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_20" } ] },
++        { "case": 21, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_21" } ] },
++        { "case": 22, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_22" } ] },
++        { "case": 23, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_23" } ] },
++        { "case": 24, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_24" } ] },
++        { "case": 25, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_25" } ] },
++        { "case": 26, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_26" } ] },
++        { "case": 27, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_27" } ] },
++        { "case": 28, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_28" } ] },
++        { "case": 29, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_29" } ] },
++        { "case": 30, "effect": [ { "u_add_trait": "TELEKINETIC_LIFTER_30" } ] }
++      ]
++    }
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEKIN_REMOVE_LIFTING_FIELD",
++    "condition": { "u_has_effect": "effect_telekinetic_lifting_field" },
++    "effect": [
++      { "run_eocs": [ "EOC_POWER_MAINTENANCE_MINUS_ONE", "EOC_TELEKIN_LIFTING_FIELD_SWITCHER_REMOVE" ] },
++      { "u_lose_effect": "effect_telekinetic_lifting_field" }
++    ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEKIN_LIFTING_FIELD_SWITCHER_REMOVE",
++    "condition": { "u_has_trait": "TELEKINETIC" },
++    "effect": [
++      { "u_lose_trait": "TELEKINETIC_LIFTER_30" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_29" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_28" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_27" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_26" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_25" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_24" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_23" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_22" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_21" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_20" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_19" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_18" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_17" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_16" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_15" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_14" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_13" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_12" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_11" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_10" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_9" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_8" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_7" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_6" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_5" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_4" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_3" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_2" },
++      { "u_lose_trait": "TELEKINETIC_LIFTER_1" }
++    ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEKIN_LIFTING_FIELD_DRAIN",
++    "condition": { "u_has_effect": "effect_telekinetic_lifting_field" },
++    "effect": [
++      { "math": [ "u_latest_channeled_power_difficulty", "=", "4" ] },
++      { "run_eocs": "EOC_PSIONICS_GAIN_NETHER_ATTUNEMENT_2" },
++      { "math": [ "u_calories()", "-=", "psionics_kcal_cost(4)" ] },
++      { "math": [ "u_spell_exp('telekinetic_lifting_field')", "+=", "(maintenance_exp_factor(u_val('focus')))" ] },
++      { "run_eocs": "EOC_POWER_MAINTENANCE_CONCENTRATION_CHECK" },
++      {
++        "queue_eocs": "EOC_TELEKIN_LIFTING_FIELD_DRAIN",
++        "time_in_future": [
++          {
++            "math": [
++              "( (u_spell_level('telekinetic_lifting_field') * 93) + 494) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++            ]
++          },
++          {
++            "math": [
++              "( (u_spell_level('telekinetic_lifting_field') * 259) + 1674) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++            ]
++          }
++        ]
++      }
++    ],
++    "false_effect": [  ]
++  },
+   {
+     "type": "effect_on_condition",
+     "id": "EOC_TELEKIN_STRENGTH_INITIATE",
+@@ -77,7 +218,7 @@
+           },
+           {
+             "math": [
+-              "( (u_spell_level('telekinetic_strength') * 30) + 120 )* (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++              "( (u_spell_level('telekinetic_strength') * 30) + 120) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
+             ]
+           }
+         ]
+diff --git a/data/mods/MindOverMatter/professions.json b/data/mods/MindOverMatter/professions.json
+index 7eb0ab435b..63d1b907f6 100644
+--- a/data/mods/MindOverMatter/professions.json
++++ b/data/mods/MindOverMatter/professions.json
+@@ -249,7 +249,7 @@
+       { "level": 3, "name": "driving" },
+       { "level": 2, "name": "metaphysics" }
+     ],
+-    "traits": [ "TELEKINETIC", "TELEKINETIC_LIFTER_8" ],
++    "traits": [ "TELEKINETIC", "TELEKINETIC_GRAB_POCKETS" ],
+     "spells": [
+       { "id": "telekinetic_push", "level": 5 },
+       { "id": "telekinetic_pull", "level": 6 },
+diff --git a/data/mods/MindOverMatter/recipes/practice/telekinesis_practice.json b/data/mods/MindOverMatter/recipes/practice/telekinesis_practice.json
+index f1dbbed6af..a88ead4c78 100644
+--- a/data/mods/MindOverMatter/recipes/practice/telekinesis_practice.json
++++ b/data/mods/MindOverMatter/recipes/practice/telekinesis_practice.json
+@@ -16,6 +16,7 @@
+       "practice_telekinetic_momentum",
+       "practice_telekinetic_slowfall",
+       "practice_telekinetic_wave",
++      "practice_telekinetic_lifting_field",
+       "practice_telekinetic_strength",
+       "practice_telekinetic_hammer",
+       "practice_telekinetic_vehicle_lift",
+@@ -514,6 +515,91 @@
+       }
+     ]
+   },
++  {
++    "type": "recipe",
++    "activity_level": "LIGHT_EXERCISE",
++    "name": "contemplation: lifting field",
++    "id": "practice_telekinetic_lifting_field",
++    "description": "Contemplate your powers and develop your ability to lift a single object for long periods of time.",
++    "category": "CC_*",
++    "subcategory": "CSC_*_NESTED",
++    "skill_used": "metaphysics",
++    "difficulty": 3,
++    "time": "0 s",
++    "autolearn": false,
++    "proficiencies": [ { "proficiency": "prof_contemplation_telekinesis", "required": false } ],
++    "tools": [
++      [ [ "matrix_crystal_drained", -1 ], [ "black_nether_crystal_pseudo_tool", -1 ], [ "matrix_crystal_telekinesis", -1 ] ]
++    ],
++    "components": [ [ [ "matrix_crystal_telekin_dust", 1 ] ] ],
++    "flags": [ "SECRET", "BLIND_EASY", "NO_MANIP", "AFFECTED_BY_PAIN", "NO_BENCH", "NO_ENCHANTMENT" ],
++    "result_eocs": [
++      {
++        "id": "EOC_PRACTICE_TELEKIN_LIFTING_FIELD",
++        "condition": { "math": [ "u_spell_level('telekinetic_lifting_field')", ">=", "1" ] },
++        "effect": [
++          { "set_string_var": "telekinetic_lifting_field", "target_var": { "u_val": "latest_studied_power_name" } },
++          {
++            "set_string_var": "prof_contemplation_telekinesis",
++            "target_var": { "u_val": "latest_studied_power_proficiency" }
++          },
++          { "math": [ "u_latest_studied_power_difficulty", "=", "4" ] },
++          { "run_eocs": [ "EOC_PSI_STUDYING_POWER_BEGIN", "EOC_PSI_STUDYING_POWER_SIDE_EFFECTS" ] }
++        ],
++        "false_effect": [
++          { "set_string_var": "telekinetic_lifting_field", "target_var": { "u_val": "latest_studied_power_name" } },
++          { "u_message": "You attempt to unlock new capabilities within your mind." },
++          { "u_assign_activity": "ACT_PSI_LEARNING_NEW_POWER", "duration": "16 hours" },
++          { "u_add_effect": "effect_psi_learning_new_power", "duration": "16 hours" },
++          { "run_eocs": "EOC_PSI_PRACTICE_FOCUS_MOD" },
++          {
++            "queue_eocs": "EOC_PRACTICE_TELEKIN_LIFTING_FIELD_LEARNING",
++            "time_in_future": [ { "math": [ "learn_new_power_lower_time_bound(4)" ] }, { "math": [ "learn_new_power_upper_time_bound(4)" ] } ]
++          }
++        ]
++      }
++    ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_PRACTICE_TELEKIN_LIFTING_FIELD_LEARNING",
++    "condition": {
++      "and": [
++        { "compare_string": [ "telekinetic_lifting_field", { "u_val": "latest_studied_power_name" } ] },
++        { "u_has_effect": "effect_psi_learning_new_power" },
++        {
++          "not": { "u_has_any_effect": [ "sleep", "effect_vitakin_wakeful_resting", "lack_sleep", "sleep_deprived", "under_operation" ] }
++        }
++      ]
++    },
++    "effect": [
++      {
++        "run_eocs": [
++          {
++            "id": "EOC_PRACTICE_TELEKIN_LIFTING_FIELD_LEARNING_2",
++            "condition": {
++              "roll_contested": { "math": [ "u_skill('metaphysics') + u_has_proficiency('prof_contemplation_telekinesis')" ] },
++              "difficulty": 8
++            },
++            "effect": [
++              {
++                "u_message": "As you meditate, all the pieces suddenly come together.  You've unlocked the Lifting Field power.",
++                "popup": true
++              },
++              { "math": [ "u_spell_level('telekinetic_lifting_field')", "=", "1" ] },
++              { "math": [ "u_vitamin('vitamin_psionic_drain')", "+=", "rng( 20,40 )" ] },
++              { "u_lose_effect": "effect_psi_learning_new_power" }
++            ],
++            "false_effect": [
++              { "u_message": "You just couldn't manage to grasp the technique.  You'll have to try again.", "popup": true },
++              { "math": [ "u_vitamin('vitamin_psionic_drain')", "+=", "rng( 20,40 )" ] },
++              { "u_lose_effect": "effect_psi_learning_new_power" }
++            ]
++          }
++        ]
++      }
++    ]
++  },
+   {
+     "type": "recipe",
+     "activity_level": "LIGHT_EXERCISE",
+-- 
+2.45.2
+

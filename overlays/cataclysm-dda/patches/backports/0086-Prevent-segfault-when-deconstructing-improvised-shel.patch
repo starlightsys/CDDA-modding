@@ -1,0 +1,152 @@
+From 6d30f3382099b7e7daa2a1fda0b9f18f92cbbc94 Mon Sep 17 00:00:00 2001
+From: inogenous <123803852+inogenous@users.noreply.github.com>
+Date: Tue, 20 Aug 2024 20:39:56 +0200
+Subject: [PATCH 086/125] Prevent segfault when deconstructing improvised
+ shelter (#75703)
+
+Previous segfault happened when trying to display the list of items that
+deconstruction would yield, but this terrain has no `deconstruct` json.
+
+This commit also adds a check with `debugmsg` for future such cases
+during the game startup validation.
+
+Previous crash being fixed:
+```
+Thread 1 "cataclysm-tiles" received signal SIGSEGV, Segmentation fault.
+0x0000555555cb9602 in operator() (drop_group=..., __closure=<optimized out>) at src/construction.cpp:2049
+2049                            item_group::spawn_data_from_group( drop_group )->every_item_min_max();
+(gdb) bt
+ #0  0x0000555555cb9602 in operator() (drop_group=..., __closure=<optimized out>) at src/construction.cpp:2049
+ #1  0x0000555555cb9af2 in construct::do_turn_deconstruct (p=..., who=...) at src/construction.cpp:2086
+ #2  0x0000555555a32fad in activity_handlers::build_do_turn (act=0x5555583e4338, you=0x5555583e3c70) at src/activity_handlers.cpp:3424
+ #3  0x0000555555a6b7de in std::function<void(player_activity*, Character*)>::operator() (this=<optimized out>, __args#0=<optimized out>, __args#0@entry=0x5555583e4338, __args#1=<optimized out>, __args#1@entry=0x5555583e3c70) at /usr/include/c++/14/bits/std_function.h:591
+ #4  0x0000555555a69647 in activity_type::call_do_turn (this=<optimized out>, act=act@entry=0x5555583e4338, you=you@entry=0x5555583e3c70) at src/activity_type.cpp:160
+ #5  0x00005555566d3a1c in player_activity::do_turn (this=0x5555583e4338, you=...) at src/player_activity.cpp:320
+ #6  0x0000555555dcef82 in do_turn () at src/do_turn.cpp:592
+ #7  0x00005555557a1217 in main (argc=<optimized out>, argv=<optimized out>) at src/main.cpp:873
+```
+---
+ .../LIXA_furniture_and_terrain.json                  |  2 +-
+ .../furniture_and_terrain/terrain-manufactured.json  |  6 ++++++
+ .../furniture_and_terrain/terrain-manufactured.json  |  2 +-
+ .../furniture_and_terrain/terrain-flora.json         | 12 +-----------
+ src/construction.cpp                                 |  6 +++++-
+ src/mapdata.cpp                                      |  4 ++++
+ 6 files changed, 18 insertions(+), 14 deletions(-)
+
+diff --git a/data/json/furniture_and_terrain/LIXA_furniture_and_terrain.json b/data/json/furniture_and_terrain/LIXA_furniture_and_terrain.json
+index 91ab17915d..9277af3251 100644
+--- a/data/json/furniture_and_terrain/LIXA_furniture_and_terrain.json
++++ b/data/json/furniture_and_terrain/LIXA_furniture_and_terrain.json
+@@ -10,7 +10,7 @@
+     "light_emitted": 120,
+     "looks_like": "t_carpet_green",
+     "connect_groups": "INDOORFLOOR",
+-    "flags": [ "TRANSPARENT", "FLAMMABLE_HARD", "SUPPORTS_ROOF", "COLLAPSES", "INDOORS", "FLAT", "RUG", "EASY_DECONSTRUCT" ],
++    "flags": [ "TRANSPARENT", "FLAMMABLE_HARD", "SUPPORTS_ROOF", "COLLAPSES", "INDOORS", "FLAT", "RUG" ],
+     "bash": {
+       "str_min": 4,
+       "str_max": 12,
+diff --git a/data/json/furniture_and_terrain/terrain-manufactured.json b/data/json/furniture_and_terrain/terrain-manufactured.json
+index 9d7ae0a3f3..9b6c660c26 100644
+--- a/data/json/furniture_and_terrain/terrain-manufactured.json
++++ b/data/json/furniture_and_terrain/terrain-manufactured.json
+@@ -1376,6 +1376,7 @@
+       "sound_fail": "whump!",
+       "items": [ { "item": "rock_large", "count": [ 0, 20 ] }, { "item": "sharp_rock", "count": [ 0, 16 ] } ]
+     },
++    "deconstruct": { "ter_set": "t_dirt", "items": [ { "item": "rock_large", "count": 22 } ] },
+     "flags": [ "TRANSPARENT", "THIN_OBSTACLE", "SHORT", "ROUGH", "UNSTABLE", "PERMEABLE", "EASY_DECONSTRUCT" ]
+   },
+   {
+@@ -1494,6 +1495,7 @@
+       "HIDE_PLACE",
+       "EASY_DECONSTRUCT"
+     ],
++    "deconstruct": { "ter_set": "t_pit_shallow", "items": [ { "item": "stick", "count": 12 }, { "item": "pine_bough", "count": 24 } ] },
+     "bash": {
+       "str_min": 4,
+       "str_max": 60,
+@@ -1526,6 +1528,10 @@
+       "HIDE_PLACE",
+       "EASY_DECONSTRUCT"
+     ],
++    "deconstruct": {
++      "ter_set": "t_pit_shallow",
++      "items": [ { "item": "stick", "count": 12 }, { "item": "pine_bough", "count": 24 }, { "item": "withered", "count": 80 } ]
++    },
+     "bash": {
+       "str_min": 4,
+       "str_max": 60,
+diff --git a/data/mods/Megafauna/furniture_and_terrain/terrain-manufactured.json b/data/mods/Megafauna/furniture_and_terrain/terrain-manufactured.json
+index 56d9a6c9e4..00f5764a7e 100644
+--- a/data/mods/Megafauna/furniture_and_terrain/terrain-manufactured.json
++++ b/data/mods/Megafauna/furniture_and_terrain/terrain-manufactured.json
+@@ -12,7 +12,7 @@
+     "floor_bedding_warmth": 800,
+     "comfort": 1,
+     "connect_groups": "INDOORFLOOR",
+-    "flags": [ "CONTAINER", "FLAMMABLE_ASH", "REDUCE_SCENT", "INDOORS", "MOUNTABLE", "HIDE_PLACE", "EASY_DECONSTRUCT", "NO_SIGHT" ],
++    "flags": [ "CONTAINER", "FLAMMABLE_ASH", "REDUCE_SCENT", "INDOORS", "MOUNTABLE", "HIDE_PLACE", "NO_SIGHT" ],
+     "bash": {
+       "str_min": 4,
+       "str_max": 60,
+diff --git a/data/mods/Xedra_Evolved/furniture_and_terrain/terrain-flora.json b/data/mods/Xedra_Evolved/furniture_and_terrain/terrain-flora.json
+index 11bbd68837..c763c1810c 100644
+--- a/data/mods/Xedra_Evolved/furniture_and_terrain/terrain-flora.json
++++ b/data/mods/Xedra_Evolved/furniture_and_terrain/terrain-flora.json
+@@ -411,17 +411,7 @@
+     "coverage": 80,
+     "floor_bedding_warmth": 2000,
+     "comfort": 3,
+-    "flags": [
+-      "TRANSPARENT",
+-      "CONTAINER",
+-      "FLAMMABLE_ASH",
+-      "THIN_OBSTACLE",
+-      "REDUCE_SCENT",
+-      "INDOORS",
+-      "MOUNTABLE",
+-      "HIDE_PLACE",
+-      "EASY_DECONSTRUCT"
+-    ],
++    "flags": [ "TRANSPARENT", "CONTAINER", "FLAMMABLE_ASH", "THIN_OBSTACLE", "REDUCE_SCENT", "INDOORS", "MOUNTABLE", "HIDE_PLACE" ],
+     "bash": {
+       "str_min": 12,
+       "str_max": 60,
+diff --git a/src/construction.cpp b/src/construction.cpp
+index 5209148a52..addbc67329 100644
+--- a/src/construction.cpp
++++ b/src/construction.cpp
+@@ -2045,8 +2045,12 @@ void construct::do_turn_deconstruct( const tripoint_bub_ms &p, Character &who )
+ 
+         auto deconstruct_items = []( const item_group_id & drop_group ) {
+             std::string ret;
++            const Item_spawn_data *spawn_data = item_group::spawn_data_from_group( drop_group );
++            if( spawn_data == nullptr ) {
++                return ret;
++            }
+             const std::map<const itype *, std::pair<int, int>> deconstruct_items =
+-                        item_group::spawn_data_from_group( drop_group )->every_item_min_max();
++                        spawn_data->every_item_min_max();
+             for( const auto &deconstruct_item : deconstruct_items ) {
+                 const int &min = deconstruct_item.second.first;
+                 const int &max = deconstruct_item.second.second;
+diff --git a/src/mapdata.cpp b/src/mapdata.cpp
+index bd7099becb..b275474b9c 100644
+--- a/src/mapdata.cpp
++++ b/src/mapdata.cpp
+@@ -1039,6 +1039,10 @@ void ter_t::check() const
+             debugmsg( "ter %s has invalid emission %s set", id.c_str(), e.str().c_str() );
+         }
+     }
++    if( has_flag( ter_furn_flag::TFLAG_EASY_DECONSTRUCT ) && !deconstruct.can_do ) {
++        debugmsg( "ter %s has EASY_DECONSTRUCT flag but cannot be deconstructed",
++                  id.c_str(), deconstruct.drop_group.c_str() );
++    }
+ }
+ 
+ furn_t::furn_t() : open( furn_str_id::NULL_ID() ), close( furn_str_id::NULL_ID() ) {}
+-- 
+2.45.2
+

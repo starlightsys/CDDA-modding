@@ -1,0 +1,25 @@
+From 39530f35ec79f6800d405050188eaea5ae6eeebf Mon Sep 17 00:00:00 2001
+From: Standing-Storm <120433252+Standing-Storm@users.noreply.github.com>
+Date: Sat, 17 Aug 2024 15:21:47 -0500
+Subject: [PATCH 037/125] Fix recoil (#75748)
+
+---
+ data/mods/MindOverMatter/effects/effects_psionic.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/mods/MindOverMatter/effects/effects_psionic.json b/data/mods/MindOverMatter/effects/effects_psionic.json
+index 77ccb24947..13e97fa0e2 100644
+--- a/data/mods/MindOverMatter/effects/effects_psionic.json
++++ b/data/mods/MindOverMatter/effects/effects_psionic.json
+@@ -435,7 +435,7 @@
+             }
+           },
+           { "value": "MOVE_COST", "multiply": -0.1 },
+-          { "value": "RECOIL_MODIFIER", "add": -30 },
++          { "value": "RECOIL_MODIFIER", "multiply": -0.3 },
+           {
+             "value": "MELEE_DAMAGE",
+             "multiply": {
+-- 
+2.45.2
+

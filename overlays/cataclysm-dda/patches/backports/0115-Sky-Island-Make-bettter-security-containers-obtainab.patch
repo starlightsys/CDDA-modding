@@ -1,0 +1,176 @@
+From 822aa469eda688dc9cb65890b88fd1fcbb6ef664 Mon Sep 17 00:00:00 2001
+From: Naadn <97841551+Naadn@users.noreply.github.com>
+Date: Sat, 24 Aug 2024 12:30:05 +0800
+Subject: [PATCH 115/125] [Sky Island] Make bettter security containers
+ obtainable (#75883)
+
+* Fix the security container mission
+
+* Lint
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+---------
+
+Co-authored-by: Anton Simakov <67688115+GuardianDll@users.noreply.github.com>
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+---
+ data/mods/Sky_Island/dialog_statue.json    | 12 ++++--------
+ data/mods/Sky_Island/upgrade_missions.json | 20 ++++++++++++--------
+ 2 files changed, 16 insertions(+), 16 deletions(-)
+
+diff --git a/data/mods/Sky_Island/dialog_statue.json b/data/mods/Sky_Island/dialog_statue.json
+index a5d0b7859a..df613529ba 100644
+--- a/data/mods/Sky_Island/dialog_statue.json
++++ b/data/mods/Sky_Island/dialog_statue.json
+@@ -203,8 +203,7 @@
+           "and": [
+             { "not": { "u_has_mission": "SKYISLAND_UPGRADE_security2" } },
+             { "math": [ "securitylevel", "==", "1" ] },
+-            { "math": [ "islandrank", ">=", "2" ] },
+-            { "math": [ "debug_never_achievable", "==", "1" ] }
++            { "math": [ "islandrank", ">=", "2" ] }
+           ]
+         },
+         "effect": [ { "assign_mission": "SKYISLAND_UPGRADE_security2" } ],
+@@ -216,8 +215,7 @@
+           "and": [
+             { "not": { "u_has_mission": "SKYISLAND_UPGRADE_security3" } },
+             { "math": [ "securitylevel", "==", "2" ] },
+-            { "math": [ "islandrank", ">=", "4" ] },
+-            { "math": [ "debug_never_achievable", "==", "1" ] }
++            { "math": [ "islandrank", ">=", "4" ] }
+           ]
+         },
+         "effect": [ { "assign_mission": "SKYISLAND_UPGRADE_security3" } ],
+@@ -229,8 +227,7 @@
+           "and": [
+             { "not": { "u_has_mission": "SKYISLAND_UPGRADE_security4" } },
+             { "math": [ "securitylevel", "==", "3" ] },
+-            { "math": [ "islandrank", ">=", "4" ] },
+-            { "math": [ "debug_never_achievable", "==", "1" ] }
++            { "math": [ "islandrank", ">=", "4" ] }
+           ]
+         },
+         "effect": [ { "assign_mission": "SKYISLAND_UPGRADE_security4" } ],
+@@ -242,8 +239,7 @@
+           "and": [
+             { "not": { "u_has_mission": "SKYISLAND_UPGRADE_security5" } },
+             { "math": [ "securitylevel", "==", "4" ] },
+-            { "math": [ "islandrank", ">=", "4" ] },
+-            { "math": [ "debug_never_achievable", "==", "1" ] }
++            { "math": [ "islandrank", ">=", "4" ] }
+           ]
+         },
+         "effect": [ { "assign_mission": "SKYISLAND_UPGRADE_security5" } ],
+diff --git a/data/mods/Sky_Island/upgrade_missions.json b/data/mods/Sky_Island/upgrade_missions.json
+index 239c463def..50fc84bf11 100644
+--- a/data/mods/Sky_Island/upgrade_missions.json
++++ b/data/mods/Sky_Island/upgrade_missions.json
+@@ -3406,7 +3406,7 @@
+     "id": "SKYISLAND_UPGRADE_security2",
+     "type": "mission_definition",
+     "name": "Upgrade: Security Beta",
+-    "description": "With the supplied recipe, you will be able to expand the capacity of your secure container.\n\nEMPTY YOUR SECURE CONTAINER FIRST!  Anything left inside when upgrading will be lost forever!",
++    "description": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+     "goal": "MGOAL_FIND_ITEM",
+     "item": "secure_container_2",
+     "count": 1,
+@@ -3417,7 +3417,7 @@
+       "effect": [
+         { "u_learn_recipe": "secure_container_2" },
+         {
+-          "u_message": "With the supplied recipe, you will be able to expand the capacity of your secure container.\n\nEMPTY YOUR SECURE CONTAINER FIRST!  Anything left inside when upgrading will be lost forever!",
++          "u_message": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+           "popup": true
+         }
+       ]
+@@ -3426,6 +3426,7 @@
+       "effect": [
+         { "math": [ "securitylevel", "=", "2" ] },
+         { "u_forget_recipe": "secure_container_2" },
++        { "u_lose_trait": "mut_secure_container_1" },
+         { "u_add_trait": "mut_secure_container_2" },
+         {
+           "u_message": "The strange metaphysical container churns inward with violent force, grinding loudly before suddenly expanding.  Your secure container can now carry more.",
+@@ -3452,7 +3453,7 @@
+     "id": "SKYISLAND_UPGRADE_security3",
+     "type": "mission_definition",
+     "name": "Upgrade: Security Gamma",
+-    "description": "With the supplied recipe, you will be able to expand the capacity of your secure container.\n\nEMPTY YOUR SECURE CONTAINER FIRST!  Anything left inside when upgrading will be lost forever!",
++    "description": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+     "goal": "MGOAL_FIND_ITEM",
+     "item": "secure_container_3",
+     "count": 1,
+@@ -3463,7 +3464,7 @@
+       "effect": [
+         { "u_learn_recipe": "secure_container_3" },
+         {
+-          "u_message": "With the supplied recipe, you will be able to expand the capacity of your secure container.\n\nEMPTY YOUR SECURE CONTAINER FIRST!  Anything left inside when upgrading will be lost forever!",
++          "u_message": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+           "popup": true
+         }
+       ]
+@@ -3472,6 +3473,7 @@
+       "effect": [
+         { "math": [ "securitylevel", "=", "3" ] },
+         { "u_forget_recipe": "secure_container_3" },
++        { "u_lose_trait": "mut_secure_container_2" },
+         { "u_add_trait": "mut_secure_container_3" },
+         {
+           "u_message": "The strange metaphysical container churns inward with violent force, grinding loudly before suddenly expanding.  Your secure container can now carry more.",
+@@ -3498,7 +3500,7 @@
+     "id": "SKYISLAND_UPGRADE_security4",
+     "type": "mission_definition",
+     "name": "Upgrade: Security Epsilon",
+-    "description": "With the supplied recipe, you will be able to expand the capacity of your secure container.\n\nEMPTY YOUR SECURE CONTAINER FIRST!  Anything left inside when upgrading will be lost forever!",
++    "description": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+     "goal": "MGOAL_FIND_ITEM",
+     "item": "secure_container_4",
+     "count": 1,
+@@ -3509,7 +3511,7 @@
+       "effect": [
+         { "u_learn_recipe": "secure_container_4" },
+         {
+-          "u_message": "With the supplied recipe, you will be able to expand the capacity of your secure container.\n\nEMPTY YOUR SECURE CONTAINER FIRST!  Anything left inside when upgrading will be lost forever!",
++          "u_message": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+           "popup": true
+         }
+       ]
+@@ -3518,6 +3520,7 @@
+       "effect": [
+         { "math": [ "securitylevel", "=", "4" ] },
+         { "u_forget_recipe": "secure_container_4" },
++        { "u_lose_trait": "mut_secure_container_3" },
+         { "u_add_trait": "mut_secure_container_4" },
+         {
+           "u_message": "The strange metaphysical container churns inward with violent force, grinding loudly before suddenly expanding.  Your secure container can now carry more.",
+@@ -3544,7 +3547,7 @@
+     "id": "SKYISLAND_UPGRADE_security5",
+     "type": "mission_definition",
+     "name": "Upgrade: Security Kappa",
+-    "description": "With the supplied recipe, you will be able to expand the capacity of your secure container to its maximum size.\n\nEMPTY YOUR SECURE CONTAINER FIRST!  Anything left inside when upgrading will be lost forever!",
++    "description": "With the supplied recipe, you will be able to expand the capacity of your secure container to its maximum size.",
+     "goal": "MGOAL_FIND_ITEM",
+     "item": "secure_container_5",
+     "count": 1,
+@@ -3555,7 +3558,7 @@
+       "effect": [
+         { "u_learn_recipe": "secure_container_5" },
+         {
+-          "u_message": "With the supplied recipe, you will be able to expand the capacity of your secure container to its maximum size.\n\nEMPTY YOUR SECURE CONTAINER FIRST!  Anything left inside when upgrading will be lost forever!",
++          "u_message": "With the supplied recipe, you will be able to expand the capacity of your secure container to its maximum size.",
+           "popup": true
+         }
+       ]
+@@ -3564,6 +3567,7 @@
+       "effect": [
+         { "math": [ "securitylevel", "=", "5" ] },
+         { "u_forget_recipe": "secure_container_5" },
++        { "u_lose_trait": "mut_secure_container_4" },
+         { "u_add_trait": "mut_secure_container_5" },
+         {
+           "u_message": "The strange metaphysical container churns inward with violent force, grinding loudly before suddenly expanding.  Your secure container can now carry more.",
+-- 
+2.45.2
+

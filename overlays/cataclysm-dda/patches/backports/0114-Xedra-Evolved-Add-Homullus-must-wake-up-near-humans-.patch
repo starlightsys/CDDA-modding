@@ -1,0 +1,100 @@
+From a4e24153740f44b5e71f03bdf3b671d99317540d Mon Sep 17 00:00:00 2001
+From: Standing-Storm <120433252+Standing-Storm@users.noreply.github.com>
+Date: Fri, 23 Aug 2024 22:04:04 -0500
+Subject: [PATCH 114/125] [Xedra Evolved] Add Homullus must wake up near humans
+ fae ban + eating restrictions (#75891)
+
+* Add must wake up near humans fae ban
+
+* Adjustments
+
+* EoC to prevent purifying away food traits
+
+* Fix spelling error
+
+* Fix parentheses
+
+* contat -> contact
+
+* Check for threshold too
+---
+ .../paraclesians/homullus_mutations.json      |  2 +-
+ .../paraclesians/paraclesian_fae_bans.json    | 49 +++++++++++++++++++
+ 2 files changed, 50 insertions(+), 1 deletion(-)
+
+diff --git a/data/mods/Xedra_Evolved/mutations/paraclesians/homullus_mutations.json b/data/mods/Xedra_Evolved/mutations/paraclesians/homullus_mutations.json
+index b102a698dc..073da91687 100644
+--- a/data/mods/Xedra_Evolved/mutations/paraclesians/homullus_mutations.json
++++ b/data/mods/Xedra_Evolved/mutations/paraclesians/homullus_mutations.json
+@@ -487,7 +487,7 @@
+     "id": "HOMULLUS_EAT_DEMIHUMANS",
+     "name": { "str": "The Top of the Food Chain" },
+     "points": 5,
+-    "description": "Humanity are omnivores in the most literal sense.  You can eat anything not human without any moral qualms.",
++    "description": "Humanity are omnivores in the most literal sense.  You can eat anything not human without any moral qualms.  However, the food that pre-Cataclysm humanity would slowly poison themselves with is anathema to you, and you will eat only good-tasting food unless you are starving.",
+     "types": [ "DIET" ],
+     "prereqs": [ "HOMULLUS_THE_HUNTER", "HOMULLUS_THE_HUNTER2" ],
+     "category": [ "HOMULLUS" ],
+diff --git a/data/mods/Xedra_Evolved/mutations/paraclesians/paraclesian_fae_bans.json b/data/mods/Xedra_Evolved/mutations/paraclesians/paraclesian_fae_bans.json
+index 6fe427f378..47c0df1fca 100644
+--- a/data/mods/Xedra_Evolved/mutations/paraclesians/paraclesian_fae_bans.json
++++ b/data/mods/Xedra_Evolved/mutations/paraclesians/paraclesian_fae_bans.json
+@@ -198,6 +198,55 @@
+       }
+     ]
+   },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_HOMULLUS_FAE_BAN_DIDNT_SLEEP_NEAR_HUMANS",
++    "eoc_type": "EVENT",
++    "required_event": "character_wakes_up",
++    "condition": {
++      "and": [
++        {
++          "or": [
++            { "and": [ { "u_has_trait": "HOMULLUS_BACKSTAGE" }, { "u_has_trait": "HOMULLUS_REGEN_STAMINA" } ] },
++            { "u_has_trait": "THRESH_HOMULLUS" }
++          ]
++        },
++        { "math": [ "u_characters_nearby('radius': 45, 'attitude': 'any')", "==", "0" ] }
++      ]
++    },
++    "effect": [
++      { "run_eocs": "EOC_PARACLESIAN_BROKE_FAE_BAN" },
++      {
++        "u_message": "You awaken with a start as a terrible feeling of crushing loneliness grips you.  You were meant to live in close contact with humans, not wake up to an empty home.",
++        "type": "bad"
++      }
++    ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_HOMULLUS_FAE_BAN_PICKY_EATER",
++    "eoc_type": "EVENT",
++    "required_event": "gains_mutation",
++    "//": "Automatically gain the Picky Eater and Junkfood Intolerance traits when gaining the The Top of the Food Chain trait",
++    "condition": {
++      "and": [ { "compare_string": [ "HOMULLUS_EAT_DEMIHUMANS", { "context_val": "trait" } ] }, { "u_has_trait": "HOMULLUS" } ]
++    },
++    "effect": [ { "u_add_trait": "PICKYEATER" }, { "u_add_trait": "ANTIJUNK" } ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_HOMULLUS_FAE_BAN_KEEP_FOOD_TRAITS",
++    "//": "This is to prevent the Homullus from purifying those traits away as long as they have The Top of the Food Chain, or are post-threshold.",
++    "eoc_type": "EVENT",
++    "required_event": "character_wakes_up",
++    "condition": {
++      "and": [
++        { "or": [ { "u_has_trait": "HOMULLUS_EAT_DEMIHUMANS" }, { "u_has_trait": "THRESH_HOMULLUS" } ] },
++        { "or": [ { "not": { "u_has_trait": "PICKYEATER" } }, { "not": { "u_has_trait": "ANTIJUNK" } } ] }
++      ]
++    },
++    "effect": [ { "u_add_trait": "PICKYEATER" }, { "u_add_trait": "ANTIJUNK" } ]
++  },
+   {
+     "type": "effect_on_condition",
+     "id": "EOC_SALAMANDER_FAE_BAN_GET_WET",
+-- 
+2.45.2
+

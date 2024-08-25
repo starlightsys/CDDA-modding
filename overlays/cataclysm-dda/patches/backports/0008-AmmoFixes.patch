@@ -1,0 +1,81 @@
+From e97f9e3a3da18d4a75ca03c1ba11264f030ad701 Mon Sep 17 00:00:00 2001
+From: klorpa <30924131+klorpa@users.noreply.github.com>
+Date: Tue, 16 Jun 2020 12:02:32 -0500
+Subject: [PATCH 008/125] AmmoFixes
+
+---
+ data/json/items/ammo/500.json                    | 2 +-
+ data/json/items/ammo/545x39.json                 | 2 +-
+ data/json/monsters/turrets.json                  | 2 +-
+ data/mods/Aftershock/mobs/robots.json            | 2 +-
+ data/mods/Aftershock/mobs/uplifted_monsters.json | 2 +-
+ 5 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/data/json/items/ammo/500.json b/data/json/items/ammo/500.json
+index a3fd3f93eb..ff421b65d7 100644
+--- a/data/json/items/ammo/500.json
++++ b/data/json/items/ammo/500.json
+@@ -16,7 +16,7 @@
+     "color": "light_gray",
+     "count": 20,
+     "stack_size": 10,
+-    "ammo_type": "500",
++    "ammo_type": [ "500" ],
+     "casing": "500_casing",
+     "range": 16,
+     "damage": { "damage_type": "bullet", "amount": 55, "armor_penetration": 8 },
+diff --git a/data/json/items/ammo/545x39.json b/data/json/items/ammo/545x39.json
+index bbfffbc325..e1b4b1438d 100644
+--- a/data/json/items/ammo/545x39.json
++++ b/data/json/items/ammo/545x39.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 30,
+     "stack_size": 30,
+-    "ammo_type": "545x39",
++    "ammo_type": [ "545x39" ],
+     "casing": "545_casing",
+     "range": 37,
+     "//": ".222 52.8gr Mil FMJ, 21.3gr SF033 fl.",
+diff --git a/data/json/monsters/turrets.json b/data/json/monsters/turrets.json
+index 00af339a58..b032bc9bcc 100644
+--- a/data/json/monsters/turrets.json
++++ b/data/json/monsters/turrets.json
+@@ -26,7 +26,7 @@
+         "cooldown": 1,
+         "move_cost": 150,
+         "gun_type": "hk_mp5",
+-        "ammo_type": "9mm",
++        "ammo_type": [ "9mm" ],
+         "fake_skills": [ [ "gun", 5 ], [ "smg", 5 ] ],
+         "fake_dex": 12,
+         "ranges": [ [ 0, 14, "DEFAULT" ] ],
+diff --git a/data/mods/Aftershock/mobs/robots.json b/data/mods/Aftershock/mobs/robots.json
+index 5111c55bd2..d1ae8961b9 100644
+--- a/data/mods/Aftershock/mobs/robots.json
++++ b/data/mods/Aftershock/mobs/robots.json
+@@ -225,7 +225,7 @@
+         "type": "gun",
+         "cooldown": 1,
+         "gun_type": "rm451_flamethrower",
+-        "ammo_type": "napalm",
++        "ammo_type": [ "napalm" ],
+         "fake_skills": [ [ "gun", 4 ], [ "launcher", 5 ] ],
+         "fake_dex": 10,
+         "no_ammo_sound": "hiss!",
+diff --git a/data/mods/Aftershock/mobs/uplifted_monsters.json b/data/mods/Aftershock/mobs/uplifted_monsters.json
+index 4a98ca1824..3a69e394a7 100644
+--- a/data/mods/Aftershock/mobs/uplifted_monsters.json
++++ b/data/mods/Aftershock/mobs/uplifted_monsters.json
+@@ -29,7 +29,7 @@
+         "cooldown": 1,
+         "move_cost": 150,
+         "gun_type": "hk_mp5",
+-        "ammo_type": "9mm",
++        "ammo_type": [ "9mm" ],
+         "fake_skills": [ [ "gun", 5 ], [ "smg", 5 ] ],
+         "fake_dex": 9,
+         "ranges": [ [ 0, 14, "DEFAULT" ] ],
+-- 
+2.45.2
+

@@ -1,0 +1,90 @@
+From 6c5db36c5e575b81049afedddcebdb4157aa440c Mon Sep 17 00:00:00 2001
+From: inogenous <123803852+inogenous@users.noreply.github.com>
+Date: Tue, 20 Aug 2024 20:32:31 +0200
+Subject: [PATCH 082/125] Prevent crash from negative array index for
+ visibility_cache (#75521)
+
+Prevents referencing `visibility_cache` using out-of-bounds array
+indexes such as negative values. Using out-of-bound indexes for this
+array previously caused crashes when compiled with
+`-D_GLIBCXX_ASSERTIONS`.
+
+The function `pixel_minimap::render_critters` is, for example, called
+with `center=(64,59,-5)`, which gives `start=(4,-1)` and then
+`p=(4,-1,-5)`, which previously crashed because
+`visibility_cache[p.x][p.y]` then gives a negative array index. Such
+values were seen when peeking using `X` at a submap boundary.
+
+Gdb backtrace of previous crash being fixed:
+```
+(gdb) bt
+ #0  __pthread_kill_implementation (threadid=<optimized out>, signo=signo@entry=6, no_tid=no_tid@entry=0) at ./nptl/pthread_kill.c:44
+ #1  0x00007ffff787840f in __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+ #2  0x00007ffff78294f2 in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+ #3  0x00007ffff78124ed in __GI_abort () at ./stdlib/abort.c:79
+ #4  0x00007ffff7ad30be in std::__glibcxx_assert_fail(char const*, int, char const*, char const*) () from /lib/x86_64-linux-gnu/libstdc++.so.6
+ #5  0x000055555668a04e in std::array<lit_level, 132ul>::operator[] (__n=18446744073709551615, this=0x555599f30348) at /usr/include/c++/13/array:211
+ #6  0x000055555668ab7a in std::array<lit_level, 132ul>::operator[] (__n=18446744073709551615, this=0x555599f30348) at /usr/include/c++/13/array:211
+ #7  pixel_minimap::render_critters (this=this@entry=0x555558108960, center=...) at src/pixel_minimap.cpp:521
+ #8  0x000055555668ada2 in pixel_minimap::render (this=0x555558108960, center=...) at src/pixel_minimap.cpp:447
+ #9  0x000055555668bb69 in pixel_minimap::draw (this=<optimized out>, screen_rect=..., center=...) at src/pixel_minimap.cpp:555
+ #10 0x0000555555b3fd5c in cata_tiles::draw_minimap (this=this@entry=0x555558093020, dest=..., center=..., width=width@entry=352, height=height@entry=352) at src/cata_tiles.cpp:1919
+ #11 0x00005555567f43d3 in cata_cursesport::curses_drawwindow (w=...) at src/sdltiles.cpp:1428
+ #12 0x000055555666f5e2 in std::function<void(draw_args const&)>::operator() (__args#0=..., this=<optimized out>) at /usr/include/c++/13/bits/std_function.h:591
+ #13 operator() (d=..., __closure=<optimized out>) at src/panels.cpp:54
+ #14 std::__invoke_impl<int, window_panel::window_panel(const std::function<void(const draw_args&)>&, const std::string&, const translation&, int, int, bool, const std::function<bool()>&, bool)::<lambda(const draw_args&)>&, const draw_args&> (__f=...) at /usr/include/c++/13/bits/invoke.h:61
+ #15 std::__invoke_r<int, window_panel::window_panel(const std::function<void(const draw_args&)>&, const std::string&, const translation&, int, int, bool, const std::function<bool()>&, bool)::<lambda(const draw_args&)>&, const draw_args&> (__fn=...) at /usr/include/c++/13/bits/invoke.h:114
+ #16 std::_Function_handler<int(const draw_args&), window_panel::window_panel(const std::function<void(const draw_args&)>&, const std::string&, const translation&, int, int, bool, const std::function<bool()>&, bool)::<lambda(const draw_args&)> >::_M_invoke(const std::_Any_data &, const draw_args &) (__functor=...,     __args#0=...) at /usr/include/c++/13/bits/std_function.h:290
+ #17 0x0000555555e7c9ec in std::function<int(draw_args const&)>::operator() (__args#0=..., this=0x55559461d638) at /usr/include/c++/13/bits/std_function.h:591
+ #18 game::draw_panels (this=this@entry=0x555558276c40, force_draw=force_draw@entry=true) at src/game.cpp:4006
+ #19 0x0000555555e984f8 in game::draw (this=0x555558276c40, ui=...) at src/game.cpp:3960
+ #20 0x000055555695df35 in ui_adaptor::redraw_invalidated () at src/ui_manager.cpp:440
+ #21 0x000055555695e039 in ui_adaptor::redraw () at src/ui_manager.cpp:345
+ #22 0x000055555695e060 in ui_manager::redraw () at src/ui_manager.cpp:506
+ #23 0x0000555555ea95cf in game::look_around (this=this@entry=0x555558276c40, show_window=show_window@entry=true, center=..., start_point=..., has_first_point=has_first_point@entry=false, select_zone=false, peeking=true, is_moving_zone=<optimized out>, end_point=..., change_lv=true) at src/game.cpp:7529
+ #24 0x0000555555eadd32 in game::look_around (this=this@entry=0x555558276c40, looka_params=...) at src/game.cpp:7697
+ #25 0x0000555555eadecb in game::peek (this=this@entry=0x555558276c40, p=...) at src/game.cpp:6071
+ #26 0x0000555555ec441a in game::peek (this=this@entry=0x555558276c40) at src/game.cpp:6050
+ #27 0x0000555555f124ec in game::do_regular_action (this=this@entry=0x555558276c40, act=@0x7fffffffd104: ACTION_PEEK, player_character=..., mouse_target=std::optional [no contained value]) at src/handle_action.cpp:2432
+ #28 0x0000555555f15b09 in game::handle_action (this=0x555558276c40) at src/handle_action.cpp:3174
+ #29 0x0000555555d8a108 in do_turn () at /usr/include/c++/13/bits/unique_ptr.h:199
+ #30 0x0000555555781b4e in main (argc=<optimized out>, argv=<optimized out>) at src/main.cpp:873
+
+(gdb) frame 7
+(gdb) print p
+$1 = {static dimension = 3, x = 4, y = -1, z = -5}
+(gdb) print center
+$2 = (const tripoint &) @0x7fffffffbda8: {static dimension = 3, x = 64, y = 59, z = -5}
+```
+---
+ src/pixel_minimap.cpp | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/src/pixel_minimap.cpp b/src/pixel_minimap.cpp
+index c983bdc93d..a469e3f4d9 100644
+--- a/src/pixel_minimap.cpp
++++ b/src/pixel_minimap.cpp
+@@ -506,7 +506,8 @@ void pixel_minimap::render_critters( const tripoint &center )
+         mixture = lerp_clamped( 0, 100, std::max( s, 0.0f ) );
+     }
+ 
+-    const level_cache &access_cache = get_map().access_cache( center.z );
++    const map &m = get_map();
++    const level_cache &access_cache = m.access_cache( center.z );
+ 
+     const point start( center.x - total_tiles_count.x / 2, center.y - total_tiles_count.y / 2 );
+     const point beacon_size = {
+@@ -518,6 +519,10 @@ void pixel_minimap::render_critters( const tripoint &center )
+     for( int y = 0; y < total_tiles_count.y; y++ ) {
+         for( int x = 0; x < total_tiles_count.x; x++ ) {
+             const tripoint p = start + tripoint( x, y, center.z );
++            if( !m.inbounds( p ) ) {
++                // p might be out-of-bounds when peeking at submap boundary. Example: center=(64,59,-5), start=(4,-1) -> p=(4,-1,-5)
++                continue;
++            }
+             const lit_level lighting = access_cache.visibility_cache[p.x][p.y];
+ 
+             if( lighting == lit_level::DARK || lighting == lit_level::BLANK ) {
+-- 
+2.45.2
+

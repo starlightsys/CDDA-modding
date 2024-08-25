@@ -1,0 +1,65 @@
+From 0cf6bfcf102aae7f9a8a4486d66d7847840ec3cb Mon Sep 17 00:00:00 2001
+From: Psithief <psithief@gmail.com>
+Date: Thu, 15 Aug 2024 20:58:46 +0800
+Subject: [PATCH 040/125] Allow speech to be relearnt in the dark
+
+---
+ data/json/recipes/practice/social.json | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/data/json/recipes/practice/social.json b/data/json/recipes/practice/social.json
+index a06e48f359..9714f6030b 100644
+--- a/data/json/recipes/practice/social.json
++++ b/data/json/recipes/practice/social.json
+@@ -40,7 +40,8 @@
+     "skill_used": "speech",
+     "time": "1 h",
+     "practice_data": { "min_difficulty": 0, "max_difficulty": 0, "skill_limit": 1 },
+-    "result_eocs": [ "EOC_UNMUTE_BIRD" ]
++    "result_eocs": [ "EOC_UNMUTE_BIRD" ],
++    "flags": [ "BLIND_EASY" ]
+   },
+   {
+     "type": "practice",
+@@ -53,7 +54,8 @@
+     "skill_used": "speech",
+     "time": "1 h",
+     "practice_data": { "min_difficulty": 0, "max_difficulty": 0, "skill_limit": 1 },
+-    "result_eocs": [ "EOC_UNMUTE_CEPH" ]
++    "result_eocs": [ "EOC_UNMUTE_CEPH" ],
++    "flags": [ "BLIND_EASY" ]
+   },
+   {
+     "type": "practice",
+@@ -66,7 +68,8 @@
+     "skill_used": "speech",
+     "time": "1 h",
+     "practice_data": { "min_difficulty": 0, "max_difficulty": 0, "skill_limit": 1 },
+-    "result_eocs": [ "EOC_UNMUTE_GASTROPOD" ]
++    "result_eocs": [ "EOC_UNMUTE_GASTROPOD" ],
++    "flags": [ "BLIND_EASY" ]
+   },
+   {
+     "type": "practice",
+@@ -79,7 +82,8 @@
+     "skill_used": "speech",
+     "time": "1 h",
+     "practice_data": { "min_difficulty": 0, "max_difficulty": 0, "skill_limit": 1 },
+-    "result_eocs": [ "EOC_UNMUTE_INSECT" ]
++    "result_eocs": [ "EOC_UNMUTE_INSECT" ],
++    "flags": [ "BLIND_EASY" ]
+   },
+   {
+     "type": "practice",
+@@ -92,6 +96,7 @@
+     "skill_used": "speech",
+     "time": "1 h",
+     "practice_data": { "min_difficulty": 0, "max_difficulty": 0, "skill_limit": 1 },
+-    "result_eocs": [ "EOC_UNMUTE_SLIME" ]
++    "result_eocs": [ "EOC_UNMUTE_SLIME" ],
++    "flags": [ "BLIND_EASY" ]
+   }
+ ]
+-- 
+2.45.2
+

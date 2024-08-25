@@ -1,0 +1,34 @@
+From 3794945ce503c13af98a6c825e532746ebe394b9 Mon Sep 17 00:00:00 2001
+From: "Standing-StormStanding-Storm git config --global user.name
+ Standing-Storm git config --global user.name Standing-Storm"
+ <dorchadas@gmail.com>
+Date: Wed, 21 Aug 2024 22:13:47 -0500
+Subject: [PATCH 107/125] Remove unarmed skill bonus, add Intimidate
+ bonus/persuasion penalty
+
+---
+ data/mods/Xedra_Evolved/mutations/shapeshifters.json | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/data/mods/Xedra_Evolved/mutations/shapeshifters.json b/data/mods/Xedra_Evolved/mutations/shapeshifters.json
+index b7b50692bc..d72b525e0c 100644
+--- a/data/mods/Xedra_Evolved/mutations/shapeshifters.json
++++ b/data/mods/Xedra_Evolved/mutations/shapeshifters.json
+@@ -94,10 +94,11 @@
+           { "value": "MELEE_DAMAGE", "multiply": 0.33 },
+           { "value": "CRAFTING_SPEED_MULTIPLIER", "multiply": -0.8 },
+           { "value": "STAMINA_REGEN_MOD", "add": 0.2 },
+-          { "value": "MELEE_STAMINA_CONSUMPTION", "multiply": -0.33 }
++          { "value": "MELEE_STAMINA_CONSUMPTION", "multiply": -0.33 },
++          { "value": "SOCIAL_PERSUADE", "add": -50 },
++          { "value": "SOCIAL_INTIMIDATE", "add": 40 }
+         ],
+-        "mutations": [ "MUZZLE", "TAIL_FLUFFY", "PAWS", "LUPINE_FUR", "LUPINE_EARS", "PERSISTENCE_HUNTER2", "PRED3" ],
+-        "skills": [ { "value": "unarmed", "add": 4 } ]
++        "mutations": [ "MUZZLE", "TAIL_FLUFFY", "PAWS", "LUPINE_FUR", "LUPINE_EARS", "PERSISTENCE_HUNTER2", "PRED3" ]
+       },
+       {
+         "condition": "ALWAYS",
+-- 
+2.45.2
+

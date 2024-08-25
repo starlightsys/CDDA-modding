@@ -1,0 +1,31 @@
+From 0faded11381c198974d9f51a002b88a993a0eeed Mon Sep 17 00:00:00 2001
+From: Mara Luna Lilith Stelzner <mara.stelzner@gmail.com>
+Date: Sat, 3 Aug 2024 10:12:27 +0200
+Subject: [PATCH 125/125] make the option to have salvaged mk3 exos repaired
+ actually show up at the hub
+
+---
+ .../robofac_intercom/robofac_intercom_prototypes.json      | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/data/json/npcs/robofac/robofac_intercom/robofac_intercom_prototypes.json b/data/json/npcs/robofac/robofac_intercom/robofac_intercom_prototypes.json
+index 96717e070d..543e062eef 100644
+--- a/data/json/npcs/robofac/robofac_intercom/robofac_intercom_prototypes.json
++++ b/data/json/npcs/robofac/robofac_intercom/robofac_intercom_prototypes.json
+@@ -206,10 +206,9 @@
+       {
+         "text": "I salvaged this combat exoskeleton.  Do you think you could repair it?",
+         "condition": {
+-          "or": [
+-            { "u_has_var": "dialogue_hub_rnd_u_current_project", "value": "phase_immersion_suit" },
+-            { "u_has_var": "dialogue_hub_rnd_u_current_project", "value": "rm13_armor" },
+-            { "u_has_var": "dialogue_hub_rnd_u_current_project", "value": "combat_exoskeleton_light_salvaged" }
++          "and": [
++            { "u_has_items": { "item": "combat_exoskeleton_light_salvaged", "count": 1 } },
++            { "not": { "u_has_var": "dialogue_hub_rnd_u_project_ongoing", "value": "yes" } }
+           ]
+         },
+         "topic": "TALK_ROBOFAC_INTERCOM_EXOSKELETON_REPAIR"
+-- 
+2.45.2
+

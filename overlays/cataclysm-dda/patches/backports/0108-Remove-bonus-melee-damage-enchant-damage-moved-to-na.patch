@@ -1,0 +1,27 @@
+From 1b4f360620d3acf8c6428b7997e1274e3e0e0c19 Mon Sep 17 00:00:00 2001
+From: "Standing-StormStanding-Storm git config --global user.name
+ Standing-Storm git config --global user.name Standing-Storm"
+ <dorchadas@gmail.com>
+Date: Wed, 21 Aug 2024 22:14:59 -0500
+Subject: [PATCH 108/125] Remove bonus melee damage enchant (damage moved to
+ natural weapons/custom techniques)
+
+---
+ data/mods/Xedra_Evolved/mutations/shapeshifters.json | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/data/mods/Xedra_Evolved/mutations/shapeshifters.json b/data/mods/Xedra_Evolved/mutations/shapeshifters.json
+index d72b525e0c..797fc70b6e 100644
+--- a/data/mods/Xedra_Evolved/mutations/shapeshifters.json
++++ b/data/mods/Xedra_Evolved/mutations/shapeshifters.json
+@@ -91,7 +91,6 @@
+           { "value": "DEXTERITY", "add": 2 },
+           { "value": "STRENGTH", "add": 6 },
+           { "value": "NIGHT_VIS", "add": 8 },
+-          { "value": "MELEE_DAMAGE", "multiply": 0.33 },
+           { "value": "CRAFTING_SPEED_MULTIPLIER", "multiply": -0.8 },
+           { "value": "STAMINA_REGEN_MOD", "add": 0.2 },
+           { "value": "MELEE_STAMINA_CONSUMPTION", "multiply": -0.33 },
+-- 
+2.45.2
+

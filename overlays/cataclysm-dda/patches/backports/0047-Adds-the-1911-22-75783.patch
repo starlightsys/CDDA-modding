@@ -1,0 +1,250 @@
+From 2149e01d4194adcac24966ab41b0b82f9bce29d7 Mon Sep 17 00:00:00 2001
+From: Holli <78005870+Holli-Git@users.noreply.github.com>
+Date: Sun, 18 Aug 2024 08:13:05 -0600
+Subject: [PATCH 047/125] Adds the 1911-22 (#75783)
+
+* Add the gun + magazine
+
+* Adds to item groups
+
+* missing looks_like
+
+* Mod/test stuff
+
+Added in the MK4 as I realized it wasn't included
+
+* Material magazine change
+---
+ .../Weapons_Mods_Ammo/guns_by_calibre.json    |  9 +++--
+ .../Weapons_Mods_Ammo/magazines.json          |  3 +-
+ .../Weapons_Mods_Ammo/nested_guns.json        | 13 +++++++
+ data/json/items/gun/22.json                   | 37 +++++++++++++++++++
+ data/json/items/magazine/22.json              | 27 ++++++++++++++
+ .../firearms/gg_firearms_migration.json       |  3 +-
+ .../magazines/gg_magazines_migration.json     |  3 +-
+ data/mods/TEST_DATA/item_demographics.json    |  4 ++
+ 8 files changed, 93 insertions(+), 6 deletions(-)
+
+diff --git a/data/json/itemgroups/Weapons_Mods_Ammo/guns_by_calibre.json b/data/json/itemgroups/Weapons_Mods_Ammo/guns_by_calibre.json
+index 58175f8d1c..516430855a 100644
+--- a/data/json/itemgroups/Weapons_Mods_Ammo/guns_by_calibre.json
++++ b/data/json/itemgroups/Weapons_Mods_Ammo/guns_by_calibre.json
+@@ -28,7 +28,8 @@
+       { "group": "nested_sig_mosquito", "prob": 18 },
+       { "group": "nested_cp33", "prob": 9 },
+       { "group": "nested_ruger_mk4", "prob": 74 },
+-      { "group": "nested_ruger_charger", "prob": 1 }
++      { "group": "nested_ruger_charger", "prob": 1 },
++      { "group": "nested_1911_22", "prob": 40 }
+     ]
+   },
+   {
+@@ -114,7 +115,8 @@
+       { "item": "sig_mosquito", "prob": 15, "charges": [ 0, -1 ] },
+       { "item": "walther_p22", "prob": 30, "charges": [ 0, -1 ] },
+       { "item": "ruger_lcr_22", "prob": 60, "charges": [ 0, -1 ] },
+-      { "item": "ruger_mk4", "prob": 130, "charges": [ 0, -1 ] }
++      { "item": "ruger_mk4", "prob": 130, "charges": [ 0, -1 ] },
++      { "item": "1911_22", "prob": 20, "charges": [ 0, -1 ] }
+     ]
+   },
+   {
+@@ -212,7 +214,8 @@
+       { "item": "rough_rider_pistol_9", "prob": 4 },
+       { "item": "cp33", "prob": 14 },
+       { "item": "ruger_mk4", "prob": 72 },
+-      { "item": "ruger_charger", "prob": 10 }
++      { "item": "ruger_charger", "prob": 10 },
++      { "item": "1911_22", "prob": 50 }
+     ]
+   },
+   {
+diff --git a/data/json/itemgroups/Weapons_Mods_Ammo/magazines.json b/data/json/itemgroups/Weapons_Mods_Ammo/magazines.json
+index 932fb710d5..8b477a15c6 100644
+--- a/data/json/itemgroups/Weapons_Mods_Ammo/magazines.json
++++ b/data/json/itemgroups/Weapons_Mods_Ammo/magazines.json
+@@ -190,7 +190,8 @@
+       [ "wp22mag", 7 ],
+       [ "cp33_mag", 4 ],
+       [ "cp33_mag_50", 1 ],
+-      [ "ruger_mk4_mag", 11 ]
++      [ "ruger_mk4_mag", 11 ],
++      [ "1911_22_mag", 7 ]
+     ]
+   },
+   {
+diff --git a/data/json/itemgroups/Weapons_Mods_Ammo/nested_guns.json b/data/json/itemgroups/Weapons_Mods_Ammo/nested_guns.json
+index 402f2f3650..6e599b158c 100644
+--- a/data/json/itemgroups/Weapons_Mods_Ammo/nested_guns.json
++++ b/data/json/itemgroups/Weapons_Mods_Ammo/nested_guns.json
+@@ -254,6 +254,19 @@
+       { "group": "on_hand_22" }
+     ]
+   },
++  {
++    "id": "nested_1911_22",
++    "type": "item_group",
++    "//": "this is a distribution for the gun, reasonable number of backup mags, and some ammo to repack",
++    "subtype": "collection",
++    "ammo": 100,
++    "entries": [
++      { "item": "1911_22", "charges": [ 0, 10 ] },
++      { "item": "1911_22_mag" },
++      { "item": "1911_22_mag", "prob": 50 },
++      { "group": "on_hand_22" }
++    ]
++  },
+   {
+     "id": "nested_ruger_charger",
+     "type": "item_group",
+diff --git a/data/json/items/gun/22.json b/data/json/items/gun/22.json
+index 43cf565e61..d4505bdecd 100644
+--- a/data/json/items/gun/22.json
++++ b/data/json/items/gun/22.json
+@@ -552,5 +552,42 @@
+         "description": "A cheap, single action revolver chambered in .22 LR.  While it makes for a handy plinking gun, the single action mechanism, size of the firearm, combined with the lack of a swing out cylinder makes for a less than ideal zombie fighting handgun, even with the slightly increased performance from the longer barrel."
+       }
+     ]
++  },
++  {
++    "id": "1911_22",
++    "copy-from": "pistol_base",
++    "type": "GUN",
++    "looks_like": "1911",
++    "//": "Based on https://www.browning.com/products/firearms/pistols/1911-22/1911-22-a1.html",
++    "name": { "str": ".22 1911 pistol" },
++    "description": "A 1911 in .22 LR, with a 4 1/4\" barrel, and feeding from 10 round magazines.",
++    "ascii_picture": "m1911",
++    "weight": "425 g",
++    "volume": "369 ml",
++    "longest_side": "212 mm",
++    "barrel_length": "108 mm",
++    "price": "749 USD 99 cent",
++    "price_postapoc": "10 USD",
++    "to_hit": { "grip": "none", "length": "hand", "surface": "any", "balance": "uneven" },
++    "material": [ "steel" ],
++    "symbol": "(",
++    "color": "light_gray",
++    "ammo": [ "22" ],
++    "ranged_damage": { "damage_type": "bullet", "amount": -1 },
++    "dispersion": 320,
++    "durability": 8,
++    "min_cycle_recoil": 39,
++    "valid_mod_locations": [ [ "brass catcher", 1 ], [ "mechanism", 2 ], [ "sights mount", 1 ], [ "stock", 1 ] ],
++    "faults": [ "fault_gun_blackpowder", "fault_gun_dirt", "fault_gun_chamber_spent" ],
++    "pocket_data": [ { "magazine_well": "40 ml", "pocket_type": "MAGAZINE_WELL", "item_restriction": [ "1911_22_mag" ] } ],
++    "melee_damage": { "bash": 5 },
++    "variant_type": "gun",
++    "variants": [
++      {
++        "id": "1911_22",
++        "name": { "str_sp": "1911-22" },
++        "description": "A 1911 handgun with \"1911-22\" stamped on the slide.  While .22 LR 1911s were first devised as a training aid for US soldiers, it found large civilian use from concealed carry to plinking thanks to the readily available ammunition and familiar platform."
++      }
++    ]
+   }
+ ]
+diff --git a/data/json/items/magazine/22.json b/data/json/items/magazine/22.json
+index 9a499b19b9..b613027649 100644
+--- a/data/json/items/magazine/22.json
++++ b/data/json/items/magazine/22.json
+@@ -258,5 +258,32 @@
+     "ammo_type": [ "22" ],
+     "flags": [ "MAG_COMPACT" ],
+     "pocket_data": [ { "pocket_type": "MAGAZINE", "rigid": true, "ammo_restriction": { "22": 10 } } ]
++  },
++  {
++    "id": "1911_22_mag",
++    "looks_like": "glock17_17",
++    "type": "MAGAZINE",
++    "//": "Based on https://www.browning.com/products/shooting-accessories/magazines/1911-22-magazine.html#Black",
++    "name": { "str": ".22 1911 pistol magazine" },
++    "description": "A 10-round magazine for a .22 1911 pistol.",
++    "variant_type": "gun",
++    "variants": [
++      {
++        "id": "1911_22_mag",
++        "name": { "str": "1911-22 magazine" },
++        "description": "A magazine for the 1911-22 pistol, holding 10 rounds of .22 LR.  It features a magazine follower button to allow easier reloading, along with a cut-out in the side to see your round count."
++      }
++    ],
++    "weight": "91 g",
++    "volume": "44 ml",
++    "longest_side": "113 mm",
++    "price": "59 USD 99 cent",
++    "price_postapoc": "2 USD",
++    "material": [ "steel" ],
++    "symbol": "#",
++    "color": "light_gray",
++    "ammo_type": [ "22" ],
++    "flags": [ "MAG_COMPACT" ],
++    "pocket_data": [ { "pocket_type": "MAGAZINE", "rigid": true, "ammo_restriction": { "22": 10 } } ]
+   }
+ ]
+diff --git a/data/mods/Generic_Guns/firearms/gg_firearms_migration.json b/data/mods/Generic_Guns/firearms/gg_firearms_migration.json
+index 8c5f3ccd4e..8602e00bab 100644
+--- a/data/mods/Generic_Guns/firearms/gg_firearms_migration.json
++++ b/data/mods/Generic_Guns/firearms/gg_firearms_migration.json
+@@ -208,7 +208,8 @@
+       "cp33",
+       "ruger_mk4",
+       "rough_rider_pistol",
+-      "rough_rider_pistol_9"
++      "rough_rider_pistol_9",
++      "1911_22"
+     ],
+     "type": "MIGRATION",
+     "replace": "pistol_tiny_target"
+diff --git a/data/mods/Generic_Guns/magazines/gg_magazines_migration.json b/data/mods/Generic_Guns/magazines/gg_magazines_migration.json
+index 07ec5302b2..7a0977e28b 100644
+--- a/data/mods/Generic_Guns/magazines/gg_magazines_migration.json
++++ b/data/mods/Generic_Guns/magazines/gg_magazines_migration.json
+@@ -207,7 +207,8 @@
+       "kp32mag",
+       "cp33_mag",
+       "cp33_mag_50",
+-      "ruger_mk4_mag"
++      "ruger_mk4_mag",
++      "1911_22_mag"
+     ],
+     "type": "MIGRATION",
+     "replace": "pistol_tiny_mag"
+diff --git a/data/mods/TEST_DATA/item_demographics.json b/data/mods/TEST_DATA/item_demographics.json
+index 54abfa513c..3ea469d642 100644
+--- a/data/mods/TEST_DATA/item_demographics.json
++++ b/data/mods/TEST_DATA/item_demographics.json
+@@ -689,6 +689,7 @@
+           "type": "22",
+           "weight": 204,
+           "items": {
++            "1911-22": 1,
+             "marlin_9a": 1,
+             "rifle_22": 1,
+             "ruger_1022": 1,
+@@ -699,6 +700,7 @@
+             "ruger_charger": 1,
+             "ruger_charger_auto": 1,
+             "ruger_1022_auto": 1,
++            "ruger_mk4": 1,
+             "rough_rider_pistol": 1,
+             "rough_rider_pistol_9": 1,
+             "rossi_gallery": 1
+@@ -955,6 +957,7 @@
+           "type": "pistols",
+           "weight": 616,
+           "items": {
++            "1911_22": 1,
+             "2_shot_special": 1,
+             "90two40": 1,
+             "ar_pistol": 1,
+@@ -1023,6 +1026,7 @@
+             "rugerlcp": 1,
+             "ruger_lcr_22": 1,
+             "ruger_lcr_38": 1,
++            "ruger_mk4": 1,
+             "ruger_redhawk": 1,
+             "rough_rider_pistol": 1,
+             "rough_rider_pistol_9": 1,
+-- 
+2.45.2
+

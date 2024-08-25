@@ -1,0 +1,122 @@
+From 8bb97fd45490aada5abac2b6e481b53e827167ba Mon Sep 17 00:00:00 2001
+From: Anton Simakov <67688115+GuardianDll@users.noreply.github.com>
+Date: Mon, 19 Aug 2024 00:35:41 +0200
+Subject: [PATCH 067/125] Monster vision enchantment and evaluation (#75753)
+
+* Add enchantment to affect monster vision
+
+* improve vision_range_eval() to evaluate monster sight range also
+---
+ doc/MAGIC.md              | 1 +
+ doc/NPCs.md               | 2 +-
+ src/magic_enchantment.cpp | 3 +++
+ src/magic_enchantment.h   | 1 +
+ src/math_parser_diag.cpp  | 4 ++++
+ src/monster.cpp           | 6 ++++--
+ 6 files changed, 14 insertions(+), 3 deletions(-)
+
+diff --git a/doc/MAGIC.md b/doc/MAGIC.md
+index 2e693724c9..e7486a851b 100644
+--- a/doc/MAGIC.md
++++ b/doc/MAGIC.md
+@@ -956,6 +956,7 @@ Character status value  | Description
+ `ARMOR_HEAT`            | 
+ `ARMOR_STAB`            | 
+ `REGEN_HP`              | Affects the rate the monster recovers hp.
++`VISION_RANGE`          | Affects monster vision range, both day and night one.
+ `SPEED`                 | Affects the base speed of the monster.
+ `LUMINATION`            | Affects monster luminance
+ 
+diff --git a/doc/NPCs.md b/doc/NPCs.md
+index b5d50383f3..4ddf9bf659 100644
+--- a/doc/NPCs.md
++++ b/doc/NPCs.md
+@@ -1379,7 +1379,7 @@ _some functions support array arguments or kwargs, denoted with square brackets
+ | val(`s`)    |  ✅   |   varies  | u, n  | Return or set a Character or item value. Argument is a [Character/item aspect](#list-of-character-and-item-aspects).<br/><br/>These are all in one function for legacy reasons and are generally poorly tested. If you need one of them, consider porting it to a native math function.<br/><br/>Example:<br/>`{ "math": [ "u_val('strength')", "=", "2" ] }`|
+ | vitamin(`s`/`v`)    |  ✅   |   ✅  | u, n  | Return or set the characters vitamin level.<br/>Argument is vitamin ID.<br/><br/>Example:<br/>`{ "math": [ "u_vitamin('mutagen')", "=", "0" ] }`|
+ | warmth(`s`/`v`)    |  ✅   |   ❌  | u, n  | Return the characters warmth on a body part.<br/>Argument is bodypart ID.<br/><br/>Example:<br/> The value displayed in-game is calculated as follows.<br/> `"{ "math": [ "u_warmth_in_game", "=", "(u_warmth('torso') / 100) * 2 - 100"] }`|
+-| vision_range()    |  ✅   |   ❌  | u, n  | Return the character's visual range, adjusted by their mutations, effects, and other issues.<br/><br/>Example:<br/> `"{ "math": [ "u_vision_range", "<", "30"] }`|
++| vision_range()    |  ✅   |   ❌  | u, n  | Return the character's or monsters visual range, adjusted by their mutations, effects, and other issues.<br/><br/>Example:<br/> `"{ "math": [ "n_vision_range()", "<", "30"] }`|
+ | weather(`s`)  |  ✅  |   ✅   | N/A<br/>(global)  | Return or set a weather aspect<br/><br/>Aspect must be one of:<br/>`temperature` (in Kelvin),<br/>`humidity` (as percentage),<br/>`pressure` (in millibar),<br/>`windpower` (in mph).<br/>`precipitation` (in mm / h) either 0.5 (very_light ), 1.5 (light), or 3 (heavy). Read only.<br/><br/>Temperature conversion functions are available: `celsius()`, `fahrenheit()`, `from_celsius()`, and `from_fahrenheit()`.<br/><br/>Examples:<br/>`{ "math": [ "weather('temperature')", "<", "from_fahrenheit( 33 )" ] }`<br/>`{ "math": [ "fahrenheit( weather('temperature') )", "==", "21" ] }`|
+ | damage_level()    |  ✅   |   ❌  | u, n  | Return the damage level of the talker, which must be an item.<br/><br/>Example:<br/>`"condition": { "math": [ "n_damage_level()", "<", "1" ] }`|
+ | climate_control_str_heat()    |  ✅   |   ❌  | u, n  | return amount of heat climate control that character currently has (character feels better in warm places with it), in warmth points; default 0, affected by CLIMATE_CONTROL_HEAT enchantment.<br/><br/>Example:<br/>`"condition": { "math": [ "u_climate_control_str_heat()", "<", "0" ] }`|
+diff --git a/src/magic_enchantment.cpp b/src/magic_enchantment.cpp
+index dd9c0d90f6..5baf8e186c 100644
+--- a/src/magic_enchantment.cpp
++++ b/src/magic_enchantment.cpp
+@@ -95,6 +95,7 @@ namespace io
+             case enchant_vals::mod::ATTACK_NOISE: return "ATTACK_NOISE";
+             case enchant_vals::mod::SHOUT_NOISE: return "SHOUT_NOISE";
+             case enchant_vals::mod::FOOTSTEP_NOISE: return "FOOTSTEP_NOISE";
++            case enchant_vals::mod::VISION_RANGE: return "VISION_RANGE";
+             case enchant_vals::mod::SIGHT_RANGE_ELECTRIC: return "SIGHT_RANGE_ELECTRIC";
+             case enchant_vals::mod::MOTION_VISION_RANGE: return "MOTION_VISION_RANGE";
+             case enchant_vals::mod::SIGHT_RANGE_FAE: return "SIGHT_RANGE_FAE";
+@@ -324,6 +325,7 @@ bool enchantment::is_monster_relevant() const
+             pair_values.first == enchant_vals::mod::ARMOR_HEAT ||
+             pair_values.first == enchant_vals::mod::ARMOR_STAB ||
+             pair_values.first == enchant_vals::mod::REGEN_HP ||
++            pair_values.first == enchant_vals::mod::VISION_RANGE ||
+             pair_values.first == enchant_vals::mod::SPEED ||
+             pair_values.first == enchant_vals::mod::LUMINATION ) {
+             return true;
+@@ -344,6 +346,7 @@ bool enchantment::is_monster_relevant() const
+             pair_values.first == enchant_vals::mod::ARMOR_HEAT ||
+             pair_values.first == enchant_vals::mod::ARMOR_STAB ||
+             pair_values.first == enchant_vals::mod::REGEN_HP ||
++            pair_values.first == enchant_vals::mod::VISION_RANGE ||
+             pair_values.first == enchant_vals::mod::SPEED ||
+             pair_values.first == enchant_vals::mod::LUMINATION ) {
+             return true;
+diff --git a/src/magic_enchantment.h b/src/magic_enchantment.h
+index 40bbb2aab5..bf6bd747e3 100644
+--- a/src/magic_enchantment.h
++++ b/src/magic_enchantment.h
+@@ -71,6 +71,7 @@ enum class mod : int {
+     ATTACK_NOISE,
+     SHOUT_NOISE,
+     FOOTSTEP_NOISE,
++    VISION_RANGE,
+     SIGHT_RANGE_ELECTRIC,
+     MOTION_VISION_RANGE,
+     SIGHT_RANGE_FAE,
+diff --git a/src/math_parser_diag.cpp b/src/math_parser_diag.cpp
+index 43c748f80d..554ccb3c4b 100644
+--- a/src/math_parser_diag.cpp
++++ b/src/math_parser_diag.cpp
+@@ -1406,6 +1406,10 @@ std::function<double( dialogue & )> vision_range_eval( char scope,
+         talker const *const actor = d.actor( beta );
+         if( Character const *const chr = actor->get_character(); chr != nullptr ) {
+             return chr->unimpaired_range();
++        } else if( monster const *const mon = actor->get_monster(); mon != nullptr ) {
++            map &here = get_map();
++            tripoint_bub_ms tripoint = get_map().bub_from_abs( mon->get_location() );
++            return mon->sight_range( here.ambient_light_at( tripoint ) );
+         }
+         debugmsg( "Tried to access vision range of a non-Character talker" );
+         return 0;
+diff --git a/src/monster.cpp b/src/monster.cpp
+index 04176faa5b..95759d3acb 100644
+--- a/src/monster.cpp
++++ b/src/monster.cpp
+@@ -1297,13 +1297,15 @@ int monster::sight_range( const float light_level ) const
+     }
+     static const float default_daylight = default_daylight_level();
+     if( light_level == 0 ) {
+-        return type->vision_night;
++        return calculate_by_enchantment( type->vision_night, enchant_vals::mod::VISION_RANGE, true );
+     } else if( light_level >= default_daylight ) {
+-        return type->vision_day;
++        return calculate_by_enchantment( type->vision_day, enchant_vals::mod::VISION_RANGE, true );
+     }
+     int range = ( light_level * type->vision_day + ( default_daylight - light_level ) *
+                   type->vision_night ) / default_daylight;
+ 
++    range = calculate_by_enchantment( range, enchant_vals::mod::VISION_RANGE, true );
++
+     return range;
+ }
+ 
+-- 
+2.45.2
+

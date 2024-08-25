@@ -1,0 +1,307 @@
+From 3eb6df14e6ca78b52eb5fb035ad78df51ba3427c Mon Sep 17 00:00:00 2001
+From: Standing-Storm <120433252+Standing-Storm@users.noreply.github.com>
+Date: Fri, 23 Aug 2024 13:42:40 -0500
+Subject: [PATCH 112/125] [MoM] Add QD944-P 'Mindsight' glasses (#75855)
+
+* Initial commit
+
+* grammar fixes
+
+* Add spawn groups + fixes
+---
+ .../itemgroups/feral_deathdrops.json          |  3 +-
+ .../itemgroups/matrix_technology_labs.json    | 14 ++-
+ .../mods/MindOverMatter/items/armor/head.json | 59 ++++++++++++
+ .../items/files_and_post_it.json              | 16 ++++
+ .../mapgen/nested/skyscraper_lab_modular.json | 96 +++++++++++++++++++
+ .../psi_lab_surface_nested.json               |  3 +-
+ .../MindOverMatter/snippets/snippets_new.json | 11 +++
+ 7 files changed, 199 insertions(+), 3 deletions(-)
+
+diff --git a/data/mods/MindOverMatter/itemgroups/feral_deathdrops.json b/data/mods/MindOverMatter/itemgroups/feral_deathdrops.json
+index 32e281d0a5..ef23f08278 100644
+--- a/data/mods/MindOverMatter/itemgroups/feral_deathdrops.json
++++ b/data/mods/MindOverMatter/itemgroups/feral_deathdrops.json
+@@ -246,7 +246,8 @@
+       { "group": "feral_humans_crystal_drops_clair", "prob": 40 },
+       { "group": "feral_humans_crystal_drops_vita", "prob": 25 },
+       { "item": "phavian_psionic_martial_power_book", "prob": 8 },
+-      { "group": "dist_psionic_shield_belts", "prob": 60, "damage": [ 1, 4 ] }
++      { "group": "dist_psionic_shield_belts", "prob": 60, "damage": [ 1, 4 ] },
++      { "item": "psionic_mindsight_glasses", "prob": 2, "damage": [ 1, 4 ] }
+     ]
+   }
+ ]
+diff --git a/data/mods/MindOverMatter/itemgroups/matrix_technology_labs.json b/data/mods/MindOverMatter/itemgroups/matrix_technology_labs.json
+index 12f808453b..a23756e1d4 100644
+--- a/data/mods/MindOverMatter/itemgroups/matrix_technology_labs.json
++++ b/data/mods/MindOverMatter/itemgroups/matrix_technology_labs.json
+@@ -101,7 +101,13 @@
+     "type": "item_group",
+     "subtype": "collection",
+     "id": "collection_force_field_and_note",
+-    "items": [ { "item": "force_field_generator", "prob": 1 }, { "item": "lab_file_OS647_P_item", "prob": 1 } ]
++    "items": [ { "item": "force_field_generator", "prob": 100 }, { "item": "lab_file_OS647_P_item", "prob": 100 } ]
++  },
++  {
++    "type": "item_group",
++    "subtype": "collection",
++    "id": "collection_mindsight_and_note",
++    "items": [ { "item": "psionic_mindsight_glasses", "prob": 100 }, { "item": "lab_file_QD944_P_item", "prob": 100 } ]
+   },
+   {
+     "type": "item_group",
+@@ -183,5 +189,11 @@
+       { "item": "camera_pro", "prob": 1, "charges": [ 0, 150 ] },
+       { "item": "camera_pro", "container-item": "camera_bag", "prob": 1, "charges": [ 0, 150 ] }
+     ]
++  },
++  {
++    "id": "clairsentience_telepathy_matrix_technology",
++    "type": "item_group",
++    "subtype": "distribution",
++    "items": [ { "group": "collection_mindsight_and_note", "prob": 1 }, { "item": "psionic_telepathic_dampener", "prob": 1 } ]
+   }
+ ]
+diff --git a/data/mods/MindOverMatter/items/armor/head.json b/data/mods/MindOverMatter/items/armor/head.json
+index 3d0611427c..be9978259e 100644
+--- a/data/mods/MindOverMatter/items/armor/head.json
++++ b/data/mods/MindOverMatter/items/armor/head.json
+@@ -36,5 +36,64 @@
+       { "encumbrance": 4, "coverage": 100, "covers": [ "head" ], "specifically_covers": [ "head_crown", "head_forehead" ] }
+     ],
+     "flags": [ "PADDED", "PORTAL_PROOF" ]
++  },
++  {
++    "id": "psionic_mindsight_glasses",
++    "type": "TOOL_ARMOR",
++    "category": "clothing",
++    "looks_like": "ar_glasses_advanced",
++    "name": { "str": "QD944-P 'Mindsight' glasses", "str_pl": "sets of QD944-P 'Mindsight' glasses" },
++    "description": "A set of AR-looking glasses.  The code \"QD944-P\" is printed in small letters on the temples.",
++    "weight": "170 g",
++    "volume": "750 ml",
++    "price": "30 kUSD",
++    "price_postapoc": "400 USD",
++    "material": [ { "type": "plastic", "portion": 12 }, { "type": "nether_crystal" } ],
++    "symbol": "[",
++    "color": "white",
++    "ammo": "battery",
++    "charges_per_use": 1,
++    "use_action": {
++      "type": "transform",
++      "msg": "You activate your %s.",
++      "target": "psionic_mindsight_glasses_on",
++      "active": true,
++      "need_charges": 1,
++      "need_charges_msg": "The %s's batteries are dead."
++    },
++    "pocket_data": [
++      {
++        "pocket_type": "MAGAZINE_WELL",
++        "rigid": true,
++        "flag_restriction": [ "BATTERY_LIGHT", "BATTERY_ULTRA_LIGHT" ],
++        "default_magazine": "light_plus_battery_cell"
++      }
++    ],
++    "armor": [ { "encumbrance": 4, "coverage": 100, "covers": [ "eyes" ] } ],
++    "material_thickness": 1,
++    "environmental_protection": 1,
++    "flags": [ "OUTER", "FRAGILE", "SUN_GLASSES", "WATER_BREAK", "PADDED", "ELECTRONIC" ],
++    "relic_data": {
++      "passive_effects": [ { "has": "WORN", "condition": "ACTIVE", "values": [ { "value": "SIGHT_RANGE_MINDS", "add": 20 } ] } ]
++    }
++  },
++  {
++    "id": "psionic_mindsight_glasses_on",
++    "type": "TOOL_ARMOR",
++    "category": "clothing",
++    "copy-from": "psionic_mindsight_glasses",
++    "name": { "str": "QD944-P 'Mindsight' glasses (on)", "str_pl": "sets of QD944-P 'Mindsight' glasses (on)" },
++    "description": "A set of AR-looking glasses.  The code \"QD944-P\" is printed in small letters on the temples.  They are currently active.",
++    "use_action": {
++      "ammo_scale": 0,
++      "type": "transform",
++      "menu_text": "Turn off",
++      "msg": "Your %s deactivates.",
++      "target": "psionic_mindsight_glasses"
++    },
++    "power_draw": "3500 mW",
++    "relic_data": {
++      "passive_effects": [ { "has": "WORN", "condition": "ACTIVE", "values": [ { "value": "SIGHT_RANGE_MINDS", "add": 20 } ] } ]
++    }
+   }
+ ]
+diff --git a/data/mods/MindOverMatter/items/files_and_post_it.json b/data/mods/MindOverMatter/items/files_and_post_it.json
+index dfbd652331..60d7f1abdc 100644
+--- a/data/mods/MindOverMatter/items/files_and_post_it.json
++++ b/data/mods/MindOverMatter/items/files_and_post_it.json
+@@ -194,6 +194,22 @@
+     "flags": [ "TRADER_AVOID" ],
+     "copy-from": "file"
+   },
++  {
++    "type": "GENERIC",
++    "id": "lab_file_QD944_P_item",
++    "name": { "str": "QD944-P Progress Update", "str_pl": "copies of QD944-P Progress Update" },
++    "category": "books",
++    "description": "A note written on official XEDRA letterhead.",
++    "snippet_category": "lab_file_QD944_P",
++    "weight": "15 g",
++    "to_hit": -3,
++    "color": "white",
++    "symbol": ",",
++    "material": [ "paper" ],
++    "volume": "50 ml",
++    "flags": [ "TRADER_AVOID" ],
++    "copy-from": "file"
++  },
+   {
+     "type": "GENERIC",
+     "id": "lab_file_phavian_memo_item",
+diff --git a/data/mods/MindOverMatter/mapgen/nested/skyscraper_lab_modular.json b/data/mods/MindOverMatter/mapgen/nested/skyscraper_lab_modular.json
+index e6e6905756..37af29937e 100644
+--- a/data/mods/MindOverMatter/mapgen/nested/skyscraper_lab_modular.json
++++ b/data/mods/MindOverMatter/mapgen/nested/skyscraper_lab_modular.json
+@@ -409,6 +409,102 @@
+       ]
+     }
+   },
++  {
++    "//": "room for creating matrix technology prototypes, doors in the lower left",
++    "type": "mapgen",
++    "method": "json",
++    "weight": 600,
++    "nested_mapgen_id": "phavian_skyscraper_lab_north_lldoor",
++    "object": {
++      "mapgensize": [ 8, 8 ],
++      "rows": [
++        "U......C",
++        "U..MM..M",
++        "U..CC..M",
++        "U..¢¢..C",
++        "&......C",
++        ":::==:::",
++        "........",
++        "&..llSĆĆ"
++      ],
++      "flags": [ "ERASE_ALL_BEFORE_PLACING_TERRAIN" ],
++      "palettes": [ "phavian_skyscraper_office_room_palette" ],
++      "furniture": { "¢": "f_counter", "M": "f_machinery_electronic", "Ć": "f_counter" },
++      "items": {
++        "¢": [
++          { "item": "supplies_electronics", "chance": 40, "repeat": [ 1, 4 ] },
++          { "item": "hardware", "chance": 20, "repeat": [ 1, 3 ] },
++          { "item": "clairsentience_telepathy_matrix_technology", "chance": 40 }
++        ],
++        "l": [
++          { "item": "lab_torso", "chance": 40, "repeat": [ 1, 8 ] },
++          { "item": "lab_shoes", "chance": 40, "repeat": [ 1, 8 ] },
++          { "item": "hardware_clothing", "chance": 60, "repeat": [ 1, 5 ] },
++          { "item": "decontamination_room", "chance": 10, "repeat": [ 1, 3 ] }
++        ],
++        "C": [
++          { "item": "psi_lab_no_recipes", "chance": 10, "repeat": [ 1, 3 ] },
++          { "item": "supplies_electronics", "chance": 40, "repeat": [ 1, 4 ] },
++          { "item": "hardware", "chance": 20, "repeat": [ 1, 3 ] }
++        ],
++        "U": [
++          { "item": "psi_lab_no_recipes", "chance": 40, "repeat": [ 1, 3 ] },
++          { "item": "supplies_electronics", "chance": 60, "repeat": [ 1, 4 ] },
++          { "item": "hardware", "chance": 40, "repeat": [ 1, 5 ] }
++        ],
++        "&": { "item": "trash", "chance": 75, "repeat": [ 1, 2 ] }
++      },
++      "place_monster": [ { "monster": "mon_zombie_technician", "x": [ 1, 6 ], "y": [ 0, 4 ], "repeat": [ 2, 4 ], "chance": 50 } ]
++    }
++  },
++  {
++    "//": "room for creating matrix technology prototypes, doors in the lower right",
++    "type": "mapgen",
++    "method": "json",
++    "weight": 600,
++    "nested_mapgen_id": "phavian_skyscraper_lab_north_lrdoor",
++    "object": {
++      "mapgensize": [ 8, 8 ],
++      "rows": [
++        "C......U",
++        "M..MM..U",
++        "M..CC..U",
++        "C..¢¢..U",
++        "C......&",
++        ":::==:::",
++        "........",
++        "ĆĆSll..&"
++      ],
++      "flags": [ "ERASE_ALL_BEFORE_PLACING_TERRAIN" ],
++      "palettes": [ "phavian_skyscraper_office_room_palette" ],
++      "furniture": { "¢": "f_counter", "M": "f_machinery_electronic", "Ć": "f_counter" },
++      "items": {
++        "¢": [
++          { "item": "supplies_electronics", "chance": 40, "repeat": [ 1, 4 ] },
++          { "item": "hardware", "chance": 20, "repeat": [ 1, 3 ] },
++          { "item": "clairsentience_telepathy_matrix_technology", "chance": 40 }
++        ],
++        "l": [
++          { "item": "lab_torso", "chance": 40, "repeat": [ 1, 8 ] },
++          { "item": "lab_shoes", "chance": 40, "repeat": [ 1, 8 ] },
++          { "item": "hardware_clothing", "chance": 60, "repeat": [ 1, 5 ] },
++          { "item": "decontamination_room", "chance": 10, "repeat": [ 1, 3 ] }
++        ],
++        "C": [
++          { "item": "psi_lab_no_recipes", "chance": 10, "repeat": [ 1, 3 ] },
++          { "item": "supplies_electronics", "chance": 40, "repeat": [ 1, 4 ] },
++          { "item": "hardware", "chance": 20, "repeat": [ 1, 3 ] }
++        ],
++        "U": [
++          { "item": "psi_lab_no_recipes", "chance": 40, "repeat": [ 1, 3 ] },
++          { "item": "supplies_electronics", "chance": 60, "repeat": [ 1, 4 ] },
++          { "item": "hardware", "chance": 40, "repeat": [ 1, 5 ] }
++        ],
++        "&": { "item": "trash", "chance": 75, "repeat": [ 1, 2 ] }
++      },
++      "place_monster": [ { "monster": "mon_zombie_technician", "x": [ 1, 6 ], "y": [ 0, 4 ], "repeat": [ 2, 4 ], "chance": 50 } ]
++    }
++  },
+   {
+     "//": "generic office room, door in the upper left",
+     "type": "mapgen",
+diff --git a/data/mods/MindOverMatter/mapgen/psi_surface_lab/psi_lab_surface_nested.json b/data/mods/MindOverMatter/mapgen/psi_surface_lab/psi_lab_surface_nested.json
+index 501e4cdd51..6e24e6e451 100644
+--- a/data/mods/MindOverMatter/mapgen/psi_surface_lab/psi_lab_surface_nested.json
++++ b/data/mods/MindOverMatter/mapgen/psi_surface_lab/psi_lab_surface_nested.json
+@@ -367,7 +367,8 @@
+         "d": [
+           { "item": "office", "chance": 25, "repeat": [ 1, 3 ] },
+           { "item": "electronics", "chance": 15 },
+-          { "item": "dist_lab_file_phavian_internal", "chance": 3 }
++          { "item": "dist_lab_file_phavian_internal", "chance": 3 },
++          { "item": "collection_mindsight_and_note", "chance": 10 }
+         ],
+         "H": { "item": "bed", "chance": 15 },
+         "i": { "item": "office", "chance": 95 },
+diff --git a/data/mods/MindOverMatter/snippets/snippets_new.json b/data/mods/MindOverMatter/snippets/snippets_new.json
+index 367950d87b..44f56ee97e 100644
+--- a/data/mods/MindOverMatter/snippets/snippets_new.json
++++ b/data/mods/MindOverMatter/snippets/snippets_new.json
+@@ -402,6 +402,17 @@
+       }
+     ]
+   },
++  {
++    "type": "snippet",
++    "category": "lab_file_QD944_P",
++    "text": [
++      {
++        "name": "QD944-P Progress Update",
++        "id": "lab_file_item_QD944_P_01",
++        "text": "Dr. Doherty,\nHere's the latest updated version of JUKEBOX TALISMAN.  The first thing I have to say is that it finally works--no headaches, no eyestrain, no expensive prop that requires a mathematician to achieve its stated function, no whatever happened during test J4-6553 (hopefully B55 has made a full recovery).  Someone off the street could put on QD944-P and immediately see any potential targets through walls.\n\nNow, the downsides.  Seeing others through walls is all that it can do.  As of yet, we've been unable to achieve the main goals of JUKEBOX TALISMAN.  The next prototype after this one might have gotten closer to meeting the project goals, but it's impossible to tell because anyone, including a GRAY DAWN mathematician, who puts one on immediately gets a splitting headache.  We have also been unable to miniaturize the power source enough to make the glasses inconspicuous, since COBALT RAIN still has not gotten below the \"large generator\" stage, and even with existing battery sizes the power draw is considerable.  Hopefully COBALT RAIN reaches the miniaturization stage soon.  That said, I think the existing prototype is still valuable enough to be workable while we further refine the design.\nErin McGrath\nResearcher"
++      }
++    ]
++  },
+   {
+     "type": "snippet",
+     "category": "lab_file_matrix_research",
+-- 
+2.45.2
+

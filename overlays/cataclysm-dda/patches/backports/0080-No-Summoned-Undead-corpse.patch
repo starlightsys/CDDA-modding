@@ -1,0 +1,35 @@
+From 765c9923b6113e0310bcdaabf2e7acd98e6edac1 Mon Sep 17 00:00:00 2001
+From: OromisElf <oromis.der.lehrer.eragons@freenet.de>
+Date: Sun, 18 Aug 2024 22:17:28 +0200
+Subject: [PATCH 080/125] No Summoned Undead corpse
+
+adds "NO_CORPSE_QUIET" flag to summoned zombies
+---
+ data/mods/Magiclysm/Spells/animist.json | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/data/mods/Magiclysm/Spells/animist.json b/data/mods/Magiclysm/Spells/animist.json
+index c4ebb5f75c..49eb21b072 100644
+--- a/data/mods/Magiclysm/Spells/animist.json
++++ b/data/mods/Magiclysm/Spells/animist.json
+@@ -123,7 +123,7 @@
+     "max_range": 3,
+     "min_aoe": 2,
+     "max_aoe": 2,
+-    "flags": [ "SILENT", "NO_EXPLOSION_SFX" ],
++    "flags": [ "SILENT", "NO_EXPLOSION_SFX", "NO_CORPSE_QUIET" ],
+     "min_duration": { "math": [ "summoning_proficiency_bonus_calculate(36000, 30)" ] },
+     "max_duration": { "math": [ "summoning_proficiency_bonus_calculate(1080000, 30)" ] },
+     "duration_increment": { "math": [ "summoning_proficiency_bonus_calculate(36000, 0.034)" ] }
+@@ -268,7 +268,7 @@
+     "max_range": 3,
+     "min_aoe": 2,
+     "max_aoe": 2,
+-    "flags": [ "SILENT", "NO_EXPLOSION_SFX" ],
++    "flags": [ "SILENT", "NO_EXPLOSION_SFX", "NO_CORPSE_QUIET" ],
+     "min_duration": { "math": [ "summoning_proficiency_bonus_calculate(36000, 30)" ] },
+     "max_duration": { "math": [ "summoning_proficiency_bonus_calculate(1080000, 30)" ] },
+     "duration_increment": { "math": [ "summoning_proficiency_bonus_calculate(36000, 0.034)" ] }
+-- 
+2.45.2
+

@@ -1,0 +1,1596 @@
+From e4bdf797d17ea9bab0b60497a96031e5e7812817 Mon Sep 17 00:00:00 2001
+From: phi2dao <orgodemir.v@gmail.com>
+Date: Sun, 25 Aug 2024 12:18:44 -0400
+Subject: [PATCH 124/125] JSON-ify sleep-affecting mutations, trying to sleep,
+ and sleep comfort (#75852)
+
+* Add sleep_data
+
+* Add comfort calculations
+
+* Rework handle_action::sleep()
+
+* Add sleep aid msg to avatar::try_to_sleep
+Add fall asleep msg to Character::fall_asleep
+
+* Cleanup old functions, add comfort to json
+
+* Fix code and json errors
+
+* Move sleep messaging into sleep.h/cpp
+
+* Commented code
+
+* Documented comfort data and conditions
+
+* Fix typo in mutations.json
+
+* Update msvc-full-features/Cataclysm-lib-vcpkg-static.vcxproj
+
+* Appease clang-tidy
+
+* Fix discomfort messaging
+
+* Renamed comfort_data::condition::category to ccategory to appease GCC
+
+---------
+
+Co-authored-by: Maleclypse <54345792+Maleclypse@users.noreply.github.com>
+---
+ .../mutation_eocs/mutation_sleep_eocs.json    |  25 ++
+ data/json/mutations/mutations.json            | 139 ++++++-
+ .../paraclesians/undine_mutations.json        |  14 +-
+ doc/MUTATIONS.md                              |  51 +++
+ src/avatar.cpp                                | 127 +------
+ src/character.cpp                             | 284 +++------------
+ src/character.h                               |  41 ++-
+ src/handle_action.cpp                         |  16 +-
+ src/map.cpp                                   |   5 +
+ src/map.h                                     |   1 +
+ src/mutation.h                                |   4 +
+ src/mutation_data.cpp                         |   2 +
+ src/npcmove.cpp                               |   7 +-
+ src/sleep.cpp                                 | 342 ++++++++++++++++++
+ src/sleep.h                                   | 117 ++++++
+ 15 files changed, 787 insertions(+), 388 deletions(-)
+ create mode 100644 data/json/effects_on_condition/mutation_eocs/mutation_sleep_eocs.json
+ create mode 100644 src/sleep.cpp
+ create mode 100644 src/sleep.h
+
+diff --git a/data/json/effects_on_condition/mutation_eocs/mutation_sleep_eocs.json b/data/json/effects_on_condition/mutation_eocs/mutation_sleep_eocs.json
+new file mode 100644
+index 0000000000..b4c0f6cc48
+--- /dev/null
++++ b/data/json/effects_on_condition/mutation_eocs/mutation_sleep_eocs.json
+@@ -0,0 +1,25 @@
++[
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_PRE_THRESHOLD_SPIDER_SLEEP_MUTATION",
++    "eoc_type": "EVENT",
++    "required_event": "character_attempt_to_fall_asleep",
++    "condition": {
++      "and": [
++        { "u_has_trait": "WEB_WALKER" },
++        { "not": { "u_has_trait": "WEB_SPINNER" } },
++        { "not": { "u_has_trait": "WEB_WEAVER" } },
++        { "math": [ "u_field_strength('fd_web')", "<", "3" ] }
++      ]
++    },
++    "deactivate_condition": {
++      "or": [ { "not": { "u_has_trait": "WEB_WALKER" } }, { "u_has_trait": "WEB_SPINNER" }, { "u_has_trait": "WEB_WEAVER" } ]
++    },
++    "effect": [ { "u_transform_radius": 0, "ter_furn_transform": "spider_clear_webs" } ]
++  },
++  {
++    "type": "ter_furn_transform",
++    "id": "spider_clear_webs",
++    "field": [ { "result": "fd_null", "valid_field": [ "fd_web" ] } ]
++  }
++]
+diff --git a/data/json/mutations/mutations.json b/data/json/mutations/mutations.json
+index 49d9bf904b..e2fa51c6ab 100644
+--- a/data/json/mutations/mutations.json
++++ b/data/json/mutations/mutations.json
+@@ -2766,7 +2766,17 @@
+       { "part": "torso", "ignored": 60 }
+     ],
+     "armor": [ { "part_types": [ "ALL" ], "cut": 3, "bash": 5 } ],
+-    "enchantments": [ { "condition": "ALWAYS", "values": [ { "value": "SPEED", "multiply": -0.2 } ] } ]
++    "enchantments": [ { "condition": "ALWAYS", "values": [ { "value": "SPEED", "multiply": -0.2 } ] } ],
++    "comfort": [
++      {
++        "conditions": [ { "type": "terrain", "flag": "FUNGUS" } ],
++        "comfort": "very_comfortable",
++        "msg_try": {
++          "text": "Our fibers meld with the ground beneath us.  The gills on our neck begin to seed the air with spores as our awareness fades.",
++          "rating": "good"
++        }
++      }
++    ]
+   },
+   {
+     "type": "mutation",
+@@ -5804,7 +5814,30 @@
+     "description": "Your body excretes very fine amounts of a chemical which prevents you from sticking to webs.  Walking through webs does not affect you at all.",
+     "leads_to": [ "WEB_WEAVER" ],
+     "flags": [ "WEBWALK" ],
+-    "category": [ "SPIDER" ]
++    "category": [ "SPIDER" ],
++    "comfort": [
++      {
++        "conditions": [
++          { "type": "field", "id": "fd_web", "intensity": 3 },
++          { "type": "trait", "id": "WEB_SPINNER", "invert": true },
++          { "type": "trait", "id": "WEB_WEAVER", "invert": true }
++        ],
++        "comfort": "sleep_aid",
++        "use_better_comfort": true,
++        "add_sleep_aids": true,
++        "msg_try": { "text": "These thick webs support your weight, and are strangely comfortable…", "rating": "good" }
++      },
++      {
++        "conditions": [
++          { "type": "field", "id": "fd_web" },
++          { "type": "trait", "id": "WEB_SPINNER", "invert": true },
++          { "type": "trait", "id": "WEB_WEAVER", "invert": true }
++        ],
++        "add_human_comfort": true,
++        "add_sleep_aids": true,
++        "msg_try": { "text": "You try to sleep, but the webs get in the way.  You brush them aside.", "rating": "info" }
++      }
++    ]
+   },
+   {
+     "type": "mutation",
+@@ -5817,7 +5850,20 @@
+     "prereqs": [ "WEB_WALKER" ],
+     "threshreq": [ "THRESH_SPIDER" ],
+     "changes_to": [ "WEB_WEAVER" ],
+-    "category": [ "SPIDER" ]
++    "category": [ "SPIDER" ],
++    "comfort": [
++      {
++        "conditions": [ { "type": "field", "id": "fd_web", "intensity": 3, "invert": true } ],
++        "comfort": "impossible",
++        "msg_try": { "text": "You try to sleep, but you feel exposed and your spinnerets keep twitching.", "rating": "bad" },
++        "msg_hint": { "text": "Maybe a nice thick web would help you sleep.", "rating": "info" }
++      },
++      {
++        "conditions": [ { "type": "field", "id": "fd_web", "intensity": 3 } ],
++        "comfort": "very_comfortable",
++        "msg_try": { "text": "You relax into your web.", "rating": "good" }
++      }
++    ]
+   },
+   {
+     "type": "mutation",
+@@ -5835,7 +5881,20 @@
+     "cost": 69,
+     "time": "100 s",
+     "kcal": true,
+-    "thirst": true
++    "thirst": true,
++    "comfort": [
++      {
++        "conditions": [ { "type": "field", "id": "fd_web", "intensity": 3, "invert": true } ],
++        "comfort": "impossible",
++        "msg_try": { "text": "You try to sleep, but you feel exposed and your spinnerets keep twitching.", "rating": "bad" },
++        "msg_hint": { "text": "Maybe a nice thick web would help you sleep.", "rating": "info" }
++      },
++      {
++        "conditions": [ { "type": "field", "id": "fd_web", "intensity": 3 } ],
++        "comfort": "very_comfortable",
++        "msg_try": { "text": "You relax into your web.", "rating": "good" }
++      }
++    ]
+   },
+   {
+     "type": "mutation",
+@@ -8061,7 +8120,45 @@
+     "category": [ "PLANT" ],
+     "scent_type": "sc_flower",
+     "encumbrance_covered": [ [ "foot_l", 10 ], [ "foot_r", 10 ] ],
+-    "flags": [ "TOUGH_FEET", "ROOTS3" ]
++    "flags": [ "TOUGH_FEET", "ROOTS3" ],
++    "comfort": [
++      {
++        "conditions": [ { "type": "vehicle" } ],
++        "comfort": "impossible",
++        "msg_try": { "text": "It's impossible to sleep in this wheeled pot!", "rating": "bad" }
++      },
++      {
++        "conditions": [ { "type": "furniture", "id": "f_null", "invert": true } ],
++        "comfort": "impossible",
++        "msg_try": { "text": "The humans' furniture blocks your roots.  You can't get comfortable.", "rating": "bad" }
++      },
++      {
++        "conditions": [
++          { "type": "terrain", "flag": "PLOWABLE", "invert": true },
++          { "type": "terrain", "flag": "PLANTABLE", "invert": true },
++          { "type": "terrain", "id": "t_pit", "invert": true },
++          { "type": "terrain", "id": "t_pit_shallow", "invert": true }
++        ],
++        "comfort": "impossible",
++        "msg_try": { "text": "Your roots scrabble ineffectively at the unyielding surface.", "rating": "bad" }
++      },
++      {
++        "conditions": [
++          { "type": "terrain", "flag": "PLANTABLE" },
++          { "type": "terrain", "id": "t_dirt" },
++          { "type": "terrain", "id": "t_pit" },
++          { "type": "terrain", "id": "t_pit_shallow" }
++        ],
++        "conditions_any": true,
++        "comfort": "very_comfortable",
++        "msg_try": { "text": "You relax as your roots embrace the soil.", "rating": "good" }
++      },
++      {
++        "conditions": [ { "type": "terrain", "flag": "PLOWABLE" } ],
++        "comfort": "comfortable",
++        "msg_try": { "text": "You relax as your roots embrace the soil.", "rating": "good" }
++      }
++    ]
+   },
+   {
+     "type": "mutation",
+@@ -8508,7 +8605,14 @@
+     "category": [ "CEPHALOPOD", "GASTROPOD" ],
+     "wet_protection": [ { "part": "torso", "ignored": 26 } ],
+     "active": true,
+-    "integrated_armor": [ "integrated_shell2" ]
++    "integrated_armor": [ "integrated_shell2" ],
++    "comfort": [
++      {
++        "conditions": [ { "type": "trait", "id": "SHELL2", "active": true } ],
++        "comfort": "sleep_aid",
++        "add_sleep_aids": true
++      }
++    ]
+   },
+   {
+     "type": "mutation",
+@@ -8526,7 +8630,14 @@
+     "category": [ "GASTROPOD" ],
+     "wet_protection": [ { "part": "torso", "ignored": 45 } ],
+     "active": true,
+-    "integrated_armor": [ "integrated_shell3" ]
++    "integrated_armor": [ "integrated_shell3" ],
++    "comfort": [
++      {
++        "conditions": [ { "type": "trait", "id": "SHELL3", "active": true } ],
++        "comfort": "sleep_aid",
++        "add_sleep_aids": true
++      }
++    ]
+   },
+   {
+     "type": "mutation",
+@@ -8960,7 +9071,19 @@
+     "description": "Falling asleep underwater is easy for you, and you spend less time asleep when you rest there.  You can also eat underwater, though you can't drink.",
+     "prereqs": [ "SEESLEEP", "FROG_EYES", "GILLS_CEPH" ],
+     "category": [ "FISH", "BATRACHIAN", "CEPHALOPOD" ],
+-    "threshreq": [ "THRESH_FISH", "THRESH_BATRACHIAN", "THRESH_CEPHALOPOD" ]
++    "threshreq": [ "THRESH_FISH", "THRESH_BATRACHIAN", "THRESH_CEPHALOPOD" ],
++    "comfort": [
++      {
++        "conditions": [ { "type": "terrain", "flag": "DEEP_WATER" } ],
++        "comfort": "very_comfortable",
++        "msg_try": { "text": "You lay beneath the waves' embrace, gazing up through the water's surface…", "rating": "good" }
++      },
++      {
++        "conditions": [ { "type": "terrain", "flag": "SWIMMABLE" } ],
++        "comfort": "very_comfortable",
++        "msg_try": { "text": "You settle into the water and begin to drowse…", "rating": "good" }
++      }
++    ]
+   },
+   {
+     "type": "mutation",
+diff --git a/data/mods/Xedra_Evolved/mutations/paraclesians/undine_mutations.json b/data/mods/Xedra_Evolved/mutations/paraclesians/undine_mutations.json
+index fd6ca4b88a..e23336d856 100644
+--- a/data/mods/Xedra_Evolved/mutations/paraclesians/undine_mutations.json
++++ b/data/mods/Xedra_Evolved/mutations/paraclesians/undine_mutations.json
+@@ -321,7 +321,19 @@
+     "prereqs": [ "UNDINE_SKIN_2", "UNDINE_SKIN_3" ],
+     "prereqs2": [ "BREATH_UNDERWATER" ],
+     "category": [ "UNDINE" ],
+-    "enchantments": [ { "condition": "u_is_underwater", "values": [ { "value": "SLEEPY", "add": 40 } ] } ]
++    "enchantments": [ { "condition": "u_is_underwater", "values": [ { "value": "SLEEPY", "add": 40 } ] } ],
++    "comfort": [
++      {
++        "conditions": [ { "type": "terrain", "flag": "DEEP_WATER" } ],
++        "comfort": "very_comfortable",
++        "msg_try": { "text": "You lay beneath the waves' embrace, gazing up through the water's surface…", "rating": "good" }
++      },
++      {
++        "conditions": [ { "type": "terrain", "flag": "SWIMMABLE" } ],
++        "comfort": "very_comfortable",
++        "msg_try": { "text": "You settle into the water and begin to drowse…", "rating": "good" }
++      }
++    ]
+   },
+   {
+     "type": "mutation",
+diff --git a/doc/MUTATIONS.md b/doc/MUTATIONS.md
+index 22fc7a1754..a4173ac8a8 100644
+--- a/doc/MUTATIONS.md
++++ b/doc/MUTATIONS.md
+@@ -229,6 +229,25 @@ Note that **all new traits that can be obtained through mutation must be purifia
+       }
+     ]
+   ],
++  "comfort": [                                // List of comfort data. The first comfort data with passing conditions will apply.
++  {                                           // If multiple mutations would apply comfort data, only the data with the worst `comfort` will apply.
++      "conditions": [                         // List of comfort conditions. See 'Comfort Conditions' below. Mandatory.
++        { "type": "terrain", "flag": "DEEP_WATER" },
++        { "type": "furniture", "id": "f_null", "invert": true },
++        { "type": "field", "id": "fd_web", "intensity": 3 },
++        { "type": "vehicle" },
++        { "type": "trait": "id": "SHELL2", "active": true }
++      ],
++      "conditions_any": true,                 // If this comfort data passes when ANY of its conditions are true (true) or when ALL of its conditions are true (false) (default: false).
++      "comfort": "very_comfortable",          // The comfort provided by this comfort data if applied. Can be an integer or any of "very_comfortable" (10), "comfortable" (5), "sleep_aid" (4), "slightly_comfortable" (3), "neutral" (0), "uncomfortable" (-7), or "impossible" (-999) (default: "neutral").
++      "add_human_comfort": false,             // If the furniture/trap/terrain's comfort value should be added to `comfort` (default: false). Not compatible with `use_better_comfort`.
++      "use_better_comfort": false,            // If the furniture/trap/terrain's comfort value should be used INSTEAD OF `comfort` if better (default: false). Not compatible with `add_human_comfort`.
++      "add_sleep_aids": false,                // If sleep aids should add their comfort value to the final result (default: false).
++      "msg_try": { "text": "You try to sleep.", "rating": "good" },                 // Message displayed when trying to sleep.
++      "msg_hint": { "text": "Maybe you should sleep on a bed?", "rating": "info" }, // Message displayed after the above message. Used to suggest better places for a mutant to sleep.
++      "msg_sleep": { "text": "You fall asleep.", "rating": "good" }                 // Message displayed when falling asleep.
++    }
++  ],
+   "activated_is_setup": true,                 // If this is true the bellow activated EOC runs then the mutation turns on for processing every turn. If this is false the below "activated_eocs" will run and then the mod will turn itself off.
+   "activated_eocs": [ "eoc_id_1" ],           // List of effect_on_conditions that attempt to activate when this mutation is successfully activated.
+   "processed_eocs": [ "eoc_id_1" ],           // List of effect_on_conditions that attempt to activate every time (defined above) units of time. Time of 0 means every turn it processes. Processed when the mutation is active for activatable mutations and always for non-activatable ones.
+@@ -289,6 +308,38 @@ These fields are optional, but are very frequently used in mutations and their c
+ 
+ There are many, many optional fields present for mutations to let them do all sorts of things. You can see them documented above.
+ 
++### Comfort Conditions
++
++Comfort data can have one or more `conditions`. Comfort data passes (is true) when **any** of its conditions pass, if `conditions_any` is `true`, or when **all** of its conditions pass, if `conditions_any` is `false`.
++
++#### Fields
++
++Conditions have the following fields. `type` is mandatory and determines which other fields are mandatory. `invert` is always optional.
++
++| Identifier  | Type    | Description
++|-------------|---------|-------------
++| `type`      | string  | One of `"terrain"`, `"furniture"`, `"trap"`, `"field"`, `"vehicle"`, `"character"`, or `"trait"`. Always mandatory.
++| `id`        | string  | The ID of a terrain, furniture, trap, field, or trait.
++| `flag`      | string  | A terrain, furniture, vehicle part, or character flag.
++| `intensity` | integer | A field's intensity.
++| `active`    | boolean | If a trait must be active.
++| `invert`    | boolean | If a condition should pass when it would fail and fail when it would pass. Always optional.
++
++#### Types
++
++A condition's `type` determines what it checks for in a location. A condition passes (is true) according to it's `type`.
++
++| Type        | Mandatory      | Optional    | Passes
++|-------------|----------------|-------------|-------------
++| `terrain`   | `id` or `flag` |             | Passes if on terrain with the given `id` or `flag`.
++| `furniture` | `id` or `flag` |             | Passes if on furniture with the given `id` or `flag`.
++| `trap`      | `id`           |             | Passes if on a trap with the given `id`.
++| `field`     | `id`           | `intensity` | Passes if in a field with the given `id`. If `intensity` is defined, the field's intensity must be greater than or equal to `intensity`.
++| `vehicle`   |                | `flag`      | Passes if in/on a part of a vehicle. If `flag` is defined, the part must have the given `flag` and cannot be broken.
++| `character` | `flag`         |             | Passes if the character has the given `flag`.
++| `trait`     | `id`           | `active`    | Passes if the character has a trait with the given `id`. If `active` is defined, the trait must be active.
++| all types   |                | `invert`    | Passes if the condition would fail. Fails if the condition would pass.
++
+ ### EOC details
+ 
+ Mutations support EOC on activate, deactivate and for processing. As well for each of those the EOC has access to the context variable `this` which is the ID of the mutation itself.
+diff --git a/src/avatar.cpp b/src/avatar.cpp
+index 470bbdb0a7..26d262a5d0 100644
+--- a/src/avatar.cpp
++++ b/src/avatar.cpp
+@@ -69,6 +69,7 @@
+ #include "rng.h"
+ #include "scenario.h"
+ #include "skill.h"
++#include "sleep.h"
+ #include "stomach.h"
+ #include "string_formatter.h"
+ #include "talker.h"
+@@ -125,35 +126,20 @@ static const move_mode_id move_mode_prone( "prone" );
+ static const move_mode_id move_mode_run( "run" );
+ static const move_mode_id move_mode_walk( "walk" );
+ 
+-static const ter_str_id ter_t_dirt( "t_dirt" );
+-static const ter_str_id ter_t_dirtmound( "t_dirtmound" );
+-static const ter_str_id ter_t_floor( "t_floor" );
+-static const ter_str_id ter_t_grass( "t_grass" );
+-static const ter_str_id ter_t_pit( "t_pit" );
+-static const ter_str_id ter_t_pit_shallow( "t_pit_shallow" );
+-
+ static const trait_id trait_ARACHNID_ARMS( "ARACHNID_ARMS" );
+ static const trait_id trait_ARACHNID_ARMS_OK( "ARACHNID_ARMS_OK" );
+ static const trait_id trait_CHITIN2( "CHITIN2" );
+ static const trait_id trait_CHITIN3( "CHITIN3" );
+ static const trait_id trait_CHITIN_FUR3( "CHITIN_FUR3" );
+-static const trait_id trait_CHLOROMORPH( "CHLOROMORPH" );
+ static const trait_id trait_COMPOUND_EYES( "COMPOUND_EYES" );
+ static const trait_id trait_DEBUG_CLOAK( "DEBUG_CLOAK" );
+ static const trait_id trait_INSECT_ARMS( "INSECT_ARMS" );
+ static const trait_id trait_INSECT_ARMS_OK( "INSECT_ARMS_OK" );
+-static const trait_id trait_M_SKIN3( "M_SKIN3" );
+ static const trait_id trait_PROF_DICEMASTER( "PROF_DICEMASTER" );
+ static const trait_id trait_SHELL2( "SHELL2" );
+ static const trait_id trait_SHELL3( "SHELL3" );
+ static const trait_id trait_STIMBOOST( "STIMBOOST" );
+ static const trait_id trait_THICK_SCALES( "THICK_SCALES" );
+-static const trait_id trait_THRESH_SPIDER( "THRESH_SPIDER" );
+-static const trait_id trait_UNDINE_SLEEP_WATER( "UNDINE_SLEEP_WATER" );
+-static const trait_id trait_WATERSLEEP( "WATERSLEEP" );
+-static const trait_id trait_WEB_SPINNER( "WEB_SPINNER" );
+-static const trait_id trait_WEB_WALKER( "WEB_WALKER" );
+-static const trait_id trait_WEB_WEAVER( "WEB_WEAVER" );
+ static const trait_id trait_WHISKERS( "WHISKERS" );
+ static const trait_id trait_WHISKERS_RAT( "WHISKERS_RAT" );
+ 
+@@ -1948,119 +1934,12 @@ bool avatar::wield_contents( item &container, item *internal_item, bool penaltie
+ 
+ void avatar::try_to_sleep( const time_duration &dur )
+ {
+-    map &here = get_map();
+-    const optional_vpart_position vp = here.veh_at( pos_bub() );
+-    const trap &trap_at_pos = here.tr_at( pos_bub() );
+-    const ter_id ter_at_pos = here.ter( pos_bub() );
+-    const furn_id furn_at_pos = here.furn( pos_bub() );
+-    bool plantsleep = false;
+-    bool fungaloid_cosplay = false;
+-    bool websleep = false;
+-    bool webforce = false;
+-    bool websleeping = false;
+-    bool in_shell = false;
+-    bool watersleep = false;
+-    if( has_trait( trait_CHLOROMORPH ) ) {
+-        plantsleep = true;
+-        const std::unordered_set<ter_str_id> comfy_ters = { ter_t_dirt, ter_t_dirtmound, ter_t_grass, ter_t_pit, ter_t_pit_shallow };
+-        if( comfy_ters.find( ter_at_pos.id() ) != comfy_ters.end() && !vp &&
+-            furn_at_pos == furn_str_id::NULL_ID() ) {
+-            add_msg_if_player( m_good, _( "You relax as your roots embrace the soil." ) );
+-        } else if( vp ) {
+-            add_msg_if_player( m_bad, _( "It's impossible to sleep in this wheeled pot!" ) );
+-        } else if( furn_at_pos != furn_str_id::NULL_ID() ) {
+-            add_msg_if_player( m_bad,
+-                               _( "The humans' furniture blocks your roots.  You can't get comfortable." ) );
+-        } else { // Floor problems
+-            add_msg_if_player( m_bad, _( "Your roots scrabble ineffectively at the unyielding surface." ) );
+-        }
+-    } else if( has_trait( trait_M_SKIN3 ) ) {
+-        fungaloid_cosplay = true;
+-        if( here.has_flag_ter_or_furn( ter_furn_flag::TFLAG_FUNGUS, pos_bub() ) ) {
+-            add_msg_if_player( m_good,
+-                               _( "Our fibers meld with the ground beneath us.  The gills on our neck begin to seed the air with spores as our awareness fades." ) );
+-        }
+-    }
+-    if( has_trait( trait_WEB_WALKER ) ) {
+-        websleep = true;
+-    }
+-    // Not sure how one would get Arachnid w/o web-making, but Just In Case
+-    if( has_trait( trait_THRESH_SPIDER ) && ( has_trait( trait_WEB_SPINNER ) ||
+-            has_trait( trait_WEB_WEAVER ) ) ) {
+-        webforce = true;
+-    }
+-    if( websleep || webforce ) {
+-        int web = here.get_field_intensity( pos_bub(), fd_web );
+-        if( !webforce ) {
+-            // At this point, it's kinda weird, but surprisingly comfy...
+-            if( web >= 3 ) {
+-                add_msg_if_player( m_good,
+-                                   _( "These thick webs support your weight, and are strangely comfortable…" ) );
+-                websleeping = true;
+-            } else if( web > 0 ) {
+-                add_msg_if_player( m_info,
+-                                   _( "You try to sleep, but the webs get in the way.  You brush them aside." ) );
+-                here.remove_field( pos(), fd_web );
+-            }
+-        } else {
+-            // Here, you're just not comfortable outside a nice thick web.
+-            if( web >= 3 ) {
+-                add_msg_if_player( m_good, _( "You relax into your web." ) );
+-                websleeping = true;
+-            } else {
+-                add_msg_if_player( m_bad,
+-                                   _( "You try to sleep, but you feel exposed and your spinnerets keep twitching." ) );
+-                add_msg_if_player( m_info, _( "Maybe a nice thick web would help you sleep." ) );
+-            }
+-        }
+-    }
+-    if( has_active_mutation( trait_SHELL2 ) || has_active_mutation( trait_SHELL3 ) ) {
+-        // Your shell's interior is a comfortable place to sleep.
+-        in_shell = true;
+-    }
+-    if( has_trait( trait_WATERSLEEP ) || has_trait( trait_UNDINE_SLEEP_WATER ) ) {
+-        if( underwater ) {
+-            add_msg_if_player( m_good,
+-                               _( "You lay beneath the waves' embrace, gazing up through the water's surface…" ) );
+-            watersleep = true;
+-        } else if( here.has_flag_ter( ter_furn_flag::TFLAG_SWIMMABLE, pos_bub() ) ) {
+-            add_msg_if_player( m_good, _( "You settle into the water and begin to drowse…" ) );
+-            watersleep = true;
+-        }
+-    }
+-    if( !plantsleep && ( furn_at_pos.obj().comfort > static_cast<int>( comfort_level::neutral ) ||
+-                         ter_at_pos.obj().comfort > static_cast<int>( comfort_level::neutral ) ||
+-                         trap_at_pos.comfort > static_cast<int>( comfort_level::neutral ) ||
+-                         in_shell || websleeping || watersleep ||
+-                         vp.part_with_feature( "SEAT", true ) ||
+-                         vp.part_with_feature( "BED", true ) ) ) {
+-        add_msg_if_player( m_good, _( "This is a comfortable place to sleep." ) );
+-    } else if( !plantsleep && !fungaloid_cosplay && !watersleep ) {
+-        if( !vp && ter_at_pos != ter_t_floor ) {
+-            add_msg_if_player( ter_at_pos.obj().movecost <= 2 ?
+-                               _( "It's a little hard to get to sleep on this %s." ) :
+-                               _( "It's hard to get to sleep on this %s." ),
+-                               ter_at_pos.obj().name() );
+-        } else if( vp ) {
+-            if( vp->part_with_feature( VPFLAG_AISLE, true ) ) {
+-                add_msg_if_player(
+-                    //~ %1$s: vehicle name, %2$s: vehicle part name
+-                    _( "It's a little hard to get to sleep on this %2$s in %1$s." ),
+-                    vp->vehicle().disp_name(),
+-                    vp->part_with_feature( VPFLAG_AISLE, true )->part().name( false ) );
+-            } else {
+-                add_msg_if_player(
+-                    //~ %1$s: vehicle name
+-                    _( "It's hard to get to sleep in %1$s." ),
+-                    vp->vehicle().disp_name() );
+-            }
+-        }
+-    }
++    get_comfort_at( pos_bub() ).add_try_msgs( *this );
++
+     add_msg_if_player( _( "You start trying to fall asleep." ) );
+     if( has_active_bionic( bio_soporific ) ) {
+         bio_soporific_powered_at_last_sleep_check = has_power();
+         if( bio_soporific_powered_at_last_sleep_check ) {
+-            // The actual bonus is applied in sleep_spot( p ).
+             add_msg_if_player( m_good, _( "Your soporific inducer starts working its magic." ) );
+         } else {
+             add_msg_if_player( m_bad, _( "Your soporific inducer doesn't have enough power to operate." ) );
+diff --git a/src/character.cpp b/src/character.cpp
+index fb15b11f28..a956db8c2f 100644
+--- a/src/character.cpp
++++ b/src/character.cpp
+@@ -400,12 +400,6 @@ static const species_id species_HUMAN( "HUMAN" );
+ 
+ static const start_location_id start_location_sloc_shelter_a( "sloc_shelter_a" );
+ 
+-static const ter_str_id ter_t_dirt( "t_dirt" );
+-static const ter_str_id ter_t_dirtmound( "t_dirtmound" );
+-static const ter_str_id ter_t_grass( "t_grass" );
+-static const ter_str_id ter_t_pit( "t_pit" );
+-static const ter_str_id ter_t_pit_shallow( "t_pit_shallow" );
+-
+ static const trait_id trait_ADRENALINE( "ADRENALINE" );
+ static const trait_id trait_ANTENNAE( "ANTENNAE" );
+ static const trait_id trait_BADBACK( "BADBACK" );
+@@ -480,15 +474,11 @@ static const trait_id trait_SPIRITUAL( "SPIRITUAL" );
+ static const trait_id trait_STRONGBACK( "STRONGBACK" );
+ static const trait_id trait_SUNLIGHT_DEPENDENT( "SUNLIGHT_DEPENDENT" );
+ static const trait_id trait_THORNS( "THORNS" );
+-static const trait_id trait_THRESH_SPIDER( "THRESH_SPIDER" );
+ static const trait_id trait_TRANSPIRATION( "TRANSPIRATION" );
+ static const trait_id trait_UNDINE_SLEEP_WATER( "UNDINE_SLEEP_WATER" );
+ static const trait_id trait_URSINE_EYE( "URSINE_EYE" );
+ static const trait_id trait_VISCOUS( "VISCOUS" );
+ static const trait_id trait_WATERSLEEP( "WATERSLEEP" );
+-static const trait_id trait_WEB_SPINNER( "WEB_SPINNER" );
+-static const trait_id trait_WEB_WALKER( "WEB_WALKER" );
+-static const trait_id trait_WEB_WEAVER( "WEB_WEAVER" );
+ 
+ static const trap_str_id tr_ledge( "tr_ledge" );
+ 
+@@ -5118,13 +5108,12 @@ void Character::update_needs( int rate_multiplier )
+                     rest_modifier += 1;
+                 }
+ 
+-                const comfort_level comfort = base_comfort_value( pos_bub() ).level;
+-
+-                if( comfort >= comfort_level::very_comfortable ) {
++                const int comfort = get_comfort_at( pos_bub() ).comfort;
++                if( comfort >= comfort_data::COMFORT_VERY_COMFORTABLE ) {
+                     rest_modifier *= 3;
+-                } else  if( comfort >= comfort_level::comfortable ) {
++                } else if( comfort >= comfort_data::COMFORT_COMFORTABLE ) {
+                     rest_modifier *= 2.5;
+-                } else if( comfort >= comfort_level::slightly_comfortable ) {
++                } else if( comfort >= comfort_data::COMFORT_SLIGHTLY_COMFORTABLE ) {
+                     rest_modifier *= 2;
+                 }
+ 
+@@ -5607,178 +5596,6 @@ void Character::temp_equalizer( const bodypart_id &bp1, const bodypart_id &bp2 )
+     mod_part_temp_cur( bp1, diff );
+ }
+ 
+-Character::comfort_response_t Character::base_comfort_value( const tripoint_bub_ms &p ) const
+-{
+-    // Comfort of sleeping spots is "objective", while sleep_spot( p ) is "subjective"
+-    // As in the latter also checks for sleepiness and other variables while this function
+-    // only looks at the base comfyness of something. It's still subjective, in a sense,
+-    // as arachnids who sleep in webs will find most places comfortable for instance.
+-    int comfort = 0;
+-
+-    comfort_response_t comfort_response;
+-
+-    bool plantsleep = has_trait( trait_CHLOROMORPH );
+-    bool fungaloid_cosplay = has_trait( trait_M_SKIN3 );
+-    bool websleep = has_trait( trait_WEB_WALKER );
+-    bool webforce = has_trait( trait_THRESH_SPIDER ) && ( has_trait( trait_WEB_SPINNER ) ||
+-                    has_trait( trait_WEB_WEAVER ) );
+-    bool in_shell = has_active_mutation( trait_SHELL2 ) ||
+-                    has_active_mutation( trait_SHELL3 );
+-    bool watersleep = has_trait( trait_WATERSLEEP ) || has_trait( trait_UNDINE_SLEEP_WATER );
+-
+-    map &here = get_map();
+-    const optional_vpart_position vp = here.veh_at( p );
+-    const maptile tile = here.maptile_at( p );
+-    const trap &trap_at_pos = tile.get_trap_t();
+-    const ter_id ter_at_pos = tile.get_ter();
+-    const furn_id furn_at_pos = tile.get_furn();
+-
+-    int web = here.get_field_intensity( p, fd_web );
+-
+-    // Some mutants have different comfort needs
+-    if( !plantsleep && !webforce ) {
+-        if( in_shell ) { // NOLINT(bugprone-branch-clone)
+-            comfort += 1 + static_cast<int>( comfort_level::slightly_comfortable );
+-            // Note: shelled individuals can still use sleeping aids!
+-        } else if( vp ) {
+-            if( const std::optional<vpart_reference> cargo = vp.cargo() ) {
+-                for( const item &items_it : cargo->items() ) {
+-                    if( items_it.has_flag( flag_SLEEP_AID ) ) {
+-                        // Note: BED + SLEEP_AID = 9 pts, or 1 pt below very_comfortable
+-                        comfort += 1 + static_cast<int>( comfort_level::slightly_comfortable );
+-                        comfort_response.aid = &items_it;
+-                        break; // prevents using more than 1 sleep aid
+-                    }
+-                    if( items_it.has_flag( flag_SLEEP_AID_CONTAINER ) ) {
+-                        bool found = false;
+-                        if( items_it.num_item_stacks() > 1 ) {
+-                            // Only one item is allowed, so we don't fill our pillowcase with nails
+-                            continue;
+-                        }
+-                        for( const item *it : items_it.all_items_top() ) {
+-                            if( it->has_flag( flag_SLEEP_AID ) ) {
+-                                // Note: BED + SLEEP_AID = 9 pts, or 1 pt below very_comfortable
+-                                comfort += 1 + static_cast<int>( comfort_level::slightly_comfortable );
+-                                comfort_response.aid = &items_it;
+-                                found = true;
+-                                break; // prevents using more than 1 sleep aid
+-                            }
+-                        }
+-                        // Only 1 sleep aid
+-                        if( found ) {
+-                            break;
+-                        }
+-                    }
+-                }
+-            }
+-            int max_boardable_confort = 0;
+-            bool boardable = false;
+-            for( const vpart_reference board : vp->vehicle().get_all_parts() ) {
+-                if( !board.has_feature( "BOARDABLE" ) || board.pos() != p.raw() ) {
+-                    continue;
+-                }
+-                boardable = true;
+-                int boardable_comfort = board.info().comfort;
+-                if( boardable_comfort > max_boardable_confort ) {
+-                    max_boardable_confort = boardable_comfort;
+-                }
+-            }
+-            comfort += boardable ? max_boardable_confort : -here.move_cost( p );
+-        }
+-        // Not in a vehicle, start checking furniture/terrain/traps at this point in decreasing order
+-        else if( furn_at_pos != furn_str_id::NULL_ID() ) {
+-            comfort += 0 + furn_at_pos.obj().comfort;
+-        }
+-        // Web sleepers can use their webs if better furniture isn't available
+-        else if( websleep && web >= 3 ) {
+-            comfort += 1 + static_cast<int>( comfort_level::slightly_comfortable );
+-        } else if( !trap_at_pos.is_null() ) {
+-            comfort += 0 + trap_at_pos.comfort;
+-        } else {
+-            // Not a comfortable sleeping spot
+-            comfort -= here.move_cost( p );
+-            // Include comfort from terrain, if any
+-            comfort += ter_at_pos.obj().comfort;
+-        }
+-
+-        if( comfort_response.aid == nullptr ) {
+-            const map_stack items = here.i_at( p );
+-            for( const item &items_it : items ) {
+-                if( items_it.has_flag( flag_SLEEP_AID ) ) {
+-                    // Note: BED + SLEEP_AID = 9 pts, or 1 pt below very_comfortable
+-                    comfort += 1 + static_cast<int>( comfort_level::slightly_comfortable );
+-                    comfort_response.aid = &items_it;
+-                    break; // prevents using more than 1 sleep aid
+-                }
+-                if( items_it.has_flag( flag_SLEEP_AID_CONTAINER ) ) {
+-                    bool found = false;
+-                    if( items_it.num_item_stacks() > 1 ) {
+-                        // Only one item is allowed, so we don't fill our pillowcase with nails
+-                        continue;
+-                    }
+-                    for( const item *it : items_it.all_items_top() ) {
+-                        if( it->has_flag( flag_SLEEP_AID ) ) {
+-                            // Note: BED + SLEEP_AID = 9 pts, or 1 pt below very_comfortable
+-                            comfort += 1 + static_cast<int>( comfort_level::slightly_comfortable );
+-                            comfort_response.aid = &items_it;
+-                            found = true;
+-                            break; // prevents using more than 1 sleep aid
+-                        }
+-                    }
+-                    // Only 1 sleep aid
+-                    if( found ) {
+-                        break;
+-                    }
+-                }
+-            }
+-        }
+-        if( ( fungaloid_cosplay && here.has_flag_ter_or_furn( ter_furn_flag::TFLAG_FUNGUS, p ) ) ||
+-            ( watersleep && here.has_flag_ter( ter_furn_flag::TFLAG_SWIMMABLE, p ) ) ) {
+-            comfort += static_cast<int>( comfort_level::very_comfortable );
+-        }
+-    } else if( plantsleep ) {
+-        if( vp || furn_at_pos != furn_str_id::NULL_ID() ) {
+-            // Sleep ain't happening in a vehicle or on furniture
+-            comfort = static_cast<int>( comfort_level::impossible );
+-        } else {
+-            // It's very easy for Chloromorphs to get to sleep on soil!
+-            const std::unordered_set<ter_str_id> very_comfy_ters = { ter_t_dirt, ter_t_dirtmound, ter_t_pit,  ter_t_pit_shallow };
+-            if( very_comfy_ters.find( ter_at_pos.id() ) != very_comfy_ters.end() ) {
+-                comfort += static_cast<int>( comfort_level::very_comfortable );
+-            }
+-            // Not as much if you have to dig through stuff first
+-            else if( ter_at_pos == ter_t_grass ) {
+-                comfort += static_cast<int>( comfort_level::comfortable );
+-            }
+-            // Sleep ain't happening
+-            else {
+-                comfort = static_cast<int>( comfort_level::impossible );
+-            }
+-        }
+-        // Has webforce
+-    } else {
+-        if( web >= 3 ) {
+-            // Thick Web and you're good to go
+-            comfort += static_cast<int>( comfort_level::very_comfortable );
+-        } else {
+-            comfort = static_cast<int>( comfort_level::impossible );
+-        }
+-    }
+-
+-    if( comfort > static_cast<int>( comfort_level::comfortable ) ) {
+-        comfort_response.level = comfort_level::very_comfortable;
+-    } else if( comfort > static_cast<int>( comfort_level::slightly_comfortable ) ) {
+-        comfort_response.level = comfort_level::comfortable;
+-    } else if( comfort > static_cast<int>( comfort_level::neutral ) ) {
+-        comfort_response.level = comfort_level::slightly_comfortable;
+-    } else if( comfort == static_cast<int>( comfort_level::neutral ) ) {
+-        comfort_response.level = comfort_level::neutral;
+-    } else {
+-        comfort_response.level = comfort_level::uncomfortable;
+-    }
+-    return comfort_response;
+-}
+-
+ float Character::get_dodge_base() const
+ {
+     /** @EFFECT_DEX increases dodge base */
+@@ -9060,6 +8877,9 @@ void Character::fall_asleep()
+             add_msg_if_player( _( "You use your %s to keep warm." ), item_name );
+         }
+     }
++
++    get_comfort_at( pos_bub() ).add_sleep_msgs( *this );
++
+     if( has_bionic( bio_sleep_shutdown ) ) {
+         add_msg_if_player( _( "Sleep Mode activated.  Disabling sensory response." ) );
+     }
+@@ -11230,43 +11050,6 @@ double Character::vomit_mod()
+     return mod;
+ }
+ 
+-int Character::sleep_spot( const tripoint_bub_ms &p ) const
+-{
+-    const int current_stim = get_stim();
+-    const comfort_response_t comfort_info = base_comfort_value( p );
+-    if( comfort_info.aid != nullptr ) {
+-        add_msg_if_player( m_info, _( "You use your %s for comfort." ), comfort_info.aid->tname() );
+-    }
+-
+-    int sleepy = static_cast<int>( comfort_info.level );
+-    bool watersleep = has_trait( trait_WATERSLEEP ) || has_trait( trait_UNDINE_SLEEP_WATER );
+-
+-    if( has_addiction( addiction_sleeping_pill ) ) {
+-        sleepy -= 4;
+-    }
+-
+-    sleepy = enchantment_cache->modify_value( enchant_vals::mod::SLEEPY, sleepy );
+-
+-    if( watersleep && get_map().has_flag_ter( ter_furn_flag::TFLAG_SWIMMABLE, p ) ) {
+-        sleepy += 10; //comfy water!
+-    }
+-
+-    if( get_sleepiness() < sleepiness_levels::TIRED + 1 ) {
+-        sleepy -= static_cast<int>( ( sleepiness_levels::TIRED + 1 - get_sleepiness() ) / 4 );
+-    } else {
+-        sleepy += static_cast<int>( ( get_sleepiness() - sleepiness_levels::TIRED + 1 ) / 16 );
+-    }
+-
+-    if( current_stim > 0 || !has_trait( trait_INSOMNIA ) ) {
+-        sleepy -= 2 * current_stim;
+-    } else {
+-        // Make it harder for insomniac to get around the trait
+-        sleepy -= current_stim;
+-    }
+-
+-    return sleepy;
+-}
+-
+ bool Character::can_sleep()
+ {
+     if( has_effect( effect_meth ) ) {
+@@ -11289,7 +11072,24 @@ bool Character::can_sleep()
+     }
+     last_sleep_check = now;
+ 
+-    int sleepy = sleep_spot( pos_bub() );
++    int sleepy = get_comfort_at( pos_bub() ).comfort;
++    if( has_addiction( addiction_sleeping_pill ) ) {
++        sleepy -= 4;
++    }
++    sleepy = enchantment_cache->modify_value( enchant_vals::mod::SLEEPY, sleepy );
++    if( get_sleepiness() < sleepiness_levels::TIRED + 1 ) {
++        sleepy -= int( ( sleepiness_levels::TIRED + 1 - get_sleepiness() ) / 4 );
++    } else {
++        sleepy += int( ( get_sleepiness() - sleepiness_levels::TIRED + 1 ) / 16 );
++    }
++    const int current_stim = get_stim();
++    if( current_stim > 0 || !has_trait( trait_INSOMNIA ) ) {
++        sleepy -= 2 * current_stim;
++    } else {
++        // Make it harder for insomniac to get around the trait
++        sleepy -= current_stim;
++    }
++
+     sleepy += rng( -8, 8 );
+     bool result = sleepy > 0;
+ 
+@@ -11305,6 +11105,40 @@ bool Character::can_sleep()
+     return result;
+ }
+ 
++const comfort_data &Character::get_comfort_data_for( const tripoint &p ) const
++{
++    const comfort_data *worst = nullptr;
++    for( const trait_id trait : get_mutations() ) {
++        for( const comfort_data &data : trait->comfort ) {
++            if( data.are_conditions_true( *this, p ) ) {
++                if( worst == nullptr || worst->base_comfort > data.base_comfort ) {
++                    worst = &data;
++                }
++                break;
++            }
++        }
++    }
++    return worst == nullptr ? comfort_data::human() : *worst;
++}
++
++const comfort_data &Character::get_comfort_data_for( const tripoint_bub_ms &p ) const
++{
++    return get_comfort_data_for( p.raw() );
++}
++
++const comfort_data::response &Character::get_comfort_at( const tripoint &p )
++{
++    if( comfort_cache.last_time == calendar::turn && comfort_cache.last_position == p ) {
++        return comfort_cache;
++    }
++    return comfort_cache = get_comfort_data_for( p ).get_comfort_at( p );
++}
++
++const comfort_data::response &Character::get_comfort_at( const tripoint_bub_ms &p )
++{
++    return get_comfort_at( p.raw() );
++}
++
+ void Character::shift_destination( const point &shift )
+ {
+     if( next_expected_position ) {
+diff --git a/src/character.h b/src/character.h
+index 0963e9a7ad..94237189a6 100644
+--- a/src/character.h
++++ b/src/character.h
+@@ -50,6 +50,7 @@
+ #include "ranged.h"
+ #include "ret_val.h"
+ #include "safe_reference.h"
++#include "sleep.h"
+ #include "stomach.h"
+ #include "string_formatter.h"
+ #include "subbodypart.h"
+@@ -558,15 +559,6 @@ class Character : public Creature, public visitable
+         /// Is currently in control of a vehicle
+         bool controlling_vehicle = false;
+ 
+-        enum class comfort_level : int {
+-            impossible = -999,
+-            uncomfortable = -7,
+-            neutral = 0,
+-            slightly_comfortable = 3,
+-            comfortable = 5,
+-            very_comfortable = 10
+-        };
+-
+         /// @brief Character stats
+         /// @todo Make those protected
+         int str_max;
+@@ -963,13 +955,6 @@ class Character : public Creature, public visitable
+         /** Equalizes heat between body parts */
+         void temp_equalizer( const bodypart_id &bp1, const bodypart_id &bp2 );
+ 
+-        struct comfort_response_t {
+-            comfort_level level = comfort_level::neutral;
+-            const item *aid = nullptr;
+-        };
+-        /** Rate point's ability to serve as a bed. Only takes certain mutations into account, and not sleepiness nor stimulants. */
+-        comfort_response_t base_comfort_value( const tripoint_bub_ms &p ) const;
+-
+         /** Returns focus equilibrium cap due to sleepiness **/
+         int focus_equilibrium_sleepiness_cap( int equilibrium ) const;
+         /** Uses morale and other factors to return the character's focus target goto value */
+@@ -3818,8 +3803,6 @@ class Character : public Creature, public visitable
+         double vomit_mod();
+         /** Checked each turn during "lying_down", returns true if the player falls asleep */
+         bool can_sleep();
+-        /** Rate point's ability to serve as a bed. Takes all mutations, sleepiness and stimulants into account. */
+-        int sleep_spot( const tripoint_bub_ms &p ) const;
+         /** Processes human-specific effects of effects before calling Creature::process_effects(). */
+         void process_effects() override;
+         /** Handles the still hard-coded effects. */
+@@ -3858,6 +3841,28 @@ class Character : public Creature, public visitable
+             const itype_id &id,
+             const std::function<bool( const item & )> &filter, Character &player_character ) const;
+ 
++        // --------------- Sleep Stuff ---------------
++        /**
++         * Searches mutations for comfort data and returns the least comfortable valid one.
++         *
++         * @details
++         * For mutations with multiple comfort data, the first data with passing conditions is
++         * selected. Out of each mutation with selected comfort data, the comfort data with the
++         * lowest `base_comfort` is selected and returned.
++         */
++        const comfort_data &get_comfort_data_for( const tripoint &p ) const;
++        const comfort_data &get_comfort_data_for( const tripoint_bub_ms &p ) const;
++        /**
++         * Calculates and caches the comfort of a location. Returns cached comfort if valid.
++         *
++         * @details
++         * Comfort is considered valid until any time has passed or a new location is evaluated.
++         * Gaining or losing mutations does not currently invalidate cached comfort.
++         */
++        const comfort_data::response &get_comfort_at( const tripoint &p );
++        const comfort_data::response &get_comfort_at( const tripoint_bub_ms &p );
++        comfort_data::response comfort_cache;
++
+     protected:
+         Character();
+         Character( Character && ) noexcept( map_is_noexcept );
+diff --git a/src/handle_action.cpp b/src/handle_action.cpp
+index bee7396145..b47041ee5e 100644
+--- a/src/handle_action.cpp
++++ b/src/handle_action.cpp
+@@ -80,6 +80,7 @@
+ #include "ranged.h"
+ #include "rng.h"
+ #include "safemode_ui.h"
++#include "sleep.h"
+ #include "sounds.h"
+ #include "string_formatter.h"
+ #include "string_input_popup.h"
+@@ -154,9 +155,6 @@ static const trait_id trait_HIBERNATE( "HIBERNATE" );
+ static const trait_id trait_PROF_CHURL( "PROF_CHURL" );
+ static const trait_id trait_SHELL2( "SHELL2" );
+ static const trait_id trait_SHELL3( "SHELL3" );
+-static const trait_id trait_UNDINE_SLEEP_WATER( "UNDINE_SLEEP_WATER" );
+-static const trait_id trait_WATERSLEEP( "WATERSLEEP" );
+-static const trait_id trait_WATERSLEEPER( "WATERSLEEPER" );
+ static const trait_id trait_WAYFARER( "WAYFARER" );
+ 
+ static const zone_type_id zone_type_CHOP_TREES( "CHOP_TREES" );
+@@ -1257,12 +1255,12 @@ static void sleep()
+         return;
+     }
+ 
+-    vehicle *const boat = veh_pointer_or_null( get_map().veh_at( player_character.pos_bub() ) );
+-    if( get_map().has_flag( ter_furn_flag::TFLAG_DEEP_WATER, player_character.pos_bub() ) &&
+-        !player_character.has_trait( trait_WATERSLEEPER ) &&
+-        !player_character.has_trait( trait_WATERSLEEP ) &&
+-        !player_character.has_trait( trait_UNDINE_SLEEP_WATER ) &&
+-        boat == nullptr ) {
++    const map &here = get_map();
++    const tripoint_bub_ms &p = player_character.pos_bub();
++    const optional_vpart_position vp = here.veh_at( p );
++    const comfort_data::response &comfort = player_character.get_comfort_at( p.raw() );
++    if( here.has_flag( ter_furn_flag::TFLAG_DEEP_WATER, p ) && !vp &&
++        comfort.data->human_or_impossible() ) {
+         add_msg( m_info, _( "You cannot sleep while swimming." ) );
+         return;
+     }
+diff --git a/src/map.cpp b/src/map.cpp
+index 566af69b02..e23c3a7e2b 100644
+--- a/src/map.cpp
++++ b/src/map.cpp
+@@ -3303,6 +3303,11 @@ bool map::can_put_items_ter_furn( const tripoint_bub_ms &p ) const
+     return !has_flag( ter_furn_flag::TFLAG_NOITEM, p ) && !has_flag( ter_furn_flag::TFLAG_SEALED, p );
+ }
+ 
++bool map::has_flag_ter( const std::string &flag, const tripoint &p ) const
++{
++    return ter( p ).obj().has_flag( flag );
++}
++
+ bool map::has_flag_ter( const std::string &flag, const tripoint_bub_ms &p ) const
+ {
+     return ter( p ).obj().has_flag( flag );
+diff --git a/src/map.h b/src/map.h
+index d804021569..fe2233e37c 100644
+--- a/src/map.h
++++ b/src/map.h
+@@ -1182,6 +1182,7 @@ class map
+         bool can_put_items_ter_furn( const tripoint &p ) const;
+         bool can_put_items_ter_furn( const tripoint_bub_ms &p ) const;
+         // Checks terrain
++        bool has_flag_ter( const std::string &flag, const tripoint &p ) const;
+         bool has_flag_ter( const std::string &flag, const tripoint_bub_ms &p ) const;
+         bool has_flag_ter( const std::string &flag, const point_bub_ms &p ) const {
+             return has_flag_ter( flag, tripoint_bub_ms( p, abs_sub.z() ) );
+diff --git a/src/mutation.h b/src/mutation.h
+index c8785f3551..98a0181349 100644
+--- a/src/mutation.h
++++ b/src/mutation.h
+@@ -19,6 +19,7 @@
+ #include "hash_utils.h"
+ #include "memory_fast.h"
+ #include "point.h"
++#include "sleep.h"
+ #include "translations.h"
+ #include "type_id.h"
+ #include "value_ptr.h"
+@@ -286,6 +287,9 @@ struct mutation_branch {
+         /** mutation enchantments */
+         std::vector<enchantment_id> enchantments;
+ 
++        /** alternate comfort conditions */
++        std::vector<comfort_data> comfort;
++
+         struct OverrideLook {
+             std::string id;
+             std::string tile_category;
+diff --git a/src/mutation_data.cpp b/src/mutation_data.cpp
+index 9a169db348..fdeb14845e 100644
+--- a/src/mutation_data.cpp
++++ b/src/mutation_data.cpp
+@@ -441,6 +441,8 @@ void mutation_branch::load( const JsonObject &jo, const std::string_view src )
+         enchantments.push_back( enchantment::load_inline_enchantment( jv, src, enchant_name ) );
+     }
+ 
++    optional( jo, was_loaded, "comfort", comfort );
++
+     for( const std::string s : jo.get_array( "no_cbm_on_bp" ) ) {
+         no_cbm_on_bp.emplace( s );
+     }
+diff --git a/src/npcmove.cpp b/src/npcmove.cpp
+index 6bcbd7f430..b453594dd4 100644
+--- a/src/npcmove.cpp
++++ b/src/npcmove.cpp
+@@ -68,6 +68,7 @@
+ #include "ranged.h"
+ #include "ret_val.h"
+ #include "rng.h"
++#include "sleep.h"
+ #include "sounds.h"
+ #include "stomach.h"
+ #include "talker.h"
+@@ -1631,7 +1632,7 @@ void npc::execute_action( npc_action action )
+                 }
+ 
+                 // For non-mutants, very_comfortable-1 is the expected value of an ideal normal bed.
+-                if( best_sleepy < static_cast<int>( comfort_level::very_comfortable ) - 1 ) {
++                if( best_sleepy < comfort_data::COMFORT_VERY_COMFORTABLE - 1 ) {
+                     const int sleepy = evaluate_sleep_spot( p );
+                     if( sleepy > best_sleepy ) {
+                         best_sleepy = sleepy;
+@@ -2041,10 +2042,10 @@ npc_action npc::address_needs()
+ int npc::evaluate_sleep_spot( tripoint_bub_ms p )
+ {
+     // Base evaluation is based on ability to actually fall sleep there
+-    int sleep_eval = sleep_spot( p );
++    int sleep_eval = get_comfort_at( p ).comfort;
+     // Only evaluate further if the possible bed isn't already considered very comfortable.
+     // This opt-out is necessary to allow mutant NPCs to find desired non-bed sleeping spaces
+-    if( sleep_eval < static_cast<int>( comfort_level::very_comfortable ) - 1 ) {
++    if( sleep_eval < comfort_data::COMFORT_VERY_COMFORTABLE - 1 ) {
+         const units::temperature_delta ideal_bed_value = 2_C_delta;
+         const units::temperature_delta sleep_spot_value = floor_bedding_warmth( p.raw() );
+         if( sleep_spot_value < ideal_bed_value ) {
+diff --git a/src/sleep.cpp b/src/sleep.cpp
+new file mode 100644
+index 0000000000..bdffc5c961
+--- /dev/null
++++ b/src/sleep.cpp
+@@ -0,0 +1,342 @@
++#include "sleep.h"
++
++#include <iterator>
++#include <optional>
++#include <string>
++
++#include "character.h"
++#include "flag.h"
++#include "game.h"
++#include "generic_factory.h"
++#include "item.h"
++#include "map.h"
++#include "trap.h"
++#include "type_id.h"
++#include "veh_type.h"
++#include "vehicle.h"
++#include "vpart_position.h"
++
++namespace io
++{
++template<> std::string enum_to_string<comfort_data::category>( comfort_data::category data )
++{
++    switch( data ) {
++        case comfort_data::category::terrain:
++            return "terrain";
++        case comfort_data::category::furniture:
++            return "furniture";
++        case comfort_data::category::trap:
++            return "trap";
++        case comfort_data::category::field:
++            return "field";
++        case comfort_data::category::vehicle:
++            return "vehicle";
++        case comfort_data::category::character:
++            return "character";
++        case comfort_data::category::trait:
++            return "trait";
++        case comfort_data::category::last:
++            break;
++    }
++    cata_fatal( "Invalid comfort_data::category" );
++}
++} // namespace io
++
++static comfort_data human_comfort;
++
++const comfort_data &comfort_data::human()
++{
++    if( !human_comfort.was_loaded ) {
++        human_comfort.base_comfort = 0;
++        human_comfort.add_human_comfort = true;
++        human_comfort.add_sleep_aids = true;
++        human_comfort.was_loaded = true;
++    }
++    return human_comfort;
++}
++
++int comfort_data::human_comfort_at( const tripoint &p )
++{
++    const map &here = get_map();
++    const optional_vpart_position vp = here.veh_at( p );
++    const furn_id furn = here.furn( p );
++    const trap &trap = here.tr_at( p );
++
++    if( vp ) {
++        const std::optional<vpart_reference> board = vp.part_with_feature( "BOARDABLE", true );
++        return board ? board->info().comfort : -here.move_cost( p );
++    } else if( furn != furn_str_id::NULL_ID() ) {
++        return furn->comfort;
++    } else if( !trap.is_null() ) {
++        return trap.comfort;
++    } else {
++        return here.ter( p )->comfort - here.move_cost( p );
++    }
++}
++
++bool comfort_data::try_get_sleep_aid_at( const tripoint &p, item &result )
++{
++    map &here = get_map();
++    const optional_vpart_position vp = here.veh_at( p );
++    const map_stack items = here.i_at( p );
++    item_stack::const_iterator begin = items.begin();
++    item_stack::const_iterator end = items.end();
++
++    if( vp ) {
++        if( const std::optional<vpart_reference> cargo = vp.cargo() ) {
++            const vehicle_stack vs = cargo->items();
++            begin = vs.begin();
++            end = vs.end();
++        }
++    }
++
++    for( item_stack::const_iterator item_it = begin; item_it != end; item_it++ ) {
++        if( item_it->has_flag( flag_SLEEP_AID ) ) {
++            result = *item_it;
++            return true;
++        } else if( item_it->has_flag( flag_SLEEP_AID_CONTAINER ) ) {
++            if( item_it->num_item_stacks() > 1 ) {
++                continue;
++            }
++            for( const item *it : item_it->all_items_top() ) {
++                if( it->has_flag( flag_SLEEP_AID ) ) {
++                    result = *item_it;
++                    return true;
++                }
++            }
++        }
++    }
++    return false;
++}
++
++void comfort_data::deserialize_comfort( const JsonObject &jo, bool was_loaded,
++                                        const std::string &name, int &member )
++{
++    if( !was_loaded ) {
++        if( jo.has_int( name ) ) {
++            member = jo.get_int( name );
++        } else if( jo.has_string( name ) ) {
++            const std::string str = jo.get_string( name );
++            if( str == "impossible" ) {
++                member = COMFORT_IMPOSSIBLE;
++            } else if( str == "uncomfortable" ) {
++                member = COMFORT_UNCOMFORTABLE;
++            } else if( str == "neutral" ) {
++                member = COMFORT_NEUTRAL;
++            } else if( str == "slightly_comfortable" ) {
++                member = COMFORT_SLIGHTLY_COMFORTABLE;
++            } else if( str == "sleep_aid" ) {
++                member = COMFORT_SLEEP_AID;
++            } else if( str == "comfortable" ) {
++                member = COMFORT_COMFORTABLE;
++            } else if( str == "very_comfortable" ) {
++                member = COMFORT_VERY_COMFORTABLE;
++            } else {
++                jo.throw_error( "invalid comfort level" );
++            }
++        }
++    }
++}
++
++bool comfort_data::condition::is_condition_true( const Character &guy, const tripoint &p ) const
++{
++    bool result = false;
++    const map &here = get_map();
++    const optional_vpart_position vp = here.veh_at( p );
++    const trap &trap = here.tr_at( p );
++    switch( ccategory ) {
++        case category::terrain:
++            if( !id.empty() ) {
++                result = ter_id( id ) == here.ter( p );
++            } else if( !flag.empty() ) {
++                result = here.has_flag_ter( flag, p );
++            }
++            break;
++        case category::furniture:
++            if( !id.empty() ) {
++                result = furn_id( id ) == here.furn( p );
++            } else if( !flag.empty() ) {
++                result = here.has_flag_furn( flag, p );
++            }
++            break;
++        case category::trap:
++            result = trap_id( id ) == trap.id;
++            break;
++        case category::field:
++            result = here.get_field_intensity( p, field_type_id( id ) ) >= intensity;
++            break;
++        case category::vehicle:
++            if( vp && !flag.empty() ) {
++                result = !!vp.part_with_feature( flag, true );
++            } else {
++                result = !!vp;
++            }
++            break;
++        case category::character:
++            result = guy.has_flag( json_character_flag( flag ) );
++            break;
++        case category::trait:
++            if( active ) {
++                result = guy.has_active_mutation( trait_id( id ) );
++            } else {
++                result = guy.has_trait( trait_id( id ) );
++            }
++            break;
++        case category::last:
++            break;
++    }
++    return result != invert;
++}
++
++void comfort_data::condition::deserialize( const JsonObject &jo )
++{
++    mandatory( jo, false, "type", ccategory );
++    switch( ccategory ) {
++        case category::terrain:
++        case category::furniture:
++            optional( jo, false, "id", id );
++            optional( jo, false, "flag", flag );
++            break;
++        case category::trap:
++            mandatory( jo, false, "id", id );
++            break;
++        case category::field:
++            mandatory( jo, false, "id", id );
++            optional( jo, false, "intensity", intensity, 1 );
++            break;
++        case category::vehicle:
++            optional( jo, false, "flag", flag );
++            break;
++        case category::character:
++            mandatory( jo, false, "flag", flag );
++            break;
++        case category::trait:
++            mandatory( jo, false, "id", id );
++            optional( jo, false, "active", active );
++            break;
++        case category::last:
++            break;
++    }
++    optional( jo, false, "invert", invert );
++}
++
++void comfort_data::message::deserialize( const JsonObject &jo )
++{
++    mandatory( jo, false, "text", text );
++    optional( jo, false, "rating", type );
++}
++
++void comfort_data::response::add_try_msgs( const Character &guy ) const
++{
++    const message &msg_try = data->msg_try;
++    if( !msg_try.text.empty() ) {
++        guy.add_msg_if_player( msg_try.type, msg_try.text );
++    }
++
++    const message &msg_hint = data->msg_hint;
++    if( !msg_hint.text.empty() ) {
++        guy.add_msg_if_player( msg_hint.type, msg_hint.text );
++    }
++
++    if( !sleep_aid.empty() ) {
++        //~ %s: item name
++        guy.add_msg_if_player( m_info, _( "You use your %s for comfort." ), sleep_aid );
++    }
++
++    if( comfort > COMFORT_NEUTRAL ) {
++        guy.add_msg_if_player( m_good, _( "This is a comfortable place to sleep." ) );
++    } else {
++        const map &here = get_map();
++        if( const optional_vpart_position &vp = here.veh_at( last_position ) ) {
++            if( const std::optional<vpart_reference> aisle = vp.part_with_feature( "AISLE", true ) ) {
++                //~ %1$s: vehicle name, %2$s: vehicle part name
++                guy.add_msg_if_player( m_bad, _( "It's a little hard to get to sleep on this %2$s in %1$s." ),
++                                       vp->vehicle().disp_name(), aisle->part().name( false ) );
++            } else {
++                //~ %1$s: vehicle name
++                guy.add_msg_if_player( m_bad, _( "It's hard to get to sleep in %1$s." ),
++                                       vp->vehicle().disp_name() );
++            }
++        } else {
++            std::string name;
++            const furn_id furn = here.furn( last_position );
++            const trap &trap = here.tr_at( last_position );
++            const ter_id ter = here.ter( last_position );
++            if( furn != furn_str_id::NULL_ID() ) {
++                name = furn->name();
++            } else if( !trap.is_null() ) {
++                name = trap.name();
++            } else {
++                name = ter->name();
++            }
++            if( comfort >= -2 ) {
++                //~ %s: terrain/furniture/trap name
++                guy.add_msg_if_player( m_bad, _( "It's a little hard to get to sleep on this %s." ), name );
++            } else {
++                //~ %s: terrain/furniture/trap name
++                guy.add_msg_if_player( m_bad, _( "It's hard to get to sleep on this %s." ), name );
++            }
++        }
++    }
++}
++
++void comfort_data::response::add_sleep_msgs( const Character &guy ) const
++{
++    const message &msg_sleep = data->msg_sleep;
++    if( !msg_sleep.text.empty() ) {
++        guy.add_msg_if_player( msg_sleep.type, msg_sleep.text );
++    }
++}
++
++bool comfort_data::human_or_impossible() const
++{
++    return this == &human_comfort || base_comfort == COMFORT_IMPOSSIBLE;
++}
++
++// The logic isn't intuitive at all, but it works. Conditions are ORed together if `conditions_or`
++// is true and ANDed together if it's false. Somehow.
++bool comfort_data::are_conditions_true( const Character &guy, const tripoint &p ) const
++{
++    for( const condition &cond : conditions ) {
++        const bool passed = cond.is_condition_true( guy, p );
++        if( conditions_or == passed ) {
++            return conditions_or;
++        }
++    }
++    return !conditions_or;
++}
++
++comfort_data::response comfort_data::get_comfort_at( const tripoint &p ) const
++{
++    response result;
++    result.data = this;
++    result.comfort = base_comfort;
++    const int hc = human_comfort_at( p );
++    if( use_better_comfort && hc > base_comfort ) {
++        result.comfort = hc;
++    } else if( add_human_comfort ) {
++        result.comfort += hc;
++    }
++    item sleep_aid;
++    if( add_sleep_aids && try_get_sleep_aid_at( p, sleep_aid ) ) {
++        result.comfort += COMFORT_SLEEP_AID;
++        result.sleep_aid = sleep_aid.tname();
++    }
++    result.last_position = p;
++    result.last_time = calendar::turn;
++    return result;
++}
++
++void comfort_data::deserialize( const JsonObject &jo )
++{
++    mandatory( jo, was_loaded, "conditions", conditions );
++    optional( jo, was_loaded, "conditions_any", conditions_or );
++    deserialize_comfort( jo, was_loaded, "comfort", base_comfort );
++    optional( jo, was_loaded, "add_human_comfort", add_human_comfort );
++    optional( jo, was_loaded, "use_better_comfort", use_better_comfort );
++    optional( jo, was_loaded, "add_sleep_aids", add_sleep_aids );
++    optional( jo, was_loaded, "msg_try", msg_try );
++    optional( jo, was_loaded, "msg_hint", msg_hint );
++    optional( jo, was_loaded, "msg_sleep", msg_sleep );
++    was_loaded = true;
++}
+diff --git a/src/sleep.h b/src/sleep.h
+new file mode 100644
+index 0000000000..37cc2045ea
+--- /dev/null
++++ b/src/sleep.h
+@@ -0,0 +1,117 @@
++#pragma once
++#ifndef CATA_SRC_SLEEP_H
++#define CATA_SRC_SLEEP_H
++
++#include <string>
++#include <vector>
++
++#include "calendar.h"
++#include "enum_traits.h"
++#include "enums.h"
++#include "point.h"
++#include "translation.h"
++
++class Character;
++class JsonObject;
++class item;
++
++/**
++ * Information for evaluating the comfort of a location.
++ *
++ * @details
++ * Some mutations allow mutants to sleep in locations that unmutated characters would find
++ * uncomfortable. Comfort data provides alternative comfort values to locations that fulfill their
++ * conditions, as well as specialized messages for falling asleep under those conditions.
++ */
++struct comfort_data {
++    static const int COMFORT_IMPOSSIBLE = -999;
++    static const int COMFORT_UNCOMFORTABLE = -7;
++    static const int COMFORT_NEUTRAL = 0;
++    static const int COMFORT_SLIGHTLY_COMFORTABLE = 3;
++    static const int COMFORT_SLEEP_AID = 4;
++    static const int COMFORT_COMFORTABLE = 5;
++    static const int COMFORT_VERY_COMFORTABLE = 10;
++
++    enum class category {
++        terrain,
++        furniture,
++        trap,
++        field,
++        vehicle,
++        character,
++        trait,
++        last
++    };
++
++    struct condition {
++        category ccategory;
++        std::string id;
++        std::string flag;
++        /** True if the given field's intensity is greater than or equal to this **/
++        int intensity = 1;
++        /** True if the given trait is actived **/
++        bool active = false;
++        /** If the truth value of the condition should be inverted **/
++        bool invert = false;
++
++        bool is_condition_true( const Character &guy, const tripoint &p ) const;
++        void deserialize( const JsonObject &jo );
++    };
++
++    struct message {
++        translation text;
++        game_message_type type = game_message_type::m_neutral;
++
++        void deserialize( const JsonObject &jo );
++    };
++
++    struct response {
++        /** The comfort data that produced this response **/
++        const comfort_data *data;
++        int comfort;
++        /** The name of a used sleep aid, if one exists **/
++        std::string sleep_aid;
++        tripoint last_position;
++        time_point last_time;
++
++        void add_try_msgs( const Character &guy ) const;
++        void add_sleep_msgs( const Character &guy ) const;
++    };
++
++    std::vector<condition> conditions;
++    /** If conditions should be ORed (true) or ANDed (false) together **/
++    bool conditions_or = false;
++    int base_comfort = COMFORT_NEUTRAL;
++    /** If the human comfort of a location should be added to base comfort **/
++    bool add_human_comfort = false;
++    /** If human comfort should be used instead of base comfort when better **/
++    bool use_better_comfort = false;
++    /** If comfort from sleep aids should be added to base comfort **/
++    bool add_sleep_aids = false;
++    message msg_try;
++    message msg_hint;
++    message msg_sleep;
++
++    /** The comfort data of an unmutated human **/
++    static const comfort_data &human();
++    /** The comfort of a location as provided by its furniture/traps/terrain **/
++    static int human_comfort_at( const tripoint &p );
++    /** If there is a sleep aid at a location. The sleep aid will be stored in `result` if it exists **/
++    static bool try_get_sleep_aid_at( const tripoint &p, item &result );
++    /** Deserializes an int or string to a comfort value (int) and stores it in `member` **/
++    static void deserialize_comfort( const JsonObject &jo, bool was_loaded,
++                                     const std::string &name, int &member );
++
++    bool human_or_impossible() const;
++    bool are_conditions_true( const Character &guy, const tripoint &p ) const;
++    response get_comfort_at( const tripoint &p ) const;
++
++    void deserialize( const JsonObject &jo );
++    bool was_loaded = false;
++};
++
++template<> struct enum_traits<comfort_data::category> {
++    static constexpr comfort_data::category last = comfort_data::category::last;
++};
++
++#endif // CATA_SRC_SLEEP_H
+-- 
+2.45.2
+

@@ -1,0 +1,56 @@
+From c1dbd6263b2e70ab342af6a2684506f57517367b Mon Sep 17 00:00:00 2001
+From: Son Phan Trung <phantrungson17@gmail.com>
+Date: Tue, 13 Aug 2024 20:48:47 +0700
+Subject: [PATCH 004/125] feat: fema camp granularity
+
+---
+ .../overmap_terrain/overmap_terrain_military.json      |  4 ++--
+ data/json/overmap/vision_levels.json                   | 10 ++++++++++
+ 2 files changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/data/json/overmap/overmap_terrain/overmap_terrain_military.json b/data/json/overmap/overmap_terrain/overmap_terrain_military.json
+index 0db47d600a..69747a09f0 100644
+--- a/data/json/overmap/overmap_terrain/overmap_terrain_military.json
++++ b/data/json/overmap/overmap_terrain/overmap_terrain_military.json
+@@ -24,7 +24,7 @@
+       "fema_roof",
+       "fema_1_3_roof"
+     ],
+-    "vision_levels": "isolated_building",
++    "vision_levels": "isolated_camp",
+     "name": "FEMA camp",
+     "sym": "F",
+     "color": "i_blue",
+@@ -36,7 +36,7 @@
+     "type": "overmap_terrain",
+     "id": [ "FEMA_tlc", "FEMA_te", "FEMA_trc", "FEMA_le", "FEMA_mid", "FEMA_re", "FEMA_blc", "FEMA_brc" ],
+     "name": "FEMA refugee camp",
+-    "vision_levels": "isolated_building",
++    "vision_levels": "isolated_camp",
+     "sym": "F",
+     "color": "i_blue",
+     "extras": "build",
+diff --git a/data/json/overmap/vision_levels.json b/data/json/overmap/vision_levels.json
+index e65ecf50b3..5c9815bd09 100644
+--- a/data/json/overmap/vision_levels.json
++++ b/data/json/overmap/vision_levels.json
+@@ -36,6 +36,16 @@
+     "type": "oter_vision",
+     "levels": [ { "name": "tower", "sym": "0", "color": "light_gray" }, { "name": "tower", "sym": "0", "color": "light_gray" } ]
+   },
++  {
++    "id": "isolated_camp",
++    "//": "If there's a tent, it's a camp",
++    "type": "oter_vision",
++    "levels": [
++      { "name": "tent", "sym": ";", "color": "light_gray", "looks_like": "campsite" },
++      { "name": "camp", "sym": "+", "color": "light_gray", "looks_like": "campsite" },
++      { "name": "camp", "sym": "+", "color": "light_gray", "looks_like": "campsite" }
++    ]
++  },
+   {
+     "id": "island",
+     "//": "any island",
+-- 
+2.45.2
+

@@ -1,0 +1,69 @@
+From a5e3c66e87ab9eefbb1a820a9a31768583c85582 Mon Sep 17 00:00:00 2001
+From: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+Date: Sun, 18 Aug 2024 05:07:38 +0200
+Subject: [PATCH 046/125] Category changes for a few items (#75720)
+
+* category changes
+
+* evil
+---
+ data/json/items/fluff.json                   | 2 ++
+ data/json/items/melee/swords_and_blades.json | 1 +
+ data/json/items/tool/woodworking.json        | 2 +-
+ 3 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/data/json/items/fluff.json b/data/json/items/fluff.json
+index 10ef90a927..84a50c85ec 100644
+--- a/data/json/items/fluff.json
++++ b/data/json/items/fluff.json
+@@ -1721,6 +1721,7 @@
+     "color": "light_gray",
+     "name": { "str": "stone sculpture" },
+     "description": "A medium-sized stone sculpture.",
++    "category": "other",
+     "material": "stone",
+     "weight": "7884 g",
+     "volume": "20813 ml",
+@@ -1770,6 +1771,7 @@
+     "color": "brown",
+     "name": { "str": "clay sculpture" },
+     "description": "A small clay sculpture.",
++    "category": "other",
+     "material": "clay",
+     "weight": "150 g",
+     "volume": "94 ml",
+diff --git a/data/json/items/melee/swords_and_blades.json b/data/json/items/melee/swords_and_blades.json
+index c717dc2ca0..dc5181a32f 100644
+--- a/data/json/items/melee/swords_and_blades.json
++++ b/data/json/items/melee/swords_and_blades.json
+@@ -780,6 +780,7 @@
+     "type": "TOOL",
+     "name": { "str": "baselard" },
+     "description": "A medieval dagger forged from rough iron.  It is not the sharpest tool in the shed, but it is certainly one of the largest.",
++    "category": "weapons",
+     "weight": "380 g",
+     "volume": "187 ml",
+     "longest_side": "36 cm",
+diff --git a/data/json/items/tool/woodworking.json b/data/json/items/tool/woodworking.json
+index 392218a672..7fdd5be4cb 100644
+--- a/data/json/items/tool/woodworking.json
++++ b/data/json/items/tool/woodworking.json
+@@ -338,6 +338,7 @@
+     "color": "light_gray",
+     "name": { "str": "hatchet" },
+     "description": "A one-handed hatchet.  Makes a great melee weapon, and is useful both for chopping things and hammering them.",
++    "category": "tools",
+     "price": "25 USD",
+     "price_postapoc": "5 USD",
+     "material": [ "steel", "wood" ],
+@@ -348,7 +349,6 @@
+     "to_hit": { "grip": "weapon", "length": "short", "surface": "line", "balance": "neutral" },
+     "flags": [ "DURABLE_MELEE", "BELT_CLIP", "NONCONDUCTIVE", "SHEATH_AXE" ],
+     "weapon_category": [ "HAND_AXES" ],
+-    "category": "weapons",
+     "qualities": [ [ "AXE", 2 ], [ "CUT", 1 ], [ "HAMMER", 2 ], [ "HAMMER_FINE", 1 ], [ "BUTCHER", 16 ] ],
+     "melee_damage": { "bash": 10, "cut": 20 }
+   },
+-- 
+2.45.2
+

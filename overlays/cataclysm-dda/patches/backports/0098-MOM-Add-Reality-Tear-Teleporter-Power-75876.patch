@@ -1,0 +1,275 @@
+From 1e74cb7e3a46e1643d82a24e3a6c708f55bb3afa Mon Sep 17 00:00:00 2001
+From: b3brodie <70666939+b3brodie@users.noreply.github.com>
+Date: Thu, 22 Aug 2024 13:54:27 -0700
+Subject: [PATCH 098/125] [MOM] Add Reality Tear Teleporter Power (#75876)
+
+* Add reality tear power + infrastructure and bugfix Breach power learning
+
+* Lint
+---
+ .../effectoncondition/eoc_learn_recipes.json  |  2 +-
+ .../powers/learning_eocs/teleportation.json   | 43 ++++++++-
+ .../MindOverMatter/powers/teleportation.json  | 43 +++++++++
+ .../powers/teleportation_eoc.json             |  8 ++
+ .../practice/teleportation_practice.json      | 92 ++++++++++++++++++-
+ 5 files changed, 184 insertions(+), 4 deletions(-)
+
+diff --git a/data/mods/MindOverMatter/effectoncondition/eoc_learn_recipes.json b/data/mods/MindOverMatter/effectoncondition/eoc_learn_recipes.json
+index 08a39b78aa..2711a4fff7 100644
+--- a/data/mods/MindOverMatter/effectoncondition/eoc_learn_recipes.json
++++ b/data/mods/MindOverMatter/effectoncondition/eoc_learn_recipes.json
+@@ -998,7 +998,7 @@
+   {
+     "type": "effect_on_condition",
+     "id": "EOC_CHECK_GAMEBEGIN_TELEPORTER_RECIPE_BREACH",
+-    "condition": { "and": [ { "u_has_trait": "TELEPORTER" }, { "math": [ "u_spell_level('teleport_breach')", ">=", "0" ] } ] },
++    "condition": { "and": [ { "u_has_trait": "TELEPORTER" }, { "math": [ "u_spell_level('teleport_summon')", ">=", "0" ] } ] },
+     "effect": [ { "u_learn_recipe": "practice_teleport_breach" } ]
+   },
+   {
+diff --git a/data/mods/MindOverMatter/powers/learning_eocs/teleportation.json b/data/mods/MindOverMatter/powers/learning_eocs/teleportation.json
+index 0472ce57fa..a0e3fa6a91 100644
+--- a/data/mods/MindOverMatter/powers/learning_eocs/teleportation.json
++++ b/data/mods/MindOverMatter/powers/learning_eocs/teleportation.json
+@@ -379,11 +379,11 @@
+           ]
+         },
+         { "test_eoc": "EOC_PSI_LEARNING_BANNED_EFFECTS" },
+-        { "math": [ "u_spell_level('teleport_breach')", "<=", "0" ] },
++        { "math": [ "u_spell_level('teleport_summon')", "<=", "0" ] },
+         { "not": { "u_know_recipe": "practice_teleport_breach" } }
+       ]
+     },
+-    "deactivate_condition": { "or": [ { "not": { "u_has_trait": "TELEPORTER" } }, { "math": [ "u_spell_level('teleport_breach')", ">=", "1" ] } ] },
++    "deactivate_condition": { "or": [ { "not": { "u_has_trait": "TELEPORTER" } }, { "math": [ "u_spell_level('teleport_summon')", ">=", "1" ] } ] },
+     "effect": [
+       { "math": [ "u_vitamin('vitamin_psi_learning_counter')", "=", "0" ] },
+       { "u_learn_recipe": "practice_teleport_breach" },
+@@ -392,5 +392,44 @@
+         "popup": true
+       }
+     ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEPORT_LEARNING_REALITY_TEAR",
++    "recurrence": [
++      { "math": [ "jmath_teleportation_learning_eocs_modifiers(global_tier_three_power_learning_time_low)" ] },
++      { "math": [ "jmath_teleportation_learning_eocs_modifiers(global_tier_three_power_learning_time_high)" ] }
++    ],
++    "condition": {
++      "and": [
++        { "u_has_trait": "TELEPORTER" },
++        { "math": [ "u_vitamin('vitamin_psi_learning_counter')", "==", "1" ] },
++        {
++          "or": [
++            { "test_eoc": "EOC_CONDITION_ODDS_OF_RANDOM_TIER_THREE_POWER_INSIGHT" },
++            {
++              "and": [
++                { "math": [ "u_spell_level('teleport_summon')", ">=", "10" ] },
++                { "math": [ "u_spell_level('teleport_gateway')", ">=", "10" ] }
++              ]
++            }
++          ]
++        },
++        { "test_eoc": "EOC_PSI_LEARNING_BANNED_EFFECTS" },
++        { "math": [ "u_spell_level('teleport_reality_tear')", "<=", "0" ] },
++        { "not": { "u_know_recipe": "practice_teleport_reality_tear" } }
++      ]
++    },
++    "deactivate_condition": {
++      "or": [ { "not": { "u_has_trait": "TELEPORTER" } }, { "math": [ "u_spell_level('teleport_reality_tear')", ">=", "1" ] } ]
++    },
++    "effect": [
++      { "math": [ "u_vitamin('vitamin_psi_learning_counter')", "=", "0" ] },
++      { "u_learn_recipe": "practice_teleport_reality_tear" },
++      {
++        "u_message": "Use of your powers has led to an insight.  You are able to open a permanent tear in reality to the Nether, allowing all manners of creatures to pass through to Earth.",
++        "popup": true
++      }
++    ]
+   }
+ ]
+diff --git a/data/mods/MindOverMatter/powers/teleportation.json b/data/mods/MindOverMatter/powers/teleportation.json
+index 15e6bb784a..873bd1339a 100644
+--- a/data/mods/MindOverMatter/powers/teleportation.json
++++ b/data/mods/MindOverMatter/powers/teleportation.json
+@@ -701,5 +701,48 @@
+     "final_casting_time": 125,
+     "ignored_monster_species": [ "PSI_NULL" ],
+     "casting_time_increment": -6.5
++  },
++  {
++    "id": "teleport_reality_tear",
++    "type": "SPELL",
++    "name": "[Ψ]Reality Tear",
++    "description": "Make your own contribution to the Cataclysm by opening a permanent tear in reality, allowing all manners of netherium creatures access to Earth.  This might not be a good idea.",
++    "message": "The air fractures and the space nearby breaks!",
++    "teachable": false,
++    "valid_targets": [ "ground" ],
++    "spell_class": "TELEPORTER",
++    "skill": "metaphysics",
++    "flags": [ "PSIONIC", "CONCENTRATE", "SILENT", "NO_HANDS", "NO_LEGS" ],
++    "difficulty": 10,
++    "max_level": { "math": [ "int_to_level(1)" ] },
++    "effect": "attack",
++    "extra_effects": [ { "id": "teleport_reality_tear_effects", "hit_self": true } ],
++    "field_id": "fd_fatigue",
++    "field_chance": 1,
++    "min_field_intensity": 10,
++    "max_field_intensity": 10,
++    "shape": "blast",
++    "min_range": 1,
++    "energy_source": "STAMINA",
++    "base_energy_cost": 10000,
++    "final_energy_cost": 5000,
++    "energy_increment": -250,
++    "base_casting_time": 250,
++    "final_casting_time": 100,
++    "casting_time_increment": -10
++  },
++  {
++    "id": "teleport_reality_tear_effects",
++    "type": "SPELL",
++    "name": "[Ψ]Reality Tear - Side Effects",
++    "description": "Side effects of Reality Tear.  Seeing this spell is a bug.",
++    "teachable": false,
++    "valid_targets": [ "self" ],
++    "spell_class": "TELEPORTER",
++    "skill": "metaphysics",
++    "flags": [ "PSIONIC", "SILENT", "NO_EXPLOSION_SFX" ],
++    "effect": "effect_on_condition",
++    "effect_str": "EOC_REALITY_TEAR_EFFECTS",
++    "shape": "blast"
+   }
+ ]
+diff --git a/data/mods/MindOverMatter/powers/teleportation_eoc.json b/data/mods/MindOverMatter/powers/teleportation_eoc.json
+index 847ecb97d6..4a353df12b 100644
+--- a/data/mods/MindOverMatter/powers/teleportation_eoc.json
++++ b/data/mods/MindOverMatter/powers/teleportation_eoc.json
+@@ -106,5 +106,13 @@
+     "effect": [
+       { "u_spawn_monster": "GROUP_NETHER_BREACH", "group": true, "real_count": [ 1, 3 ], "min_radius": 2, "max_radius": 6 }
+     ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_REALITY_TEAR_EFFECTS",
++    "//": "Some way of angering factions if done nearby them would be ideal as well.  Cannot find a way to dynamically find nearby faction bases though.",
++    "effect": [
++      { "u_spawn_monster": "GROUP_NETHER_BREACH", "group": true, "real_count": [ 2, 6 ], "min_radius": 2, "max_radius": 6 }
++    ]
+   }
+ ]
+diff --git a/data/mods/MindOverMatter/recipes/practice/teleportation_practice.json b/data/mods/MindOverMatter/recipes/practice/teleportation_practice.json
+index 0ce53d2acc..98d22e9d9e 100644
+--- a/data/mods/MindOverMatter/recipes/practice/teleportation_practice.json
++++ b/data/mods/MindOverMatter/recipes/practice/teleportation_practice.json
+@@ -20,7 +20,8 @@
+       "practice_teleport_collapse",
+       "practice_teleport_banish",
+       "practice_teleport_gateway",
+-      "practice_teleport_breach"
++      "practice_teleport_breach",
++      "practice_teleport_reality_tear"
+     ],
+     "difficulty": 1
+   },
+@@ -976,5 +977,94 @@
+         ]
+       }
+     ]
++  },
++  {
++    "type": "recipe",
++    "activity_level": "LIGHT_EXERCISE",
++    "name": "contemplation: reality tear",
++    "id": "practice_teleport_reality_tear",
++    "description": "Contemplate your powers and improve your ability to permanently tear open reality.",
++    "category": "CC_*",
++    "subcategory": "CSC_*_NESTED",
++    "skill_used": "metaphysics",
++    "difficulty": 10,
++    "time": "0 s",
++    "autolearn": false,
++    "proficiencies": [ { "proficiency": "prof_contemplation_teleportation", "required": false } ],
++    "tools": [
++      [ [ "matrix_crystal_drained", -1 ], [ "black_nether_crystal_pseudo_tool", -1 ], [ "matrix_crystal_teleportation", -1 ] ]
++    ],
++    "components": [ [ [ "matrix_crystal_teleport_dust", 1 ] ] ],
++    "flags": [ "SECRET", "BLIND_EASY", "NO_MANIP", "AFFECTED_BY_PAIN", "NO_BENCH", "NO_ENCHANTMENT" ],
++    "result_eocs": [
++      {
++        "id": "EOC_PRACTICE_TELEPORT_REALITY_TEAR",
++        "condition": { "math": [ "u_spell_level('teleport_reality_tear')", ">=", "1" ] },
++        "effect": [
++          { "set_string_var": "teleport_reality_tear", "target_var": { "u_val": "latest_studied_power_name" } },
++          {
++            "set_string_var": "prof_contemplation_teleportation",
++            "target_var": { "u_val": "latest_studied_power_proficiency" }
++          },
++          { "math": [ "u_latest_studied_power_difficulty", "=", "10" ] },
++          { "run_eocs": [ "EOC_PSI_STUDYING_POWER_BEGIN", "EOC_PSI_STUDYING_POWER_SIDE_EFFECTS" ] }
++        ],
++        "false_effect": [
++          { "set_string_var": "teleport_reality_tear", "target_var": { "u_val": "latest_studied_power_name" } },
++          { "u_message": "You attempt to unlock new capabilities within your mind." },
++          { "u_assign_activity": "ACT_PSI_LEARNING_NEW_POWER", "duration": "16 hours" },
++          { "u_add_effect": "effect_psi_learning_new_power", "duration": "16 hours" },
++          { "run_eocs": "EOC_PSI_PRACTICE_FOCUS_MOD" },
++          {
++            "queue_eocs": "EOC_PRACTICE_TELEPORT_REALITY_TEAR_LEARNING",
++            "time_in_future": [ { "math": [ "learn_new_power_lower_time_bound(10)" ] }, { "math": [ "learn_new_power_upper_time_bound(10)" ] } ]
++          }
++        ]
++      }
++    ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_PRACTICE_TELEPORT_REALITY_TEAR_LEARNING",
++    "condition": {
++      "and": [
++        { "compare_string": [ "teleport_reality_tear", { "u_val": "latest_studied_power_name" } ] },
++        { "u_has_effect": "effect_psi_learning_new_power" },
++        {
++          "not": { "u_has_any_effect": [ "sleep", "effect_vitakin_wakeful_resting", "lack_sleep", "sleep_deprived", "under_operation" ] }
++        }
++      ]
++    },
++    "effect": [
++      {
++        "run_eocs": [
++          {
++            "id": "EOC_PRACTICE_TELEPORT_REALITY_TEAR_LEARNING_2",
++            "condition": {
++              "and": [
++                {
++                  "roll_contested": { "math": [ "u_skill('metaphysics') + u_has_proficiency('prof_contemplation_teleportation')" ] },
++                  "difficulty": 14
++                }
++              ]
++            },
++            "effect": [
++              {
++                "u_message": "As you meditate, all the pieces suddenly come together.  You've unlocked the Reality Tear power.",
++                "popup": true
++              },
++              { "math": [ "u_spell_level('teleport_reality_tear')", "=", "1" ] },
++              { "math": [ "u_vitamin('vitamin_psionic_drain')", "+=", "rng( 50,100 )" ] },
++              { "u_lose_effect": "effect_psi_learning_new_power" }
++            ],
++            "false_effect": [
++              { "u_message": "You just couldn't manage to grasp the technique.  You'll have to try again.", "popup": true },
++              { "math": [ "u_vitamin('vitamin_psionic_drain')", "+=", "rng( 50,100 )" ] },
++              { "u_lose_effect": "effect_psi_learning_new_power" }
++            ]
++          }
++        ]
++      }
++    ]
+   }
+ ]
+-- 
+2.45.2
+

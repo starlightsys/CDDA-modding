@@ -1,0 +1,1894 @@
+From affda1263bbd7a1b0ed9dfd653107a22e714c47c Mon Sep 17 00:00:00 2001
+From: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+Date: Thu, 22 Aug 2024 22:53:30 +0200
+Subject: [PATCH 097/125] Audit the remaining vanilla birds (#75779)
+
+* HP calculation + comment cleanup
+
+* abstracts
+
+* revise HP calculations
+
+* I hate moving file contents but this is nonactionable
+
+Potentially for reversion
+
+* waterfowl chick abstract
+
+* speeds for abstracts
+
+* chicken + grouse
+
+* mallard + grouse egg
+
+* fix tileset issues with chicks
+
+* obsolete the golden honker
+
+* turkey
+
+* pheasant
+
+* canada goose
+
+* woodpecker
+
+* grebe
+
+* hummingbird + cooking requirement collection
+
+* coot
+
+* moorhen
+
+* cormorant
+
+* oops wrong name
+
+* evil in my sight
+
+* cormorant HP
+
+* goots
+
+* forgive me but I can't manage this
+
+reorganizes some file contents
+
+* cormorant chick needs watering
+
+* domestic turk
+
+* domestic duck
+
+* domestic bird spawn shakeup
+
+* right the wrongs
+
+* Update bird.json
+
+* grouse taming in mods
+
+* Update bird.json
+
+* expand tropicata brazilian blacklist
+
+* Update egg.json
+
+* HP calculation adjustments
+
+* fix the typo or I'll lose my mind
+---
+ data/json/items/comestibles/egg.json          |  96 +-
+ data/json/monstergroups/eggs.json             |  18 +-
+ data/json/monstergroups/misc.json             |  31 +-
+ data/json/monstergroups/wilderness.json       |  11 +-
+ data/json/monsters/bird.json                  | 860 ++++++++++--------
+ .../migration_items.json                      |   5 +
+ .../json/requirements/cooking_components.json |  13 +-
+ data/mods/Tamable_Wildlife/bird.json          |  84 +-
+ .../blacklists/default_blacklist.json         |  16 +-
+ 9 files changed, 633 insertions(+), 501 deletions(-)
+
+diff --git a/data/json/items/comestibles/egg.json b/data/json/items/comestibles/egg.json
+index 1ad01ce662..8c5b3de4ad 100644
+--- a/data/json/items/comestibles/egg.json
++++ b/data/json/items/comestibles/egg.json
+@@ -42,8 +42,10 @@
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_grouse",
+-    "name": { "str": "grouse egg" },
++    "name": { "str": "ruffed grouse egg" },
++    "spoils_in": "13 days",
+     "copy-from": "egg_chicken",
++    "proportional": { "volume": 0.73, "weight": 0.73, "calories": 0.73 },
+     "rot_spawn": "GROUP_EGG_GROUSE"
+   },
+   {
+@@ -131,43 +133,54 @@
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_duck",
+-    "name": { "str": "duck egg" },
+-    "copy-from": "egg_chicken",
++    "name": { "str": "mallard egg" },
+     "spoils_in": "14 days",
++    "copy-from": "egg_chicken",
++    "proportional": { "volume": 1.4, "weight": 1.4 },
+     "calories": 130,
+-    "volume": "83 ml",
+-    "weight": "70 g",
+-    "vitamins": [ [ "calcium", 5 ], [ "iron", 15 ] ],
++    "vitamins": [ [ "iron", "3 mg" ], [ "calcium", "45 mg" ], [ "egg_allergen", 1 ] ],
+     "rot_spawn": "GROUP_EGG_DUCK"
+   },
++  {
++    "type": "COMESTIBLE",
++    "id": "egg_duck_domestic",
++    "name": { "str": "domestic duck egg" },
++    "copy-from": "egg_duck",
++    "rot_spawn": "GROUP_EGG_DUCK_DOMESTIC"
++  },
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_goose_canadian",
+-    "name": { "str": "goose egg" },
+-    "spoils_in": "14 days",
++    "name": { "str": "Canada goose egg" },
++    "spoils_in": "15 days",
+     "copy-from": "egg_chicken",
+-    "calories": 266,
+-    "volume": "130 ml",
+-    "weight": "143 g",
+-    "vitamins": [ [ "calcium", 9 ], [ "iron", 29 ] ],
++    "proportional": { "volume": 3.26, "weight": 3.26 },
++    "calories": 302,
++    "vitamins": [ [ "iron", "6 mg" ], [ "calcium", "98 mg" ], [ "egg_allergen", 1 ] ],
+     "rot_spawn": "GROUP_EGG_GOOSE_CANADIAN"
+   },
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_turkey",
+-    "name": { "str": "turkey egg" },
+-    "spoils_in": "14 days",
++    "name": { "str": "wild turkey egg" },
++    "spoils_in": "15 days",
+     "copy-from": "egg_chicken",
+-    "volume": "83 ml",
+-    "weight": "79 g",
++    "proportional": { "volume": 1.58, "weight": 1.58 },
+     "calories": 135,
+-    "vitamins": [ [ "calcium", 8 ], [ "iron", 18 ] ],
++    "vitamins": [ [ "iron", "3 mg" ], [ "calcium", "78 mg" ], [ "egg_allergen", 1 ] ],
+     "rot_spawn": "GROUP_EGG_TURKEY"
+   },
++  {
++    "type": "COMESTIBLE",
++    "id": "egg_turkey_domestic",
++    "name": { "str": "domestic turkey egg" },
++    "copy-from": "egg_turkey",
++    "rot_spawn": "GROUP_EGG_TURKEY_DOMESTIC"
++  },
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_pheasant",
+-    "name": { "str": "pheasant egg" },
++    "name": { "str": "ring-necked pheasant egg" },
+     "spoils_in": "14 days",
+     "copy-from": "egg_chicken",
+     "rot_spawn": "GROUP_EGG_PHEASANT"
+@@ -1194,64 +1207,63 @@
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_goose",
+-    "name": "goose egg",
+-    "copy-from": "egg_goose_canadian",
+-    "rot_spawn": "GROUP_EGG_GOOSE"
+-  },
+-  {
+-    "type": "COMESTIBLE",
+-    "id": "egg_goose_golden",
+-    "name": "golden goose egg",
+-    "copy-from": "egg_goose_canadian",
+-    "proportional": { "weight": 2, "calories": 2, "volume": 2 },
++    "name": { "str": "domestic goose egg" },
++    "copy-from": "egg_chicken",
++    "proportional": { "volume": 2.88, "weight": 2.88 },
++    "calories": 266,
++    "vitamins": [ [ "iron", "5 mg" ], [ "calcium", "86 mg" ], [ "egg_allergen", 1 ] ],
+     "rot_spawn": "GROUP_EGG_GOOSE"
+   },
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_hummingbird",
+-    "name": "hummingbird egg",
+-    "spoils_in": "8 days",
+-    "copy-from": "egg_crow",
++    "name": { "str": "ruby-throated hummingbird egg" },
++    "spoils_in": "7 days",
++    "copy-from": "egg_chicken",
++    "proportional": { "weight": 0.01 },
+     "volume": "1 ml",
+-    "weight": "1 g",
++    "calories": 1,
++    "//": "Volume and calories defined manually because proportional rounded them down to 0",
+     "rot_spawn": "GROUP_EGG_HUMMINGBIRD"
+   },
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_woodpecker",
+-    "name": "woodpecker egg",
+-    "spoils_in": "7 days",
+-    "copy-from": "egg_crow",
++    "name": { "str": "downy woodpecker egg" },
++    "spoils_in": "6 days",
++    "copy-from": "egg_chicken",
++    "proportional": { "volume": 0.06, "weight": 0.06, "calories": 0.06 },
+     "rot_spawn": "GROUP_EGG_WOODPECKER"
+   },
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_coot",
+-    "name": "coot egg",
+-    "spoils_in": "12 days",
++    "name": { "str": "American coot egg" },
++    "spoils_in": "13 days",
+     "copy-from": "egg_chicken",
++    "proportional": { "volume": 0.73, "weight": 0.73, "calories": 0.73 },
+     "rot_spawn": "GROUP_EGG_COOT"
+   },
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_cormorant",
+-    "name": "cormorant egg",
+-    "spoils_in": "13 days",
++    "name": { "str": "double-crested cormorant egg" },
++    "spoils_in": "14 days",
+     "copy-from": "egg_chicken",
+     "rot_spawn": "GROUP_EGG_CORMORANT"
+   },
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_moorhen",
+-    "name": "moorhen egg",
+-    "spoils_in": "10 days",
++    "name": { "str": "common gallinule egg" },
+     "copy-from": "egg_chicken",
++    "proportional": { "volume": 0.73, "weight": 0.73, "calories": 0.73 },
+     "rot_spawn": "GROUP_EGG_MOORHEN"
+   },
+   {
+     "type": "COMESTIBLE",
+     "id": "egg_grebe",
+-    "name": "grebe egg",
++    "name": { "str": "horned grebe egg" },
+     "spoils_in": "12 days",
+     "copy-from": "egg_chicken",
+     "rot_spawn": "GROUP_EGG_GREBE"
+diff --git a/data/json/monstergroups/eggs.json b/data/json/monstergroups/eggs.json
+index 046616d584..4917b69723 100644
+--- a/data/json/monstergroups/eggs.json
++++ b/data/json/monstergroups/eggs.json
+@@ -15,8 +15,7 @@
+       { "monster": "mon_cardinal_chick", "weight": 15 },
+       { "monster": "mon_sparrow_chick", "weight": 15 },
+       { "monster": "mon_goose_canadian_chick", "weight": 100 },
+-      { "monster": "mon_goose_chick", "weight": 100, "cost_multiplier": 1 },
+-      { "monster": "mon_goose_golden_chick", "weight": 100, "cost_multiplier": 1 }
++      { "monster": "mon_goose_chick", "weight": 100 }
+     ]
+   },
+   {
+@@ -79,6 +78,11 @@
+     "type": "monstergroup",
+     "monsters": [ { "monster": "mon_duck_chick" } ]
+   },
++  {
++    "name": "GROUP_EGG_DUCK_DOMESTIC",
++    "type": "monstergroup",
++    "monsters": [ { "monster": "mon_duck_domestic_chick" } ]
++  },
+   {
+     "name": "GROUP_EGG_GOOSE_CANADIAN",
+     "type": "monstergroup",
+@@ -89,6 +93,11 @@
+     "type": "monstergroup",
+     "monsters": [ { "monster": "mon_turkey_chick" } ]
+   },
++  {
++    "name": "GROUP_EGG_TURKEY_DOMESTIC",
++    "type": "monstergroup",
++    "monsters": [ { "monster": "mon_turkey_domestic_chick" } ]
++  },
+   {
+     "name": "GROUP_EGG_PHEASANT",
+     "type": "monstergroup",
+@@ -241,11 +250,6 @@
+     "type": "monstergroup",
+     "monsters": [ { "monster": "mon_goose_chick" } ]
+   },
+-  {
+-    "name": "GROUP_EGG_GOOSE_GOLD",
+-    "type": "monstergroup",
+-    "monsters": [ { "monster": "mon_goose_golden_chick" } ]
+-  },
+   {
+     "name": "GROUP_EGG_HUMMINGBIRD",
+     "type": "monstergroup",
+diff --git a/data/json/monstergroups/misc.json b/data/json/monstergroups/misc.json
+index e8221ed44c..f963b75d9b 100644
+--- a/data/json/monstergroups/misc.json
++++ b/data/json/monstergroups/misc.json
+@@ -211,7 +211,7 @@
+       { "monster": "mon_dog_dachshund", "weight": 2, "cost_multiplier": 25, "pack_size": [ 1, 3 ] },
+       { "monster": "mon_dog_gshepherd", "weight": 3, "cost_multiplier": 25, "pack_size": [ 1, 3 ] },
+       { "monster": "mon_dog_samoyed", "weight": 1, "cost_multiplier": 25, "pack_size": [ 1, 3 ] },
+-      { "monster": "mon_chicken", "weight": 50, "cost_multiplier": 10, "pack_size": [ 1, 16 ] },
++      { "group": "GROUP_BIRD_DOMESTIC", "weight": 50, "cost_multiplier": 5, "pack_size": [ 1, 12 ] },
+       { "group": "GROUP_COWS", "weight": 50, "cost_multiplier": 25, "pack_size": [ 1, 8 ] },
+       { "group": "GROUP_HORSES", "weight": 50, "cost_multiplier": 25, "pack_size": [ 1, 4 ] },
+       { "group": "GROUP_PIGS", "weight": 10, "cost_multiplier": 25, "pack_size": [ 1, 6 ] },
+@@ -221,7 +221,6 @@
+       { "group": "GROUP_PIGS", "weight": 10, "cost_multiplier": 25, "ends": "90 days", "pack_size": [ 1, 6 ] },
+       { "group": "GROUP_SHEEPS", "weight": 50, "cost_multiplier": 25, "pack_size": [ 1, 12 ] },
+       { "monster": "mon_goat", "weight": 25, "cost_multiplier": 25, "pack_size": [ 1, 12 ] },
+-      { "monster": "mon_goose", "weight": 10, "cost_multiplier": 25, "pack_size": [ 1, 6 ] },
+       { "monster": "mon_llama", "weight": 50, "cost_multiplier": 25, "pack_size": [ 1, 8 ] },
+       { "monster": "mon_zombie_pig", "weight": 10, "cost_multiplier": 25, "starts": "3 days", "pack_size": [ 1, 5 ] },
+       { "monster": "mon_zombie_pig", "weight": 10, "cost_multiplier": 25, "starts": "7 days", "pack_size": [ 1, 5 ] },
+@@ -235,6 +234,28 @@
+       { "monster": "mon_ferret", "weight": 10 }
+     ]
+   },
++  {
++    "type": "monstergroup",
++    "name": "GROUP_BIRD_DOMESTIC",
++    "default": "mon_chicken",
++    "is_animal": true,
++    "monsters": [
++      { "monster": "mon_chicken", "weight": 10, "pack_size": [ 1, 4 ] },
++      { "monster": "mon_duck_domestic", "weight": 6, "pack_size": [ 1, 3 ] },
++      { "monster": "mon_goose", "weight": 3, "pack_size": [ 1, 2 ] },
++      { "monster": "mon_turkey_domestic", "weight": 1, "pack_size": [ 1, 2 ] }
++    ]
++  },
++  {
++    "type": "monstergroup",
++    "name": "GROUP_BIRD_DOMESTIC_WATERFOWL",
++    "default": "mon_duck_domestic",
++    "is_animal": true,
++    "monsters": [
++      { "monster": "mon_duck_domestic", "weight": 2, "pack_size": [ 1, 6 ] },
++      { "monster": "mon_goose", "weight": 1, "pack_size": [ 1, 3 ] }
++    ]
++  },
+   {
+     "type": "monstergroup",
+     "name": "GROUP_SAFE",
+@@ -244,7 +265,7 @@
+       { "monster": "mon_null", "weight": 679 },
+       { "monster": "mon_bat", "weight": 10 },
+       { "monster": "mon_bobcat", "weight": 10 },
+-      { "monster": "mon_chicken", "weight": 10 },
++      { "group": "GROUP_BIRD_DOMESTIC", "weight": 20 },
+       { "monster": "mon_chipmunk", "weight": 10 },
+       { "monster": "mon_crow", "weight": 10 },
+       { "monster": "mon_raven", "weight": 10 },
+@@ -278,8 +299,6 @@
+       { "group": "GROUP_SHEEPS", "weight": 10 },
+       { "monster": "mon_goat", "weight": 10 },
+       { "monster": "mon_lemming", "weight": 10 },
+-      { "monster": "mon_goose", "weight": 10 },
+-      { "monster": "mon_goose_golden", "weight": 1 },
+       { "monster": "mon_llama", "weight": 10 },
+       { "monster": "mon_woodlouse", "weight": 10 },
+       { "monster": "mon_cicada_nymph", "weight": 10 },
+@@ -521,7 +540,6 @@
+       { "monster": "mon_opossum", "weight": 10 },
+       { "monster": "mon_squirrel", "weight": 20 },
+       { "monster": "mon_weasel", "weight": 20 },
+-      { "monster": "mon_chicken", "weight": 10 },
+       { "monster": "mon_grouse", "weight": 10 },
+       { "monster": "mon_pheasant", "weight": 10 },
+       { "monster": "mon_turkey", "weight": 20 }
+@@ -533,7 +551,6 @@
+     "//": "Special group with hardcoded reference in basecamp::hunting_results. Does not actually spawn anywhere, used solely to determine returns from camp hunting mission.",
+     "//2": "This group can only be picked from when the hunt large animals mission is used, in addition to GROUP_CAMP_HUNTING.",
+     "monsters": [
+-      { "monster": "mon_chicken", "weight": 20 },
+       { "monster": "mon_grouse", "weight": 2 },
+       { "monster": "mon_pheasant", "weight": 2 },
+       { "monster": "mon_turkey", "weight": 10 },
+diff --git a/data/json/monstergroups/wilderness.json b/data/json/monstergroups/wilderness.json
+index 027ee5386b..79cf5afb64 100644
+--- a/data/json/monstergroups/wilderness.json
++++ b/data/json/monstergroups/wilderness.json
+@@ -356,7 +356,7 @@
+         "pack_size": [ 1, 3 ]
+       },
+       { "group": "GROUP_WATER_STRIDER", "weight": 15, "cost_multiplier": 3, "pack_size": [ 2, 4 ] },
+-      { "monster": "mon_goose", "weight": 15, "cost_multiplier": 5, "pack_size": [ 1, 4 ] },
++      { "group": "GROUP_BIRD_DOMESTIC_WATERFOWL", "weight": 15, "cost_multiplier": 5 },
+       { "monster": "mon_coot", "weight": 15, "cost_multiplier": 5, "pack_size": [ 1, 6 ] },
+       { "monster": "mon_moorhen", "weight": 15, "cost_multiplier": 5, "pack_size": [ 1, 6 ] },
+       { "monster": "mon_cormorant", "weight": 15, "cost_multiplier": 5, "pack_size": [ 1, 4 ] },
+@@ -521,7 +521,6 @@
+       { "monster": "mon_chipmunk", "weight": 50, "cost_multiplier": 0 },
+       { "monster": "mon_squirrel", "weight": 50, "cost_multiplier": 0 },
+       { "monster": "mon_squirrel_red", "weight": 50, "cost_multiplier": 0 },
+-      { "monster": "mon_chicken", "weight": 10 },
+       { "monster": "mon_turkey", "weight": 10 },
+       {
+         "monster": "mon_raccoon",
+@@ -565,12 +564,11 @@
+     "monsters": [
+       { "monster": "mon_duck", "weight": 50, "cost_multiplier": 0 },
+       { "monster": "mon_goose_canadian", "weight": 50, "cost_multiplier": 0 },
+-      { "monster": "mon_goose", "weight": 50, "cost_multiplier": 0 },
++      { "group": "GROUP_BIRD_DOMESTIC_WATERFOWL", "weight": 50, "cost_multiplier": 0, "pack_size": [ 1, 1 ] },
+       { "monster": "mon_coot", "weight": 50, "cost_multiplier": 0 },
+       { "monster": "mon_moorhen", "weight": 50, "cost_multiplier": 0 },
+       { "monster": "mon_cormorant", "weight": 50, "cost_multiplier": 0 },
+-      { "monster": "mon_grebe", "weight": 50, "cost_multiplier": 0 },
+-      { "monster": "mon_goose_golden", "weight": 10, "cost_multiplier": 0 }
++      { "monster": "mon_grebe", "weight": 50, "cost_multiplier": 0 }
+     ]
+   },
+   {
+@@ -628,7 +626,7 @@
+     "is_animal": true,
+     "monsters": [
+       { "monster": "mon_goat", "weight": 1, "pack_size": [ 1, 4 ] },
+-      { "monster": "mon_chicken", "weight": 10, "pack_size": [ 4, 6 ] }
++      { "group": "GROUP_BIRD_DOMESTIC", "weight": 10, "pack_size": [ 1, 2 ] }
+     ]
+   },
+   {
+@@ -637,7 +635,6 @@
+     "is_animal": true,
+     "monsters": [
+       { "monster": "mon_duck", "weight": 20, "pack_size": [ 1, 4 ], "conditions": [ "SPRING", "SUMMER", "AUTUMN" ] },
+-      { "monster": "mon_goose", "weight": 15, "pack_size": [ 2, 4 ] },
+       { "monster": "mon_coot", "weight": 15, "pack_size": [ 2, 4 ] },
+       { "monster": "mon_moorhen", "weight": 15, "pack_size": [ 2, 4 ] },
+       { "monster": "mon_cormorant", "weight": 15, "pack_size": [ 2, 4 ] },
+diff --git a/data/json/monsters/bird.json b/data/json/monsters/bird.json
+index 611f9717db..43dead3a44 100644
+--- a/data/json/monsters/bird.json
++++ b/data/json/monsters/bird.json
+@@ -3,31 +3,43 @@
+     "abstract": "mon_bird_flying_base",
+     "type": "MONSTER",
+     "name": { "str": "flying bird abstract" },
+-    "description": "This is an abstract monsters for other wild flying birds to copy from, so that we have some common foundation to work with.  If it appears in the game that's a bug.",
++    "description": "This is an abstract monster for other flying birds to copy from, so that we have some common foundation to work with.  If it appears in the game that's a bug.  Use this when your bird can fly, but cannot swim.",
+     "bodytype": "bird",
+     "default_faction": "small_animal",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "600 ml",
+-    "weight": "450 g",
+-    "//": "~0.75g/ml density for most wild flying birds",
+-    "hp": 4,
++    "categories": ["WILDLIFE"],
++    "species": ["BIRD"],
++    "volume": "467 ml",
++    "weight": "350 g",
++    "//": "~0.75g/ml density for most wild birds",
++    "hp": 1,
+     "speed": 200,
+-    "material": [ "flesh" ],
++    "material": ["flesh"],
+     "symbol": "v",
+     "color": "dark_gray",
+     "aggression": -99,
+     "morale": 5,
+     "melee_dice": 1,
+     "melee_dice_sides": 1,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 0 } ],
++    "melee_damage": [{ "damage_type": "cut", "amount": 0 }],
+     "dodge": 4,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_flying", "prof_wp_basic_bird" ],
+-    "weakpoint_sets": [ "wps_bird_body" ],
++    "families": [
++      "prof_intro_biology",
++      "prof_physiology",
++      "prof_wp_flying",
++      "prof_wp_basic_bird"
++    ],
++    "weakpoint_sets": ["wps_bird_body"],
+     "harvest": "bird_tiny",
+     "dissect": "dissect_bird_sample_single",
+-    "baby_flags": [ "SPRING", "SUMMER" ],
+-    "fear_triggers": [ "SOUND", "PLAYER_CLOSE", "FRIEND_ATTACKED", "FRIEND_DIED", "FIRE", "HURT" ],
++    "baby_flags": ["SPRING", "SUMMER"],
++    "fear_triggers": [
++      "SOUND",
++      "PLAYER_CLOSE",
++      "FRIEND_ATTACKED",
++      "FRIEND_DIED",
++      "FIRE",
++      "HURT"
++    ],
+     "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 4 },
+     "flags": [
+       "SEES",
+@@ -45,68 +57,132 @@
+     ]
+   },
+   {
+-    "id": "mon_chicken",
++    "abstract": "mon_bird_flightless_base",
+     "type": "MONSTER",
+-    "name": { "str": "chicken" },
+-    "description": "A domesticated descendant of junglefowl, it may still be the most numerous bird in the world.  Before the Cataclysm, it was raised by humans as a source of meat, eggs, and early morning wakeup calls.",
++    "name": { "str": "flightless bird abstract" },
++    "description": "This is an abstract monster for other flightless birds to copy from, so that we have some common foundation to work with.  If it appears in the game that's a bug.  Use this when your bird can neither fly nor swim.",
++    "copy-from": "mon_bird_flying_base",
++    "speed": 105,
++    "delete": { "flags": ["FLIES"] }
++  },
++  {
++    "abstract": "mon_bird_water_base",
++    "type": "MONSTER",
++    "name": { "str": "water bird abstract" },
++    "description": "This is an abstract monster for other water birds to copy from, so that we have some common foundation to work with.  If it appears in the game that's a bug.  Use this when your bird can both fly and swim.",
++    "copy-from": "mon_bird_flying_base",
++    "speed": 85,
++    "extend": { "flags": ["SWIMS"] }
++  },
++  {
++    "abstract": "mon_generic_chick",
++    "type": "MONSTER",
++    "name": { "str": "brown chick" },
++    "description": "A tiny darkly-colored chick, it could be from a number of different species.",
+     "default_faction": "small_animal",
+     "bodytype": "bird",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "4 L",
+-    "weight": "3500 g",
+-    "hp": 8,
+-    "speed": 80,
+-    "material": [ "flesh" ],
++    "categories": ["WILDLIFE"],
++    "species": ["BIRD"],
++    "volume": "80 ml",
++    "weight": "60 g",
++    "hp": 1,
++    "speed": 40,
++    "material": ["flesh"],
+     "symbol": "v",
+-    "color": "white",
++    "color": "yellow",
+     "aggression": -99,
+-    "morale": 90,
++    "morale": -8,
+     "melee_skill": 1,
+     "melee_dice": 1,
+     "melee_dice_sides": 1,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 1 } ],
++    "melee_damage": [{ "damage_type": "cut", "amount": 1 }],
+     "dodge": 4,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_basic_bird" ],
+-    "weakpoint_sets": [ "wps_bird_body" ],
++    "families": ["prof_intro_biology", "prof_physiology", "prof_wp_basic_bird"],
++    "weakpoint_sets": ["wps_bird_body"],
+     "harvest": "bird_tiny",
+-    "dissect": "dissect_bird_sample_single",
+-    "fear_triggers": [ "SOUND", "PLAYER_CLOSE", "FIRE", "HURT" ],
+-    "reproduction": { "baby_egg": "egg_chicken", "baby_count": 1, "baby_timer": 2 },
+-    "baby_flags": [ "SPRING", "SUMMER", "AUTUMN", "WINTER" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 3 },
+-    "petfood": {
+-      "food": [ "BIRDFOOD" ],
+-      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+-      "pet": "The %s runs around your leg."
+-    },
++    "upgrades": { "age_grow": 14, "into": "mon_chicken" },
++    "//": "Grows up into a standard chicken as a fallback",
++    "fear_triggers": [
++      "SOUND",
++      "PLAYER_CLOSE",
++      "FRIEND_ATTACKED",
++      "FRIEND_DIED",
++      "FIRE",
++      "HURT"
++    ],
+     "flags": [
+       "SEES",
+       "HEARS",
+-      "SMELLS",
+       "ANIMAL",
+       "PATH_AVOID_DANGER",
++      "PATH_AVOID_FIRE",
+       "WARM",
+-      "CANPLAY",
+       "SWARMS",
+       "CAN_BE_CULLED",
++      "CANPLAY",
+       "SMALL_HIDER"
+     ]
+   },
++  {
++    "abstract": "mon_generic_chick_tiny",
++    "type": "MONSTER",
++    "name": { "str": "grey chick" },
++    "description": "A tiny dull-colored chick, it could be from a number of different species.",
++    "copy-from": "mon_generic_chick",
++    "looks_like": "mon_generic_chick_tiny",
++    "volume": "7 ml",
++    "weight": "5 g",
++    "upgrades": { "age_grow": 14, "into": "mon_sparrow" },
++    "//": "Grows up into a sparrow as a fallback"
++  },
++  {
++    "abstract": "mon_generic_chick_water",
++    "type": "MONSTER",
++    "name": { "str": "waterfowl chick" },
++    "description": "A tiny yellow and brown waterfowl chick, it could be from a number of different species.",
++    "copy-from": "mon_generic_chick",
++    "upgrades": { "age_grow": 14, "into": "mon_duck" },
++    "//": "Grows up into a duck as a fallback",
++    "extend": { "flags": ["SWIMS"] }
++  },
++  {
++    "id": "mon_chicken",
++    "type": "MONSTER",
++    "name": { "str": "chicken" },
++    "description": "A domesticated descendant of junglefowl, it may still be the most numerous bird in the world.  Before the Cataclysm, it was raised by humans as a source of meat, eggs, and early morning wakeup calls.",
++    "copy-from": "mon_bird_flightless_base",
++    "volume": "2667 ml",
++    "weight": "2 kg",
++    "hp": 5,
++    "speed": 95,
++    "color": "white",
++    "reproduction": {
++      "baby_egg": "egg_chicken",
++      "baby_count": 1,
++      "baby_timer": 2
++    },
++    "baby_flags": ["SPRING", "SUMMER", "AUTUMN", "WINTER"],
++    "petfood": {
++      "food": ["BIRDFOOD"],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
++  },
+   {
+     "id": "mon_grouse",
+     "type": "MONSTER",
+-    "copy-from": "mon_chicken",
+-    "name": { "str": "grouse" },
++    "name": { "str": "ruffed grouse" },
+     "description": "A very common game bird, these creatures remind you of what a wild chicken must have been like.",
+-    "volume": "2 L",
+-    "weight": "1100 g",
+-    "hp": 5,
+-    "speed": 110,
++    "copy-from": "mon_bird_flying_base",
++    "volume": "860 ml",
++    "weight": "645 g",
++    "speed": 140,
+     "color": "brown",
+-    "reproduction": { "baby_egg": "egg_grouse", "baby_count": 2, "baby_timer": 6 },
+-    "baby_flags": [ "SPRING", "SUMMER" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 8 }
++    "reproduction": {
++      "baby_egg": "egg_grouse",
++      "baby_count": 11,
++      "baby_timer": 35
++    }
+   },
+   {
+     "id": "mon_crow",
+@@ -114,11 +190,20 @@
+     "name": { "str": "American crow" },
+     "description": "A fairly large, elegant black bird, famous for its distinctive call.  An intelligent bird, there is a glitter of mischief behind its eyes.",
+     "copy-from": "mon_bird_flying_base",
++    "volume": "600 ml",
++    "weight": "450 g",
+     "color": "dark_gray",
+     "stomach_size": 30,
+-    "special_attacks": [ [ "EAT_CARRION", 40 ], [ "EAT_FOOD", 120 ] ],
+-    "reproduction": { "baby_egg": "egg_crow", "baby_count": 4, "baby_timer": 18 },
+-    "extend": { "flags": [ "EATS" ] }
++    "special_attacks": [
++      ["EAT_CARRION", 40],
++      ["EAT_FOOD", 120]
++    ],
++    "reproduction": {
++      "baby_egg": "egg_crow",
++      "baby_count": 4,
++      "baby_timer": 18
++    },
++    "extend": { "flags": ["EATS"] }
+   },
+   {
+     "id": "mon_raven",
+@@ -128,11 +213,19 @@
+     "copy-from": "mon_bird_flying_base",
+     "volume": "1960 ml",
+     "weight": "1470 g",
++    "hp": 4,
+     "color": "dark_gray",
+     "stomach_size": 50,
+-    "special_attacks": [ [ "EAT_CARRION", 40 ], [ "EAT_FOOD", 120 ] ],
+-    "reproduction": { "baby_egg": "egg_raven", "baby_count": 5, "baby_timer": 18 },
+-    "extend": { "flags": [ "EATS" ] }
++    "special_attacks": [
++      ["EAT_CARRION", 40],
++      ["EAT_FOOD", 120]
++    ],
++    "reproduction": {
++      "baby_egg": "egg_raven",
++      "baby_count": 5,
++      "baby_timer": 18
++    },
++    "extend": { "flags": ["EATS"] }
+   },
+   {
+     "id": "mon_bluejay",
+@@ -143,7 +236,11 @@
+     "volume": "120 ml",
+     "weight": "90 g",
+     "color": "light_blue",
+-    "reproduction": { "baby_egg": "egg_bluejay", "baby_count": 5, "baby_timer": 18 }
++    "reproduction": {
++      "baby_egg": "egg_bluejay",
++      "baby_count": 5,
++      "baby_timer": 18
++    }
+   },
+   {
+     "id": "mon_cardinal",
+@@ -154,7 +251,11 @@
+     "volume": "60 ml",
+     "weight": "45 g",
+     "color": "red",
+-    "reproduction": { "baby_egg": "egg_cardinal", "baby_count": 3, "baby_timer": 16 }
++    "reproduction": {
++      "baby_egg": "egg_cardinal",
++      "baby_count": 3,
++      "baby_timer": 16
++    }
+   },
+   {
+     "id": "mon_robin",
+@@ -165,7 +266,11 @@
+     "volume": "103 ml",
+     "weight": "77 g",
+     "color": "brown",
+-    "reproduction": { "baby_egg": "egg_robin", "baby_count": 5, "baby_timer": 16 }
++    "reproduction": {
++      "baby_egg": "egg_robin",
++      "baby_count": 5,
++      "baby_timer": 16
++    }
+   },
+   {
+     "id": "mon_sparrow",
+@@ -175,7 +280,11 @@
+     "copy-from": "mon_bird_flying_base",
+     "volume": "40 ml",
+     "weight": "30 g",
+-    "reproduction": { "baby_egg": "egg_sparrow", "baby_count": 5, "baby_timer": 16 }
++    "reproduction": {
++      "baby_egg": "egg_sparrow",
++      "baby_count": 5,
++      "baby_timer": 16
++    }
+   },
+   {
+     "id": "mon_chickadee",
+@@ -185,7 +294,11 @@
+     "copy-from": "mon_bird_flying_base",
+     "volume": "16 ml",
+     "weight": "12 g",
+-    "reproduction": { "baby_egg": "egg_chickadee", "baby_count": 8, "baby_timer": 14 }
++    "reproduction": {
++      "baby_egg": "egg_chickadee",
++      "baby_count": 8,
++      "baby_timer": 14
++    }
+   },
+   {
+     "id": "mon_chickadee_chick",
+@@ -201,7 +314,11 @@
+     "copy-from": "mon_bird_flying_base",
+     "volume": "40 ml",
+     "weight": "30 g",
+-    "reproduction": { "baby_egg": "egg_waxwing", "baby_count": 5, "baby_timer": 16 }
++    "reproduction": {
++      "baby_egg": "egg_waxwing",
++      "baby_count": 5,
++      "baby_timer": 16
++    }
+   },
+   {
+     "id": "mon_waxwing_chick",
+@@ -212,104 +329,167 @@
+   {
+     "id": "mon_duck",
+     "type": "MONSTER",
+-    "name": { "str": "duck" },
+-    "description": "A mallard duck, often seen around rivers and other bodies of water.  It feeds primarily on insects, seeds, roots, and, pre-Cataclysm, bread scraps.",
+-    "default_faction": "small_animal",
+-    "bodytype": "bird",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "1500 ml",
+-    "weight": "1500 g",
+-    "hp": 4,
+-    "speed": 140,
+-    "material": [ "flesh" ],
+-    "symbol": "v",
++    "name": { "str": "mallard" },
++    "description": "A common species of duck often seen around rivers and other bodies of water.  It feeds primarily on insects, seeds, roots, and, pre-Cataclysm, bread scraps.",
++    "copy-from": "mon_bird_water_base",
++    "volume": "1387 ml",
++    "weight": "1040 g",
++    "hp": 2,
+     "color": "brown",
+-    "aggression": -99,
+-    "morale": -8,
+-    "melee_dice": 1,
+-    "melee_dice_sides": 1,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 0 } ],
+-    "dodge": 4,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_flying", "prof_wp_basic_bird" ],
+-    "weakpoint_sets": [ "wps_bird_body" ],
+-    "harvest": "bird_small",
+-    "dissect": "dissect_bird_sample_single",
+-    "fear_triggers": [ "SOUND", "PLAYER_CLOSE", "FRIEND_ATTACKED", "FRIEND_DIED", "FIRE", "HURT" ],
+-    "reproduction": { "baby_egg": "egg_duck", "baby_count": 3, "baby_timer": 5 },
+-    "baby_flags": [ "SPRING" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 5 },
+-    "flags": [ "SEES", "HEARS", "SMELLS", "ANIMAL", "PATH_AVOID_DANGER", "WARM", "FLIES", "SWARMS", "SMALL_HIDER" ]
++    "reproduction": {
++      "baby_egg": "egg_duck",
++      "baby_count": 13,
++      "baby_timer": 88
++    },
++    "baby_flags": ["SPRING"]
++  },
++  {
++    "id": "mon_duck_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_generic_chick_water",
++    "petfood": {
++      "food": ["BIRDFOOD"],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    },
++    "upgrades": { "age_grow": 60, "into": "mon_duck" },
++    "//": "A year to reach sexual maturity, so lets assume 2/3 of that time to reach roughly adult size."
++  },
++  {
++    "id": "mon_duck_domestic",
++    "type": "MONSTER",
++    "name": { "str": "domestic duck" },
++    "description": "A domestic variety of the common mallard sporting while plumage.",
++    "copy-from": "mon_bird_water_base",
++    "looks_like": "mon_duck",
++    "volume": "2400 ml",
++    "weight": "1800 g",
++    "hp": 4,
++    "color": "white",
++    "reproduction": {
++      "baby_egg": "egg_duck_domestic",
++      "baby_count": 8,
++      "baby_timer": 14
++    },
++    "baby_flags": ["SPRING", "SUMMER", "AUTUMN"],
++    "petfood": {
++      "food": ["BIRDFOOD"],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
++  },
++  {
++    "id": "mon_duck_domestic_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_generic_chick_water",
++    "petfood": {
++      "food": ["BIRDFOOD"],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    },
++    "upgrades": { "age_grow": 49, "into": "mon_duck_domestic" },
++    "//": "28 weeks to start laying eggs for pekins."
+   },
+   {
+     "id": "mon_goose_canadian",
+     "type": "MONSTER",
+-    "copy-from": "mon_duck",
+-    "name": { "str": "goose", "str_pl": "geese" },
+-    "description": "A Canada goose; a common waterfowl that regrets leaving Canada.",
+-    "volume": "5 L",
+-    "weight": "3750 g",
+-    "hp": 15,
++    "name": { "str": "Canada goose", "str_pl": "Canada geese" },
++    "description": "A common type of waterfowl that regrets leaving Canada.",
++    "copy-from": "mon_bird_water_base",
++    "volume": "5333 ml",
++    "weight": "4 kg",
++    "hp": 11,
+     "aggression": 0,
+     "morale": 15,
+-    "aggro_character": false,
+-    "dodge": 3,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 1 } ],
+-    "anger_triggers": [ "PLAYER_CLOSE", "FRIEND_ATTACKED" ],
+-    "fear_triggers": [ "FRIEND_DIED", "FIRE" ],
+-    "reproduction": { "baby_egg": "egg_goose_canadian", "baby_count": 3, "baby_timer": 10 },
+-    "baby_flags": [ "SPRING" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 4 }
++    "anger_triggers": ["PLAYER_CLOSE", "FRIEND_ATTACKED"],
++    "fear_triggers": ["FRIEND_DIED", "FIRE", "HURT"],
++    "reproduction": {
++      "baby_egg": "egg_goose_canadian",
++      "baby_count": 10,
++      "baby_timer": 350
++    },
++    "baby_flags": ["SPRING"]
+   },
+   {
+     "id": "mon_turkey",
+     "type": "MONSTER",
+-    "name": { "str": "turkey" },
++    "name": { "str": "wild turkey" },
+     "description": "A large and colorful game bird native to the forests of North America.  Its head and beak are covered in fleshy protuberances.",
+-    "default_faction": "small_animal",
+-    "bodytype": "bird",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "30 L",
+-    "weight": "8000 g",
+-    "hp": 21,
++    "copy-from": "mon_bird_flying_base",
++    "volume": "8 L",
++    "weight": "6 kg",
++    "//": "3.6-5.4kg for females, 6.8-11kg for males. We don't differentiate genders, so lets take a rough middle ground.",
++    "hp": 16,
+     "speed": 140,
+-    "material": [ "flesh" ],
+-    "symbol": "v",
+     "color": "brown",
+-    "aggression": -10,
+-    "morale": 25,
+-    "melee_dice": 1,
+-    "melee_dice_sides": 1,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 1 } ],
+-    "dodge": 3,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_flying", "prof_wp_basic_bird" ],
+-    "weakpoint_sets": [ "wps_bird_body" ],
+-    "harvest": "bird_small",
+-    "dissect": "dissect_bird_sample_single",
+-    "vision_day": 50,
+-    "fear_triggers": [ "PLAYER_CLOSE", "FRIEND_DIED", "FIRE", "HURT" ],
+-    "reproduction": { "baby_egg": "egg_turkey", "baby_count": 3, "baby_timer": 12 },
+-    "baby_flags": [ "SPRING", "SUMMER" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 8 },
+-    "flags": [ "SEES", "HEARS", "SMELLS", "ANIMAL", "PATH_AVOID_DANGER", "WARM", "FLIES", "SMALL_HIDER" ]
++    "reproduction": {
++      "baby_egg": "egg_turkey",
++      "baby_count": 17,
++      "baby_timer": 151
++    }
++  },
++  {
++    "id": "mon_turkey_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_generic_chick",
++    "petfood": {
++      "food": ["BIRDFOOD"],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    },
++    "upgrades": { "age_grow": 75, "into": "mon_turkey" }
++  },
++  {
++    "id": "mon_turkey_domestic",
++    "type": "MONSTER",
++    "name": { "str": "domestic turkey" },
++    "description": "A domesticated relative of the common wild turkey.  Lost most of its colors and the ability to fly, but at least it got bigger!",
++    "copy-from": "mon_bird_flightless_base",
++    "looks_like": "mon_turkey",
++    "volume": "10667 ml",
++    "weight": "8 kg",
++    "hp": 20,
++    "color": "white",
++    "reproduction": {
++      "baby_egg": "egg_turkey_domestic",
++      "baby_count": 10,
++      "baby_timer": 21
++    },
++    "baby_flags": ["SPRING", "SUMMER", "AUTUMN"],
++    "petfood": {
++      "food": ["BIRDFOOD"],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
++  },
++  {
++    "id": "mon_turkey_domestic_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_generic_chick",
++    "petfood": {
++      "food": ["BIRDFOOD"],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    },
++    "upgrades": { "age_grow": 75, "into": "mon_turkey_domestic" }
+   },
+   {
+     "id": "mon_pheasant",
+     "type": "MONSTER",
+-    "copy-from": "mon_turkey",
+-    "name": { "str": "pheasant" },
+-    "description": "A medium-sized game bird that can have bright feathers depending on the sex and species.",
+-    "volume": "750 ml",
+-    "weight": "1 kg",
+-    "hp": 6,
+-    "speed": 130,
+-    "dodge": 4,
+-    "aggression": -99,
+-    "morale": -8,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 0 } ],
+-    "reproduction": { "baby_egg": "egg_pheasant", "baby_count": 5, "baby_timer": 8 },
+-    "baby_flags": [ "SPRING" ]
++    "name": { "str": "ring-necked pheasant" },
++    "description": "A medium-sized game bird that can have bright feathers depending on the sex.  Introduced from Asia to New England.",
++    "copy-from": "mon_bird_flying_base",
++    "volume": "1467 ml",
++    "weight": "1100 g",
++    "//": "0.9kg for females, 1.2kg for males. We don't differentiate genders, so lets take a rough middle ground.",
++    "hp": 3,
++    "speed": 140,
++    "reproduction": {
++      "baby_egg": "egg_pheasant",
++      "baby_count": 15,
++      "baby_timer": 108
++    },
++    "baby_flags": ["SPRING"]
+   },
+   {
+     "abstract": "mon_generic_chick",
+@@ -318,13 +498,13 @@
+     "description": "A tiny darkly-colored chick, it could be from a number of different species.",
+     "default_faction": "small_animal",
+     "bodytype": "bird",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
++    "categories": ["WILDLIFE"],
++    "species": ["BIRD"],
+     "volume": "80 ml",
+     "weight": "60 g",
+     "hp": 1,
+     "speed": 40,
+-    "material": [ "flesh" ],
++    "material": ["flesh"],
+     "symbol": "v",
+     "color": "yellow",
+     "looks_like": "mon_chicken",
+@@ -333,13 +513,20 @@
+     "melee_skill": 1,
+     "melee_dice": 1,
+     "melee_dice_sides": 1,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 0 } ],
++    "melee_damage": [{ "damage_type": "cut", "amount": 0 }],
+     "dodge": 1,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_basic_bird" ],
++    "families": ["prof_intro_biology", "prof_physiology", "prof_wp_basic_bird"],
+     "harvest": "bird_tiny",
+     "upgrades": { "age_grow": 14, "into": "mon_chicken" },
+     "//": "Grows up into a standard chicken as a fallback",
+-    "fear_triggers": [ "SOUND", "PLAYER_CLOSE", "FRIEND_ATTACKED", "FRIEND_DIED", "FIRE", "HURT" ],
++    "fear_triggers": [
++      "SOUND",
++      "PLAYER_CLOSE",
++      "FRIEND_ATTACKED",
++      "FRIEND_DIED",
++      "FIRE",
++      "HURT"
++    ],
+     "flags": [
+       "SEES",
+       "HEARS",
+@@ -372,7 +559,7 @@
+     "description": "A tiny yellow and brown chick, it could be from a number of different species.",
+     "upgrades": { "age_grow": 14, "into": "mon_chicken" },
+     "petfood": {
+-      "food": [ "BIRDFOOD" ],
++      "food": ["BIRDFOOD"],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+     }
+@@ -381,15 +568,14 @@
+     "id": "mon_grouse_chick",
+     "type": "MONSTER",
+     "copy-from": "mon_generic_chick",
+-    "description": "A tiny yellow and brown chick, it could be from a number of different species.",
+-    "upgrades": { "age_grow": 10, "into": "mon_grouse" }
++    "upgrades": { "age_grow": 30, "into": "mon_grouse" }
+   },
+   {
+     "id": "mon_crow_chick",
+     "type": "MONSTER",
+     "copy-from": "mon_generic_chick",
+     "petfood": {
+-      "food": [ "BIRDFOOD" ],
++      "food": ["BIRDFOOD"],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+     },
+@@ -427,46 +613,24 @@
+     "copy-from": "mon_generic_chick_tiny",
+     "upgrades": { "age_grow": 7, "into": "mon_sparrow" }
+   },
+-  {
+-    "id": "mon_turkey_chick",
+-    "type": "MONSTER",
+-    "copy-from": "mon_generic_chick",
+-    "petfood": {
+-      "food": [ "BIRDFOOD" ],
+-      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+-      "pet": "The %s runs around your leg."
+-    },
+-    "upgrades": { "age_grow": 18, "into": "mon_turkey" }
+-  },
+   {
+     "id": "mon_pheasant_chick",
+     "type": "MONSTER",
+     "copy-from": "mon_generic_chick",
+     "petfood": {
+-      "food": [ "BIRDFOOD" ],
++      "food": ["BIRDFOOD"],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+     },
+-    "upgrades": { "age_grow": 14, "into": "mon_pheasant" }
+-  },
+-  {
+-    "id": "mon_duck_chick",
+-    "type": "MONSTER",
+-    "copy-from": "mon_generic_chick",
+-    "name": { "str": "waterfowl chick" },
+-    "description": "A tiny yellow and brown waterfowl chick, it could be from a number of different species.",
+-    "petfood": {
+-      "food": [ "BIRDFOOD" ],
+-      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+-      "pet": "The %s runs around your leg."
+-    },
+-    "upgrades": { "age_grow": 12, "into": "mon_duck" }
++    "upgrades": { "age_grow": 55, "into": "mon_pheasant" },
++    "//": "A year to reach sexual maturity, but only 80 days to reach independence, so lets get an average from that."
+   },
+   {
+     "id": "mon_goose_canadian_chick",
+     "type": "MONSTER",
+-    "copy-from": "mon_duck_chick",
+-    "upgrades": { "age_grow": 16, "into": "mon_goose_canadian" }
++    "copy-from": "mon_generic_chick_water",
++    "upgrades": { "age_grow": 135, "into": "mon_goose_canadian" },
++    "//": "A year to reach independence, 2-3 years to reach sexual maturity, so lets assume 1.5 years to reach full size."
+   },
+   {
+     "id": "mon_crow_mutant_small",
+@@ -475,32 +639,50 @@
+     "description": "A horrible bird grown three or four times bigger than ought to be possible and sporting a swollen gut that might look comical if it weren't for the razor sharp beak and the madness in its beady eyes.",
+     "bodytype": "bird",
+     "default_faction": "corvid",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
++    "categories": ["WILDLIFE"],
++    "species": ["BIRD"],
+     "volume": "3000 ml",
+     "weight": "4000 g",
+     "hp": 8,
+     "speed": 110,
+-    "material": [ "flesh" ],
++    "material": ["flesh"],
+     "symbol": "v",
+     "color": "dark_gray",
+     "aggression": 80,
+     "morale": 90,
+     "melee_dice": 1,
+     "melee_dice_sides": 3,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 2 } ],
++    "melee_damage": [{ "damage_type": "cut", "amount": 2 }],
+     "melee_skill": 2,
+     "dodge": 1,
+     "stomach_size": 200,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_flying", "prof_wp_basic_bird" ],
+-    "weakpoint_sets": [ "wps_bird_body" ],
++    "families": [
++      "prof_intro_biology",
++      "prof_physiology",
++      "prof_wp_flying",
++      "prof_wp_basic_bird"
++    ],
++    "weakpoint_sets": ["wps_bird_body"],
+     "harvest": "mutant_bird",
+     "dissect": "dissect_bird_sample_single",
+-    "fear_triggers": [ "PLAYER_CLOSE" ],
+-    "special_attacks": [ [ "SHRIEK", 10 ], [ "EAT_CARRION", 40 ], [ "EAT_FOOD", 120 ] ],
++    "fear_triggers": ["PLAYER_CLOSE"],
++    "special_attacks": [
++      ["SHRIEK", 10],
++      ["EAT_CARRION", 40],
++      ["EAT_FOOD", 120]
++    ],
+     "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 8 },
+     "upgrades": { "half_life": 21, "into_group": "GROUP_CROW_MUTANT" },
+-    "flags": [ "SEES", "HEARS", "SMELLS", "PATH_AVOID_DANGER", "WARM", "FLIES", "EATS", "SMALL_HIDER" ]
++    "flags": [
++      "SEES",
++      "HEARS",
++      "SMELLS",
++      "PATH_AVOID_DANGER",
++      "WARM",
++      "FLIES",
++      "EATS",
++      "SMALL_HIDER"
++    ]
+   },
+   {
+     "id": "mon_crow_mutant",
+@@ -509,13 +691,13 @@
+     "description": "This may have once been a crow or a raven, but now it's a deformed monstrosity nearly the size of a man.  It heaves its sable bulk awkwardly along the ground, too overfed on carrion to fly.",
+     "bodytype": "bird",
+     "default_faction": "corvid",
+-    "species": [ "MUTANT" ],
++    "species": ["MUTANT"],
+     "diff": 2,
+     "volume": "35000 ml",
+     "weight": "40000 g",
+     "hp": 35,
+     "speed": 70,
+-    "material": [ "flesh" ],
++    "material": ["flesh"],
+     "symbol": "v",
+     "color": "dark_gray",
+     "aggression": 90,
+@@ -523,23 +705,31 @@
+     "melee_skill": 5,
+     "melee_dice": 2,
+     "melee_dice_sides": 6,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 3 } ],
++    "melee_damage": [{ "damage_type": "cut", "amount": 3 }],
+     "vision_night": 4,
+     "stomach_size": 800,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_basic_bird" ],
+-    "weakpoint_sets": [ "wps_bird_body" ],
++    "families": ["prof_intro_biology", "prof_physiology", "prof_wp_basic_bird"],
++    "weakpoint_sets": ["wps_bird_body"],
+     "harvest": "mutant_bird_flightless",
+     "dissect": "dissect_bird_sample_small",
+-    "fear_triggers": [ "FIRE" ],
++    "fear_triggers": ["FIRE"],
+     "special_attacks": [
+-      [ "SHRIEK", 10 ],
+-      [ "LUNGE", 8 ],
++      ["SHRIEK", 10],
++      ["LUNGE", 8],
+       { "type": "leap", "cooldown": 10, "max_range": 3 },
+-      [ "EAT_CARRION", 40 ],
+-      [ "EAT_FOOD", 120 ]
++      ["EAT_CARRION", 40],
++      ["EAT_FOOD", 120]
+     ],
+     "zombify_into": "mon_meat_cocoon_small",
+-    "flags": [ "SEES", "HEARS", "SMELLS", "PATH_AVOID_DANGER", "STUMBLES", "WARM", "EATS" ]
++    "flags": [
++      "SEES",
++      "HEARS",
++      "SMELLS",
++      "PATH_AVOID_DANGER",
++      "STUMBLES",
++      "WARM",
++      "EATS"
++    ]
+   },
+   {
+     "id": "mon_pigeon",
+@@ -547,11 +737,13 @@
+     "name": { "str": "feral pigeon" },
+     "description": "A gentle, plump, small-billed bird with a skin saddle, or cere, between its bill and forehead.  On the ground, it struts about with a characteristic bobbing of the head.  It is a strong, swift flier thanks to its long wings and powerful flight muscles.",
+     "copy-from": "mon_bird_flying_base",
+-    "volume": "467 ml",
+-    "weight": "350 g",
+-    "reproduction": { "baby_egg": "egg_pigeon", "baby_count": 3, "baby_timer": 32 },
++    "reproduction": {
++      "baby_egg": "egg_pigeon",
++      "baby_count": 3,
++      "baby_timer": 32
++    },
+     "petfood": {
+-      "food": [ "BIRDFOOD" ],
++      "food": ["BIRDFOOD"],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+     }
+@@ -562,7 +754,7 @@
+     "copy-from": "mon_generic_chick",
+     "upgrades": { "age_grow": 10, "into": "mon_pigeon" },
+     "petfood": {
+-      "food": [ "BIRDFOOD" ],
++      "food": ["BIRDFOOD"],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+     }
+@@ -570,227 +762,169 @@
+   {
+     "id": "mon_goose",
+     "type": "MONSTER",
+-    "copy-from": "mon_duck",
+-    "name": { "str": "goose", "str_pl": "geese" },
+-    "description": "The domestic goose.  A waterfowl well known for its loud honking and aggressive behavior.",
++    "name": { "str": "domestic goose", "str_pl": "domestic geese" },
++    "description": "A type of waterfowl well known for its loud honking and relatively aggressive behavior.",
++    "copy-from": "mon_bird_water_base",
+     "volume": "5 L",
+     "weight": "3750 g",
+-    "hp": 15,
++    "hp": 10,
+     "looks_like": "mon_goose_canadian",
+     "aggression": 1,
+     "morale": 15,
+     "dodge": 3,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_basic_bird" ],
+-    "weakpoint_sets": [ "wps_bird_body" ],
+-    "melee_damage": [ { "damage_type": "cut", "amount": 2 } ],
+-    "fear_triggers": [ "FRIEND_ATTACKED", "FRIEND_DIED", "FIRE", "HURT" ],
+-    "anger_triggers": [ "PLAYER_CLOSE" ],
+-    "reproduction": { "baby_egg": "egg_goose", "baby_count": 5, "baby_timer": 10 },
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 4 },
++    "families": ["prof_intro_biology", "prof_physiology", "prof_wp_basic_bird"],
++    "weakpoint_sets": ["wps_bird_body"],
++    "melee_damage": [{ "damage_type": "cut", "amount": 2 }],
++    "fear_triggers": ["FRIEND_ATTACKED", "FRIEND_DIED", "FIRE", "HURT"],
++    "reproduction": {
++      "baby_egg": "egg_goose",
++      "baby_count": 15,
++      "baby_timer": 35
++    },
++    "baby_flags": ["SPRING", "SUMMER", "AUTUMN"],
+     "petfood": {
+-      "food": [ "BIRDFOOD" ],
++      "food": ["BIRDFOOD"],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "flags": [ "SEES", "HEARS", "SMELLS", "ANIMAL", "PATH_AVOID_DANGER", "WARM", "CAN_BE_CULLED", "SMALL_HIDER" ]
+-  },
+-  {
+-    "id": "mon_goose_golden",
+-    "type": "MONSTER",
+-    "copy-from": "mon_goose",
+-    "name": { "str": "royal honker" },
+-    "description": "This strange colored goose seems larger than the rest.  Even more strange is its docile, almost regal demeanor.",
+-    "volume": "8 L",
+-    "weight": "4000 g",
+-    "hp": 25,
+-    "symbol": "g",
+-    "color": "yellow",
+-    "aggression": 0,
+-    "morale": 30,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 2 } ],
+-    "reproduction": { "baby_egg": "egg_goose_golden", "baby_count": 1, "baby_timer": 10 }
++    }
+   },
+   {
+     "id": "mon_goose_chick",
+     "type": "MONSTER",
+-    "copy-from": "mon_duck_chick",
+-    "upgrades": { "age_grow": 16, "into": "mon_goose" }
+-  },
+-  {
+-    "id": "mon_goose_golden_chick",
+-    "type": "MONSTER",
+-    "copy-from": "mon_goose_chick",
+-    "upgrades": { "age_grow": 16, "into": "mon_goose_golden" }
++    "copy-from": "mon_generic_chick_water",
++    "petfood": {
++      "food": ["BIRDFOOD"],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    },
++    "upgrades": { "age_grow": 53, "into": "mon_goose" }
+   },
+   {
+     "id": "mon_hummingbird",
+     "type": "MONSTER",
+-    "name": { "str": "hummingbird" },
+-    "description": "A very small ruby-throated hummingbird of varied colored feathers.  It flies at incredible speeds while seeking nectar among flowers.",
+-    "bodytype": "bird",
+-    "default_faction": "small_animal",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "150 ml",
+-    "weight": "18 g",
+-    "hp": 3,
+-    "speed": 160,
+-    "material": [ "flesh" ],
+-    "symbol": "v",
+-    "color": "brown",
+-    "aggression": -99,
+-    "morale": -8,
+-    "melee_dice": 1,
+-    "melee_dice_sides": 1,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 0 } ],
+-    "dodge": 4,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_flying", "prof_wp_basic_bird" ],
+-    "weakpoint_sets": [ "wps_bird_body" ],
+-    "harvest": "bird_tiny",
+-    "fear_triggers": [ "SOUND", "PLAYER_CLOSE", "FRIEND_ATTACKED", "FRIEND_DIED", "FIRE", "HURT" ],
+-    "reproduction": { "baby_egg": "egg_hummingbird", "baby_count": 5, "baby_timer": 14 },
+-    "baby_flags": [ "SPRING" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 8 },
+-    "flags": [ "SEES", "HEARS", "SMELLS", "ANIMAL", "PATH_AVOID_DANGER", "WARM", "FLIES", "SMALL_HIDER" ]
++    "name": { "str": "ruby-throated hummingbird" },
++    "description": "A very small hummingbird of varied colorful feathers.  It flies at incredible speeds while seeking nectar among flowers.",
++    "copy-from": "mon_bird_flying_base",
++    "volume": "5 ml",
++    "weight": "3600 mg",
++    "color": "light_green",
++    "reproduction": {
++      "baby_egg": "egg_hummingbird",
++      "baby_count": 3,
++      "baby_timer": 36
++    },
++    "baby_flags": ["SPRING"]
+   },
+   {
+     "id": "mon_woodpecker",
+     "type": "MONSTER",
+-    "name": { "str": "woodpecker" },
+-    "description": "A small bird with woody colors and a colored crest on its head.  These birds are well known for their ability to poke holes on trees while looking for grubs.",
+-    "bodytype": "bird",
+-    "default_faction": "small_animal",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "400 ml",
+-    "weight": "400 g",
+-    "hp": 10,
+-    "speed": 140,
+-    "material": [ "flesh" ],
+-    "symbol": "v",
+-    "color": "brown",
+-    "aggression": -99,
+-    "morale": -8,
+-    "melee_dice": 1,
+-    "melee_dice_sides": 1,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 0 } ],
+-    "dodge": 4,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_flying", "prof_wp_basic_bird" ],
+-    "weakpoint_sets": [ "wps_bird_body" ],
+-    "harvest": "bird_small",
+-    "fear_triggers": [ "SOUND", "PLAYER_CLOSE", "FRIEND_ATTACKED", "FRIEND_DIED", "FIRE", "HURT" ],
+-    "reproduction": { "baby_egg": "egg_woodpecker", "baby_count": 5, "baby_timer": 14 },
+-    "baby_flags": [ "SPRING" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 8 },
+-    "flags": [ "SEES", "HEARS", "SMELLS", "ANIMAL", "PATH_AVOID_DANGER", "WARM", "FLIES", "SMALL_HIDER" ]
++    "name": { "str": "downy woodpecker" },
++    "description": "A small bird with woody colors and a colored crest on its head.  Well known for its ability to poke holes on trees while looking for grubs.",
++    "copy-from": "mon_bird_flying_base",
++    "volume": "35 ml",
++    "weight": "26 g",
++    "reproduction": {
++      "baby_egg": "egg_woodpecker",
++      "baby_count": 5,
++      "baby_timer": 30
++    }
+   },
+   {
+     "id": "mon_hummingbird_chick",
+     "type": "MONSTER",
+-    "copy-from": "mon_generic_chick",
+-    "weight": "7 g",
+-    "upgrades": { "age_grow": 11, "into": "mon_hummingbird" }
++    "copy-from": "mon_generic_chick_tiny",
++    "upgrades": { "age_grow": 6, "into": "mon_hummingbird" }
+   },
+   {
+     "id": "mon_woodpecker_chick",
+     "type": "MONSTER",
+-    "copy-from": "mon_generic_chick",
+-    "volume": "200 ml",
+-    "weight": "15 g",
+-    "upgrades": { "age_grow": 11, "into": "mon_woodpecker" }
++    "copy-from": "mon_generic_chick_tiny",
++    "upgrades": { "age_grow": 6, "into": "mon_woodpecker" }
+   },
+   {
+     "id": "mon_coot",
+     "type": "MONSTER",
+-    "name": { "str": "coot" },
+-    "description": "A bird belonging to the Rallidae family.  They can be found worldwide on freshwater habitats, including many islands in the not so distant past.",
+-    "default_faction": "small_animal",
+-    "bodytype": "bird",
+-    "categories": [ "WILDLIFE" ],
+-    "species": [ "BIRD" ],
+-    "volume": "800 ml",
+-    "weight": "800 g",
+-    "hp": 5,
+-    "speed": 110,
+-    "material": [ "flesh" ],
+-    "symbol": "v",
+-    "color": "brown",
+-    "aggression": -99,
+-    "morale": -8,
+-    "melee_dice": 1,
+-    "melee_dice_sides": 1,
+-    "melee_damage": [ { "damage_type": "cut", "amount": 0 } ],
+-    "dodge": 4,
+-    "families": [ "prof_intro_biology", "prof_physiology", "prof_wp_flying", "prof_wp_basic_bird" ],
+-    "weakpoint_sets": [ "wps_bird_body" ],
+-    "harvest": "bird_small",
+-    "fear_triggers": [ "SOUND", "PLAYER_CLOSE", "FRIEND_ATTACKED", "FRIEND_DIED", "FIRE", "HURT" ],
+-    "reproduction": { "baby_egg": "egg_coot", "baby_count": 3, "baby_timer": 5 },
+-    "baby_flags": [ "SPRING" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 5 },
+-    "flags": [ "SEES", "HEARS", "SMELLS", "ANIMAL", "PATH_AVOID_DANGER", "WARM", "FLIES", "SWARMS", "SMALL_HIDER" ]
++    "name": { "str": "American coot" },
++    "description": "A bird belonging to the same family as rails.  Its relatives can be found worldwide in freshwater habitats.",
++    "copy-from": "mon_bird_water_base",
++    "volume": "733 ml",
++    "weight": "550 g",
++    "reproduction": {
++      "baby_egg": "egg_coot",
++      "baby_count": 10,
++      "baby_timer": 83
++    }
+   },
+   {
+     "id": "mon_cormorant",
+     "type": "MONSTER",
+     "copy-from": "mon_coot",
+-    "name": { "str": "cormorant" },
+-    "description": "An aquatic bird with a long snake-like neck.  They are considered coastal birds but many species can also be found on freshwater habitats.",
+-    "volume": "340 ml",
+-    "weight": "340 g",
+-    "color": "brown",
+-    "reproduction": { "baby_egg": "egg_cormorant", "baby_count": 2, "baby_timer": 6 },
+-    "baby_flags": [ "SPRING", "SUMMER" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 8 }
++    "name": { "str": "double-crested cormorant" },
++    "description": "An aquatic bird with a long snake-like neck.  While often considered coastal birds, they feel just as at home in freshwater habitats.",
++    "volume": "2467 ml",
++    "weight": "1850 g",
++    "hp": 5,
++    "speed": 110,
++    "reproduction": {
++      "baby_egg": "egg_cormorant",
++      "baby_count": 7,
++      "baby_timer": 98
++    }
+   },
+   {
+     "id": "mon_moorhen",
+     "type": "MONSTER",
+-    "copy-from": "mon_coot",
+-    "name": { "str": "moorhen" },
+-    "description": "A bird belonging to the Rallidae family.  They are relatives of the coots but have a distinctive red coloration on their heads and brownish plumage.",
+-    "volume": "400 ml",
+-    "weight": "400 g",
+-    "color": "brown",
+-    "reproduction": { "baby_egg": "egg_moorhen", "baby_count": 2, "baby_timer": 6 },
+-    "baby_flags": [ "SPRING", "SUMMER" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 8 }
++    "name": { "str": "common gallinule" },
++    "description": "A bird belonging to the same family as rails.  A relative of the coot with a distinctive red coloration on its heads and brownish plumage.",
++    "copy-from": "mon_bird_water_base",
++    "volume": "511 ml",
++    "weight": "383 g",
++    "speed": 110,
++    "reproduction": {
++      "baby_egg": "egg_moorhen",
++      "baby_count": 8,
++      "baby_timer": 78
++    }
+   },
+   {
+     "id": "mon_grebe",
+     "type": "MONSTER",
+-    "copy-from": "mon_coot",
+-    "name": { "str": "grebe" },
+-    "description": "A medium sized aquatic bird with a long neck.  These birds can be distinguished by their strange leg placement which makes them great at diving.",
+-    "volume": "500 ml",
+-    "weight": "500 g",
++    "name": { "str": "horned grebe" },
++    "description": "A medium-sized aquatic bird with a long neck.  They can be distinguished by their strange leg placement which makes them great at diving.",
++    "copy-from": "mon_bird_water_base",
++    "volume": "580 ml",
++    "weight": "435 g",
+     "color": "brown",
+-    "reproduction": { "baby_egg": "egg_grebe", "baby_count": 2, "baby_timer": 6 },
+-    "baby_flags": [ "SPRING", "SUMMER" ],
+-    "biosignature": { "biosig_item": "feces_bird", "biosig_timer": 8 }
++    "reproduction": {
++      "baby_egg": "egg_grebe",
++      "baby_count": 8,
++      "baby_timer": 49
++    }
+   },
+   {
+     "id": "mon_coot_chick",
+     "type": "MONSTER",
+-    "copy-from": "mon_generic_chick",
+-    "upgrades": { "age_grow": 14, "into": "mon_coot" }
++    "copy-from": "mon_generic_chick_water",
++    "upgrades": { "age_grow": 23, "into": "mon_coot" }
+   },
+   {
+     "id": "mon_cormorant_chick",
+     "type": "MONSTER",
+-    "copy-from": "mon_generic_chick",
+-    "upgrades": { "age_grow": 14, "into": "mon_cormorant" }
++    "copy-from": "mon_generic_chick_water",
++    "upgrades": { "age_grow": 97, "into": "mon_cormorant" },
++    "//": "2 years to reach sexual maturity, but only 10 weeks to reach independence, so lets get an average from that."
+   },
+   {
+     "id": "mon_moorhen_chick",
+     "type": "MONSTER",
+-    "copy-from": "mon_generic_chick",
+-    "upgrades": { "age_grow": 14, "into": "mon_moorhen" }
++    "copy-from": "mon_generic_chick_water",
++    "upgrades": { "age_grow": 22, "into": "mon_moorhen" }
+   },
+   {
+     "id": "mon_grebe_chick",
+     "type": "MONSTER",
+-    "copy-from": "mon_generic_chick",
+-    "upgrades": { "age_grow": 14, "into": "mon_grebe" }
++    "copy-from": "mon_generic_chick_water",
++    "upgrades": { "age_grow": 60, "into": "mon_grebe" },
++    "//": "A year to reach sexual maturity, so lets assume 2/3 of that time to reach roughly adult size."
+   }
+ ]
+diff --git a/data/json/obsoletion_and_migration_0.I/migration_items.json b/data/json/obsoletion_and_migration_0.I/migration_items.json
+index 6c5c9c703b..ed9a59ee1d 100644
+--- a/data/json/obsoletion_and_migration_0.I/migration_items.json
++++ b/data/json/obsoletion_and_migration_0.I/migration_items.json
+@@ -1838,6 +1838,11 @@
+     "replace": "small_squeeze_tube",
+     "contents": [ { "id": "super_glue", "count": 40 } ]
+   },
++  {
++    "id": "egg_goose_golden",
++    "type": "MIGRATION",
++    "replace": "egg_goose"
++  },
+   {
+     "id": "ar_pistol",
+     "type": "MIGRATION",
+diff --git a/data/json/requirements/cooking_components.json b/data/json/requirements/cooking_components.json
+index 21f719ff50..65a87602cf 100644
+--- a/data/json/requirements/cooking_components.json
++++ b/data/json/requirements/cooking_components.json
+@@ -80,17 +80,18 @@
+         [ "egg_cardinal", 12 ],
+         [ "egg_robin", 7 ],
+         [ "egg_pigeon", 3 ],
+-        [ "egg_sparrow", 20 ],
+-        [ "egg_waxwing", 20 ],
+-        [ "egg_chickadee", 50 ],
++        [ "egg_sparrow", 17 ],
++        [ "egg_waxwing", 17 ],
++        [ "egg_chickadee", 34 ],
+         [ "egg_duck", 1 ],
++        [ "egg_duck_domestic", 1 ],
+         [ "egg_goose_canadian", 1 ],
+         [ "egg_turkey", 1 ],
++        [ "egg_turkey_domestic", 1 ],
+         [ "egg_pheasant", 1 ],
+         [ "egg_goose", 1 ],
+-        [ "egg_goose_golden", 1 ],
+-        [ "egg_hummingbird", 5 ],
+-        [ "egg_woodpecker", 5 ],
++        [ "egg_hummingbird", 100 ],
++        [ "egg_woodpecker", 17 ],
+         [ "egg_coot", 1 ],
+         [ "egg_cormorant", 1 ],
+         [ "egg_moorhen", 1 ],
+diff --git a/data/mods/Tamable_Wildlife/bird.json b/data/mods/Tamable_Wildlife/bird.json
+index 7541d44e31..15b800a680 100644
+--- a/data/mods/Tamable_Wildlife/bird.json
++++ b/data/mods/Tamable_Wildlife/bird.json
+@@ -147,19 +147,17 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
+   },
+   {
+-    "id": "mon_goose_canadian",
++    "id": "mon_goose_canadian_chick",
+     "type": "MONSTER",
+-    "copy-from": "mon_goose_canadian",
++    "copy-from": "mon_goose_canadian_chick",
+     "petfood": {
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
+   },
+   {
+     "id": "mon_turkey",
+@@ -169,8 +167,7 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
+   },
+   {
+     "id": "mon_pheasant",
+@@ -180,8 +177,17 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
++  },
++  {
++    "id": "mon_grouse_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_grouse_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
+   },
+   {
+     "id": "mon_hummingbird_chick",
+@@ -201,8 +207,7 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It quickly flies around you and seems friendly.",
+       "pet": "The %s flies around you."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
+   },
+   {
+     "id": "mon_woodpecker_chick",
+@@ -214,17 +219,6 @@
+       "pet": "The %s runs around your leg."
+     }
+   },
+-  {
+-    "id": "mon_woodpecker",
+-    "type": "MONSTER",
+-    "copy-from": "mon_woodpecker",
+-    "petfood": {
+-      "food": [ "BIRDFOOD" ],
+-      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+-      "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
+-  },
+   {
+     "id": "mon_coot_chick",
+     "type": "MONSTER",
+@@ -235,17 +229,6 @@
+       "pet": "The %s runs around your leg."
+     }
+   },
+-  {
+-    "id": "mon_coot",
+-    "type": "MONSTER",
+-    "copy-from": "mon_coot",
+-    "petfood": {
+-      "food": [ "BIRDFOOD" ],
+-      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+-      "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
+-  },
+   {
+     "id": "mon_cormorant_chick",
+     "type": "MONSTER",
+@@ -256,17 +239,6 @@
+       "pet": "The %s runs around your leg."
+     }
+   },
+-  {
+-    "id": "mon_cormorant",
+-    "type": "MONSTER",
+-    "copy-from": "mon_coot",
+-    "petfood": {
+-      "food": [ "BIRDFOOD" ],
+-      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+-      "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
+-  },
+   {
+     "id": "mon_moorhen_chick",
+     "type": "MONSTER",
+@@ -277,17 +249,6 @@
+       "pet": "The %s runs around your leg."
+     }
+   },
+-  {
+-    "id": "mon_moorhen",
+-    "type": "MONSTER",
+-    "copy-from": "mon_coot",
+-    "petfood": {
+-      "food": [ "BIRDFOOD" ],
+-      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+-      "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
+-  },
+   {
+     "id": "mon_grebe_chick",
+     "type": "MONSTER",
+@@ -297,16 +258,5 @@
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+     }
+-  },
+-  {
+-    "id": "mon_grebe",
+-    "type": "MONSTER",
+-    "copy-from": "mon_coot",
+-    "petfood": {
+-      "food": [ "BIRDFOOD" ],
+-      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+-      "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
+   }
+ ]
+diff --git a/data/mods/TropiCataclysm/blacklists/default_blacklist.json b/data/mods/TropiCataclysm/blacklists/default_blacklist.json
+index cd9d288603..5c305c29f6 100644
+--- a/data/mods/TropiCataclysm/blacklists/default_blacklist.json
++++ b/data/mods/TropiCataclysm/blacklists/default_blacklist.json
+@@ -3,11 +3,13 @@
+     "type": "MONSTER_BLACKLIST",
+     "monsters": [
+       "mon_grouse",
++      "mon_grouse_chick",
+       "mon_goose_canadian",
++      "mon_goose_canadian_chick",
+       "mon_pheasant",
+-      "mon_grouse_chick",
+       "mon_pheasant_chick",
+-      "mon_goose_canadian_chick",
++      "mon_turkey",
++      "mon_turkey_chick",
+       "mon_cardinal",
+       "mon_cardinal_chick",
+       "mon_robin",
+@@ -18,6 +20,16 @@
+       "mon_chickadee_chick",
+       "mon_waxwing",
+       "mon_waxwing_chick",
++      "mon_woodpecker",
++      "mon_woodpecker_chick",
++      "mon_grebe",
++      "mon_grebe_chick",
++      "mon_hummingbird",
++      "mon_hummingbird_chick",
++      "mon_coot",
++      "mon_coot_chick",
++      "mon_cormorant",
++      "mon_cormorant_chick",
+       "mon_fish_brown_trout",
+       "mon_fry_brown_trout",
+       "mon_fish_brook_trout",
+-- 
+2.45.2
+

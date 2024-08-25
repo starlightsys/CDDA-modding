@@ -1,0 +1,35 @@
+From 0b3a5d1e2ed9b082578f04b853b55553d335ca19 Mon Sep 17 00:00:00 2001
+From: "Standing-StormStanding-Storm git config --global user.name
+ Standing-Storm git config --global user.name Standing-Storm"
+ <dorchadas@gmail.com>
+Date: Wed, 21 Aug 2024 20:05:33 -0500
+Subject: [PATCH 104/125] Slightly reduce base damage from natural weapons
+
+---
+ data/mods/Xedra_Evolved/items/armor/integrated.json | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/data/mods/Xedra_Evolved/items/armor/integrated.json b/data/mods/Xedra_Evolved/items/armor/integrated.json
+index 95e1d175d6..a84ab9e002 100644
+--- a/data/mods/Xedra_Evolved/items/armor/integrated.json
++++ b/data/mods/Xedra_Evolved/items/armor/integrated.json
+@@ -828,7 +828,7 @@
+         "encumbrance": 3
+       }
+     ],
+-    "melee_damage": { "cut": 20 }
++    "melee_damage": { "cut": 16 }
+   },
+   {
+     "id": "integrated_werewolf_teeth",
+@@ -856,6 +856,6 @@
+         "encumbrance": 0
+       }
+     ],
+-    "melee_damage": { "stab": 15 }
++    "melee_damage": { "stab": 13 }
+   }
+ ]
+-- 
+2.45.2
+

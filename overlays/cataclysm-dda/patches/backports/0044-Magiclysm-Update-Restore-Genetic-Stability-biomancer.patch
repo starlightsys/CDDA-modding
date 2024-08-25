@@ -1,0 +1,78 @@
+From a6df3c698e92a2483749bd07a6dc7a37cb38aac7 Mon Sep 17 00:00:00 2001
+From: Standing-Storm <120433252+Standing-Storm@users.noreply.github.com>
+Date: Sat, 17 Aug 2024 19:50:28 -0500
+Subject: [PATCH 044/125] [Magiclysm] Update Restore Genetic Stability
+ biomancer spell for new `MUT_INSTABILITY_MOD` effect (#75746)
+
+* Initial commit
+
+* Effect description
+---
+ data/mods/Magiclysm/Spells/biomancer.json    |  4 ++--
+ data/mods/Magiclysm/effects/effects.json     | 12 +++++++++---
+ data/mods/Magiclysm/items/spell_scrolls.json |  4 ++--
+ 3 files changed, 13 insertions(+), 7 deletions(-)
+
+diff --git a/data/mods/Magiclysm/Spells/biomancer.json b/data/mods/Magiclysm/Spells/biomancer.json
+index 6205b4fe62..13011d6fd6 100644
+--- a/data/mods/Magiclysm/Spells/biomancer.json
++++ b/data/mods/Magiclysm/Spells/biomancer.json
+@@ -527,8 +527,8 @@
+   {
+     "id": "biomancer_remove_instability",
+     "type": "SPELL",
+-    "name": "Restore Genetic Stability",
+-    "description": "The scroll said that this spell is for \"Curing the aftereffects of XE037 overexposure\", whatever that means.  According the scroll, the spell should be allowed to run its course before reapplication.",
++    "name": "Preserve Genetic Stability",
++    "description": "The scroll said that this spell is for \"Reducing negative consequencse from XE037 exposure\", whatever that means.  According the scroll, the spell should be allowed to run its course before reapplication.",
+     "valid_targets": [ "self", "ally" ],
+     "spell_class": "BIOMANCER",
+     "components": "spell_components_remove_instability",
+diff --git a/data/mods/Magiclysm/effects/effects.json b/data/mods/Magiclysm/effects/effects.json
+index 85bce6346e..4b42e17762 100644
+--- a/data/mods/Magiclysm/effects/effects.json
++++ b/data/mods/Magiclysm/effects/effects.json
+@@ -1057,16 +1057,22 @@
+     "type": "effect_type",
+     "name": [ "Increased Stability" ],
+     "desc": [
+-      "You are overcoming the aftereffects of XE037 overexposure.",
+-      "You were just overcoming the aftereffects of XE037 overexposure but now you feel awful!"
++      "You are defended against the possible effects of XE037 overexposure.",
++      "You are still defended against the effects of XE037 overexposure but now you feel awful!"
+     ],
+     "apply_message": "You feel…strange.",
+     "remove_message": "The strange feeling passes and you feel more like yourself.",
+     "rating": "good",
+     "max_intensity": 2,
+     "show_intensity": false,
+-    "vitamins": [ { "vitamin": "instability", "rate": [ [ -1, -1 ] ], "tick": [ "30 m" ] } ],
+     "scaling_mods": { "speed_mod": [ -25 ], "str_mod": [ -5 ], "dex_mod": [ -5 ], "int_mod": [ -5 ], "per_mod": [ -5 ] },
++    "enchantments": [
++      {
++        "values": [
++          { "value": "MUT_INSTABILITY_MOD", "add": { "math": [ "-1 - ( u_spell_level('biomancer_remove_instability') / 5)" ] } }
++        ]
++      }
++    ],
+     "limb_score_mods": [
+       { "limb_score": "manip", "modifier": 1, "scaling": -0.3 },
+       { "limb_score": "block", "modifier": 1.0, "scaling": -0.2 },
+diff --git a/data/mods/Magiclysm/items/spell_scrolls.json b/data/mods/Magiclysm/items/spell_scrolls.json
+index 2b0c7a35d0..1e44446b4f 100644
+--- a/data/mods/Magiclysm/items/spell_scrolls.json
++++ b/data/mods/Magiclysm/items/spell_scrolls.json
+@@ -1506,8 +1506,8 @@
+     "copy-from": "spell_scroll",
+     "id": "spell_scroll_biomancer_remove_instability",
+     "//": "Biomancer spell",
+-    "name": { "str": "Formula of Restore Genetic Stability", "str_pl": "Formulae of Restore Genetic Stability" },
+-    "description": "This research paper has an extremely complicated series of formulae with various genetic interspersed.  It claims that the spell will cure the aftereffects of XE037 overexposure.",
++    "name": { "str": "Formula of Preserve Genetic Stability", "str_pl": "Formulae of Preserve Genetic Stability" },
++    "description": "This research paper has an extremely complicated series of formulae with various genetic code diagrams interspersed.  It claims that the spell will reduce the negative effects of XE037 exposure.",
+     "use_action": { "type": "learn_spell", "spells": [ "biomancer_remove_instability" ] }
+   },
+   {
+-- 
+2.45.2
+

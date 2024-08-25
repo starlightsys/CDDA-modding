@@ -1,0 +1,25 @@
+From 6a62bc588a3e0c20446829938e86b82802cb7cf0 Mon Sep 17 00:00:00 2001
+From: Holli <hollierthanthouare@gmail.com>
+Date: Sat, 24 Aug 2024 17:03:48 -0600
+Subject: [PATCH 118/125] Update generic.json
+
+---
+ data/json/items/generic.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/json/items/generic.json b/data/json/items/generic.json
+index ab27e6f66c..ca846d283b 100644
+--- a/data/json/items/generic.json
++++ b/data/json/items/generic.json
+@@ -322,7 +322,7 @@
+     "price": "1 USD",
+     "price_postapoc": "1 USD",
+     "material": [ "plastic" ],
+-    "weight": "1 g",
++    "weight": "19 mg",
+     "volume": "1 ml",
+     "ammo_type": "superglue",
+     "//": "1 charge of superglue should cover an area of 5mm^2",
+-- 
+2.45.2
+

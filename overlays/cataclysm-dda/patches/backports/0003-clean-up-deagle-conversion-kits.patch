@@ -1,0 +1,56 @@
+From 974cd2a7ebc081cebd30f0c3859370eed80f7770 Mon Sep 17 00:00:00 2001
+From: Anton Simakov <67688115+GuardianDll@users.noreply.github.com>
+Date: Tue, 13 Aug 2024 12:54:34 +0200
+Subject: [PATCH 003/125] clean up deagle conversion kits
+
+---
+ data/json/items/gun/44.json             | 1 -
+ data/json/items/gunmod/conversions.json | 6 +++---
+ 2 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/data/json/items/gun/44.json b/data/json/items/gun/44.json
+index c9357aefa2..1e2ddee15d 100644
+--- a/data/json/items/gun/44.json
++++ b/data/json/items/gun/44.json
+@@ -37,7 +37,6 @@
+     "flags": [ "ALLOWS_BODY_BLOCK", "NO_TURRET" ],
+     "//2": "NO_TURRET should be removed once vehicle turrets are capable of mounting guns with mods attached. As it stands, trying to mount this style of weapon would require the player to remove the conversion kit, thus rendering it unusable anyhow.",
+     "weapon_category": [ "AUTOMATIC_PISTOLS" ],
+-    "pocket_data": [ { "pocket_type": "MAGAZINE_WELL", "item_restriction": [ "deaglemag" ] } ],
+     "valid_mod_locations": [ [ "bore", 1 ], [ "grip", 1 ], [ "mechanism", 2 ], [ "stock", 1 ], [ "underbarrel mount", 1 ] ],
+     "faults": [ "fault_gun_blackpowder", "fault_gun_dirt", "fault_gun_chamber_spent" ],
+     "melee_damage": { "bash": 12 }
+diff --git a/data/json/items/gunmod/conversions.json b/data/json/items/gunmod/conversions.json
+index 1237975228..3dd8c984fc 100644
+--- a/data/json/items/gunmod/conversions.json
++++ b/data/json/items/gunmod/conversions.json
+@@ -862,7 +862,7 @@
+     "symbol": ":",
+     "color": "yellow",
+     "location": "bore",
+-    "mod_targets": [ "modular_deagle", "modular_deagle_357", "modular_deagle_44", "modular_deagle_50" ],
++    "mod_targets": [ "modular_deagle" ],
+     "install_time": "2 m",
+     "ammo_modifier": [ "357mag" ],
+     "magazine_adaptor": [ [ "357mag", [ "deaglemag_357" ] ] ],
+@@ -889,7 +889,7 @@
+     "symbol": ":",
+     "color": "yellow",
+     "location": "bore",
+-    "mod_targets": [ "modular_deagle", "modular_deagle_357", "modular_deagle_44", "modular_deagle_50" ],
++    "mod_targets": [ "modular_deagle" ],
+     "install_time": "2 m",
+     "ammo_modifier": [ "44" ],
+     "magazine_adaptor": [ [ "44", [ "deaglemag" ] ] ],
+@@ -919,7 +919,7 @@
+     "symbol": ":",
+     "color": "yellow",
+     "location": "bore",
+-    "mod_targets": [ "modular_deagle", "modular_deagle_357", "modular_deagle_44", "modular_deagle_50" ],
++    "mod_targets": [ "modular_deagle" ],
+     "install_time": "2 m",
+     "ammo_modifier": [ "50ae" ],
+     "magazine_adaptor": [ [ "50ae", [ "deaglemag_50" ] ] ],
+-- 
+2.45.2
+

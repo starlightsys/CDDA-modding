@@ -1,0 +1,25 @@
+From 886c111881989faabdc54228565d6bd458371dad Mon Sep 17 00:00:00 2001
+From: Holli <hollierthanthouare@gmail.com>
+Date: Sat, 24 Aug 2024 17:08:01 -0600
+Subject: [PATCH 119/125] Fix density
+
+---
+ data/json/items/generic.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/json/items/generic.json b/data/json/items/generic.json
+index ca846d283b..76d610b4ea 100644
+--- a/data/json/items/generic.json
++++ b/data/json/items/generic.json
+@@ -322,7 +322,7 @@
+     "price": "1 USD",
+     "price_postapoc": "1 USD",
+     "material": [ "plastic" ],
+-    "weight": "19 mg",
++    "weight": "26 mg",
+     "volume": "1 ml",
+     "ammo_type": "superglue",
+     "//": "1 charge of superglue should cover an area of 5mm^2",
+-- 
+2.45.2
+

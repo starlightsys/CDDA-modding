@@ -1,0 +1,18 @@
+From 98be8a56bfe5daeecb6e59eef6ce99aa03661ba4 Mon Sep 17 00:00:00 2001
+From: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+Date: Mon, 19 Aug 2024 00:28:38 +0200
+Subject: [PATCH 061/125] move ``recipe_deconstruction.json`` to the uncraft
+ folder (#75797)
+
+---
+ data/json/{recipes => uncraft}/recipe_deconstruction.json | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ rename data/json/{recipes => uncraft}/recipe_deconstruction.json (100%)
+
+diff --git a/data/json/recipes/recipe_deconstruction.json b/data/json/uncraft/recipe_deconstruction.json
+similarity index 100%
+rename from data/json/recipes/recipe_deconstruction.json
+rename to data/json/uncraft/recipe_deconstruction.json
+-- 
+2.45.2
+

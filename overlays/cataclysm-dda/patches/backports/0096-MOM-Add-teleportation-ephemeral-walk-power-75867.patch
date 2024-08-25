@@ -1,0 +1,565 @@
+From 2db08c516d9e00bda57be46f2295d7333fee00e8 Mon Sep 17 00:00:00 2001
+From: b3brodie <70666939+b3brodie@users.noreply.github.com>
+Date: Thu, 22 Aug 2024 13:52:57 -0700
+Subject: [PATCH 096/125] [MOM] Add teleportation ephemeral walk power (#75867)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+* Add enchantment phasing move type
+
+* Add vertical phasing 😩 and enchant
+
+* Simplify duplicate code segment
+
+* Add phasing power that uses enchantment.  Difficulty 6.
+
+* Lint + Astyle
+
+* Quick EOC name fix
+
+* Change name to ephemeral walk and move activation message to just EOC
+---
+ .../PowerDescriptionSpoilers.md               |  9 ++
+ .../effects/effects_penalty.json              |  1 +
+ .../effects/effects_psionic.json              | 22 +++++
+ data/mods/MindOverMatter/hobbies.json         |  1 +
+ .../powers/learning_eocs/teleportation.json   | 39 ++++++++
+ .../MindOverMatter/powers/teleportation.json  | 37 ++++++++
+ .../teleportation_concentration_eoc.json      | 60 +++++++++++++
+ .../practice/teleportation_practice.json      | 89 +++++++++++++++++++
+ doc/MAGIC.md                                  |  1 +
+ src/avatar_action.cpp                         |  4 +
+ src/game.cpp                                  | 77 +++++++++++++++-
+ src/game.h                                    |  2 +
+ src/magic_enchantment.cpp                     |  1 +
+ src/magic_enchantment.h                       |  1 +
+ 14 files changed, 342 insertions(+), 2 deletions(-)
+
+diff --git a/data/mods/MindOverMatter/PowerDescriptionSpoilers.md b/data/mods/MindOverMatter/PowerDescriptionSpoilers.md
+index 6c398d7939..d29ca7c92b 100644
+--- a/data/mods/MindOverMatter/PowerDescriptionSpoilers.md
++++ b/data/mods/MindOverMatter/PowerDescriptionSpoilers.md
+@@ -1046,6 +1046,15 @@ Powers causing telepathic damage have a 5% chance to down the target, a 33% chan
+ *Effects*: Travel a short distance through the Nether and re-emerge nearby, allowing the psion to bypass a door or travel from the ground floor to the second floor.<br />
+ *Prerequisites*: Blink 6<br />
+ 
++## Ephemeral Walk (C)
++*Difficulty*: 6<br />
++*Target*: Self<br />
++*Duration*: 30 seconds to 5 minutes, plus 10 to 30 seconds per power level<br />
++*Stamina Cost*: 6500, minus 200 per level to a minimum of 2000<br />
++*Channeling Time*: 85 moves, minus 7 moves per level to a minimum of 25<br />
++*Effects*: Allows psion to walk through walls by directly moving into them. Starts out at one "wall" and grows at 0.1 distance per level.<br />
++*Prerequisites*: Phase 10, Extended Stride 5<br />
++
+ ## Extended Stride (C)
+ *Difficulty*: 3<br />
+ *Target*: Self<br />
+diff --git a/data/mods/MindOverMatter/effects/effects_penalty.json b/data/mods/MindOverMatter/effects/effects_penalty.json
+index c4052bc8b4..98e2c3c255 100644
+--- a/data/mods/MindOverMatter/effects/effects_penalty.json
++++ b/data/mods/MindOverMatter/effects/effects_penalty.json
+@@ -213,6 +213,7 @@
+       "effect_telepathic_morale",
+       "effect_telepath_invisibility",
+       "effect_telepath_network_effect",
++      "effect_teleport_ephemeral_walk",
+       "effect_teleport_stride",
+       "effect_vita_health",
+       "effect_vitakin_purge_rads",
+diff --git a/data/mods/MindOverMatter/effects/effects_psionic.json b/data/mods/MindOverMatter/effects/effects_psionic.json
+index 3b2e99d878..a0977f076f 100644
+--- a/data/mods/MindOverMatter/effects/effects_psionic.json
++++ b/data/mods/MindOverMatter/effects/effects_psionic.json
+@@ -1772,6 +1772,28 @@
+     ],
+     "flags": [ "UNCANNY_DODGE" ]
+   },
++  {
++    "type": "effect_type",
++    "id": "effect_teleport_ephemeral_walk",
++    "name": [ "Ephemeral Walk" ],
++    "desc": [ "You exist slightly outside of baseline reality, allowing you to effortlessly walk through solid matter." ],
++    "remove_message": "The surrounding matter feels real again.",
++    "rating": "good",
++    "enchantments": [
++      {
++        "values": [
++          {
++            "value": "PHASE_DISTANCE",
++            "add": {
++              "math": [
++                "max( ( ( ( ( u_spell_level('teleport_ephemeral_walk') * 0.1 ) + 1 ) * scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling), 1)"
++              ]
++            }
++          }
++        ]
++      }
++    ]
++  },
+   {
+     "type": "effect_type",
+     "id": "effect_teleport_slow",
+diff --git a/data/mods/MindOverMatter/hobbies.json b/data/mods/MindOverMatter/hobbies.json
+index 66c6201775..51aeb18715 100644
+--- a/data/mods/MindOverMatter/hobbies.json
++++ b/data/mods/MindOverMatter/hobbies.json
+@@ -440,6 +440,7 @@
+       { "id": "teleport_displacement", "level": 10 },
+       { "id": "teleport_stride", "level": 12 },
+       { "id": "teleport_phase", "level": 12 },
++      { "id": "teleport_ephemeral_walk", "level": 4 },
+       { "id": "teleport_collapse", "level": 7 },
+       { "id": "teleport_farstep", "level": 10 },
+       { "id": "teleport_banish", "level": 6 },
+diff --git a/data/mods/MindOverMatter/powers/learning_eocs/teleportation.json b/data/mods/MindOverMatter/powers/learning_eocs/teleportation.json
+index 4e4ff10c9b..0472ce57fa 100644
+--- a/data/mods/MindOverMatter/powers/learning_eocs/teleportation.json
++++ b/data/mods/MindOverMatter/powers/learning_eocs/teleportation.json
+@@ -31,6 +31,45 @@
+       }
+     ]
+   },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEPORT_LEARNING_EPHEMERAL_WALK",
++    "recurrence": [
++      { "math": [ "jmath_teleportation_learning_eocs_modifiers(global_tier_two_power_learning_time_low)" ] },
++      { "math": [ "jmath_teleportation_learning_eocs_modifiers(global_tier_two_power_learning_time_high)" ] }
++    ],
++    "condition": {
++      "and": [
++        { "u_has_trait": "TELEPORTER" },
++        { "math": [ "u_vitamin('vitamin_psi_learning_counter')", "==", "1" ] },
++        {
++          "or": [
++            { "test_eoc": "EOC_CONDITION_ODDS_OF_RANDOM_TIER_TWO_POWER_INSIGHT" },
++            {
++              "and": [
++                { "math": [ "u_spell_level('teleport_phase')", ">=", "10" ] },
++                { "math": [ "u_spell_level('teleport_stride')", ">=", "5" ] }
++              ]
++            }
++          ]
++        },
++        { "test_eoc": "EOC_PSI_LEARNING_BANNED_EFFECTS" },
++        { "math": [ "u_spell_level('teleport_ephemeral_walk')", "<=", "0" ] },
++        { "not": { "u_know_recipe": "practice_teleport_ephemeral_walk" } }
++      ]
++    },
++    "deactivate_condition": {
++      "or": [ { "not": { "u_has_trait": "TELEPORTER" } }, { "math": [ "u_spell_level('teleport_ephemeral_walk')", ">=", "1" ] } ]
++    },
++    "effect": [
++      { "math": [ "u_vitamin('vitamin_psi_learning_counter')", "=", "0" ] },
++      { "u_learn_recipe": "practice_teleport_ephemeral_walk" },
++      {
++        "u_message": "Use of your powers has led to an insight.  You can maintain a slight offset from normal space, allowing yourself to effortlessly phase through obstacles while still being able to interact with reality, if you can figure out the proper technique.",
++        "popup": true
++      }
++    ]
++  },
+   {
+     "type": "effect_on_condition",
+     "id": "EOC_TELEPORT_LEARNING_STRIDE",
+diff --git a/data/mods/MindOverMatter/powers/teleportation.json b/data/mods/MindOverMatter/powers/teleportation.json
+index 3ff3b08ae0..15e6bb784a 100644
+--- a/data/mods/MindOverMatter/powers/teleportation.json
++++ b/data/mods/MindOverMatter/powers/teleportation.json
+@@ -101,6 +101,43 @@
+     "final_casting_time": 15,
+     "casting_time_increment": -3
+   },
++  {
++    "id": "teleport_ephemeral_walk",
++    "type": "SPELL",
++    "name": "[Ψ]Ephemeral Walk (C)",
++    "description": "By moving slightly into the void between dimensions, you can exist in a state that allows effortless travel through obstacles.",
++    "teachable": false,
++    "valid_targets": [ "self" ],
++    "spell_class": "TELEPORTER",
++    "skill": "metaphysics",
++    "flags": [ "PSIONIC", "CONCENTRATE", "SILENT", "NO_HANDS", "NO_LEGS", "RANDOM_DURATION", "NO_EXPLOSION_SFX" ],
++    "difficulty": 6,
++    "max_level": { "math": [ "int_to_level(1)" ] },
++    "effect": "effect_on_condition",
++    "effect_str": "EOC_TELEPORT_EPHEMERAL_WALK_INITIATE",
++    "shape": "blast",
++    "min_duration": {
++      "math": [
++        "( (u_spell_level('teleport_ephemeral_walk') * 1000) + 3000) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++      ]
++    },
++    "max_duration": {
++      "math": [
++        "( (u_spell_level('teleport_ephemeral_walk') * 3000) + 30000) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++      ]
++    },
++    "energy_source": "STAMINA",
++    "base_energy_cost": {
++      "math": [
++        "u_effect_intensity('effect_teleport_ephemeral_walk') > -1 ? 0 : max((6500 - (u_spell_level('teleport_ephemeral_walk') * 225)), 2000)"
++      ]
++    },
++    "base_casting_time": {
++      "math": [
++        "u_effect_intensity('effect_teleport_ephemeral_walk') > -1 ? 10 : max((85 -(u_spell_level('teleport_ephemeral_walk') * 7)), 25)"
++      ]
++    }
++  },
+   {
+     "id": "teleport_stride",
+     "type": "SPELL",
+diff --git a/data/mods/MindOverMatter/powers/teleportation_concentration_eoc.json b/data/mods/MindOverMatter/powers/teleportation_concentration_eoc.json
+index 8a1401de0f..487239b985 100644
+--- a/data/mods/MindOverMatter/powers/teleportation_concentration_eoc.json
++++ b/data/mods/MindOverMatter/powers/teleportation_concentration_eoc.json
+@@ -58,5 +58,65 @@
+       }
+     ],
+     "false_effect": [  ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEPORT_EPHEMERAL_WALK_INITIATE",
++    "condition": { "not": { "u_has_effect": "effect_teleport_ephemeral_walk" } },
++    "effect": [
++      { "u_message": "You feel a strange coolness as matter around you feels somehow less solid.", "type": "good" },
++      { "run_eocs": "EOC_POWER_MAINTENANCE_PLUS_ONE" },
++      { "u_add_effect": "effect_teleport_ephemeral_walk", "duration": "PERMANENT" },
++      {
++        "queue_eocs": "EOC_TELEPORT_EPHEMERAL_WALK_DRAIN",
++        "time_in_future": [
++          {
++            "math": [
++              "( (u_spell_level('teleport_ephemeral_walk') * 10) + 30) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++            ]
++          },
++          {
++            "math": [
++              "( (u_spell_level('teleport_ephemeral_walk') * 30) + 300) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++            ]
++          }
++        ]
++      }
++    ],
++    "false_effect": [ { "run_eocs": "EOC_TELEPORT_REMOVE_EPHEMERAL_WALK" } ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEPORT_REMOVE_EPHEMERAL_WALK",
++    "condition": { "u_has_effect": "effect_teleport_ephemeral_walk" },
++    "effect": [ { "run_eocs": "EOC_POWER_MAINTENANCE_MINUS_ONE" }, { "u_lose_effect": "effect_teleport_ephemeral_walk" } ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_TELEPORT_EPHEMERAL_WALK_DRAIN",
++    "condition": { "u_has_effect": "effect_teleport_ephemeral_walk" },
++    "effect": [
++      { "math": [ "u_latest_channeled_power_difficulty", "=", "6" ] },
++      { "run_eocs": "EOC_PSIONICS_GAIN_NETHER_ATTUNEMENT_2" },
++      { "math": [ "u_calories()", "-=", "psionics_kcal_cost(6)" ] },
++      { "math": [ "u_spell_exp('teleport_ephemeral_walk')", "+=", "(maintenance_exp_factor(u_val('focus')))" ] },
++      { "run_eocs": "EOC_POWER_MAINTENANCE_CONCENTRATION_CHECK" },
++      {
++        "queue_eocs": "EOC_TELEPORT_EPHEMERAL_WALK_DRAIN",
++        "time_in_future": [
++          {
++            "math": [
++              "( (u_spell_level('teleport_ephemeral_walk') * 10) + 30) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++            ]
++          },
++          {
++            "math": [
++              "( (u_spell_level('teleport_ephemeral_walk') * 30) + 300) * (scaling_factor(u_val('intelligence') ) ) * u_nether_attunement_power_scaling"
++            ]
++          }
++        ]
++      }
++    ],
++    "false_effect": [  ]
+   }
+ ]
+diff --git a/data/mods/MindOverMatter/recipes/practice/teleportation_practice.json b/data/mods/MindOverMatter/recipes/practice/teleportation_practice.json
+index 2db81bfecc..0ce53d2acc 100644
+--- a/data/mods/MindOverMatter/recipes/practice/teleportation_practice.json
++++ b/data/mods/MindOverMatter/recipes/practice/teleportation_practice.json
+@@ -12,6 +12,7 @@
+       "practice_teleport_blink",
+       "practice_teleport_slow",
+       "practice_teleport_phase",
++      "practice_teleport_ephemeral_walk",
+       "practice_teleport_stride",
+       "practice_teleport_transpose",
+       "practice_teleport_displacement",
+@@ -177,6 +178,94 @@
+       }
+     ]
+   },
++  {
++    "type": "recipe",
++    "activity_level": "LIGHT_EXERCISE",
++    "name": "contemplation: ephemeral walk",
++    "id": "practice_teleport_ephemeral_walk",
++    "description": "Contemplate your powers and improve your ability to maintain a slight distance from reality.",
++    "category": "CC_*",
++    "subcategory": "CSC_*_NESTED",
++    "skill_used": "metaphysics",
++    "difficulty": 6,
++    "time": "0 s",
++    "autolearn": false,
++    "proficiencies": [ { "proficiency": "prof_contemplation_teleportation", "required": false } ],
++    "tools": [
++      [ [ "matrix_crystal_drained", -1 ], [ "black_nether_crystal_pseudo_tool", -1 ], [ "matrix_crystal_teleportation", -1 ] ]
++    ],
++    "flags": [ "SECRET", "BLIND_EASY", "NO_MANIP", "AFFECTED_BY_PAIN", "NO_BENCH", "NO_ENCHANTMENT" ],
++    "result_eocs": [
++      {
++        "id": "EOC_PRACTICE_TELEPORT_EPHEMERAL_WALK",
++        "condition": { "math": [ "u_spell_level('teleport_ephemeral_walk')", ">=", "1" ] },
++        "effect": [
++          { "set_string_var": "teleport_ephemeral_walk", "target_var": { "u_val": "latest_studied_power_name" } },
++          {
++            "set_string_var": "prof_contemplation_teleportation",
++            "target_var": { "u_val": "latest_studied_power_proficiency" }
++          },
++          { "math": [ "u_latest_studied_power_difficulty", "=", "6" ] },
++          { "run_eocs": [ "EOC_PSI_STUDYING_POWER_BEGIN", "EOC_PSI_STUDYING_POWER_SIDE_EFFECTS" ] }
++        ],
++        "false_effect": [
++          { "set_string_var": "teleport_ephemeral_walk", "target_var": { "u_val": "latest_studied_power_name" } },
++          { "u_message": "You attempt to unlock new capabilities within your mind." },
++          { "u_assign_activity": "ACT_PSI_LEARNING_NEW_POWER", "duration": "16 hours" },
++          { "u_add_effect": "effect_psi_learning_new_power", "duration": "16 hours" },
++          { "run_eocs": "EOC_PSI_PRACTICE_FOCUS_MOD" },
++          {
++            "queue_eocs": "EOC_PRACTICE_TELEPORT_EPHEMERAL_WALK_LEARNING",
++            "time_in_future": [ { "math": [ "learn_new_power_lower_time_bound(6)" ] }, { "math": [ "learn_new_power_upper_time_bound(6)" ] } ]
++          }
++        ]
++      }
++    ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_PRACTICE_TELEPORT_EPHEMERAL_WALK_LEARNING",
++    "condition": {
++      "and": [
++        { "compare_string": [ "teleport_ephemeral_walk", { "u_val": "latest_studied_power_name" } ] },
++        { "u_has_effect": "effect_psi_learning_new_power" },
++        {
++          "not": { "u_has_any_effect": [ "sleep", "effect_vitakin_wakeful_resting", "lack_sleep", "sleep_deprived", "under_operation" ] }
++        }
++      ]
++    },
++    "effect": [
++      {
++        "run_eocs": [
++          {
++            "id": "EOC_PRACTICE_TELEPORT_EPHEMERAL_WALK_LEARNING_2",
++            "condition": {
++              "and": [
++                {
++                  "roll_contested": { "math": [ "u_skill('metaphysics') + u_has_proficiency('prof_contemplation_teleportation')" ] },
++                  "difficulty": 10
++                }
++              ]
++            },
++            "effect": [
++              {
++                "u_message": "As you meditate, all the pieces suddenly come together.  You've unlocked the Ephemeral Walk power.",
++                "popup": true
++              },
++              { "math": [ "u_spell_level('teleport_ephemeral_walk')", "=", "1" ] },
++              { "math": [ "u_vitamin('vitamin_psionic_drain')", "+=", "rng( 15,30 )" ] },
++              { "u_lose_effect": "effect_psi_learning_new_power" }
++            ],
++            "false_effect": [
++              { "u_message": "You just couldn't manage to grasp the technique.  You'll have to try again.", "popup": true },
++              { "math": [ "u_vitamin('vitamin_psionic_drain')", "+=", "rng( 15,30 )" ] },
++              { "u_lose_effect": "effect_psi_learning_new_power" }
++            ]
++          }
++        ]
++      }
++    ]
++  },
+   {
+     "type": "recipe",
+     "activity_level": "LIGHT_EXERCISE",
+diff --git a/doc/MAGIC.md b/doc/MAGIC.md
+index e7486a851b..be829bf2a6 100644
+--- a/doc/MAGIC.md
++++ b/doc/MAGIC.md
+@@ -875,6 +875,7 @@ Character status value  | Description
+ `PAIN_PENALTY_MOD_SPEED`| Amount of speed you lose from pain. Default value is `pain^0.7`. Can't be bigger than 50 speed.
+ `PAIN_REMOVE`           | When pain naturally decreases every five minutes the chance of pain removal will be modified by this much.  You will still always have at least a chance to reduce pain.
+ `PERCEPTION`            | Affects the perception stat.
++`PHASE_DISTANCE`        | Distance the character is able to teleport through impassible terrain.  Values less than 1 do nothing and the max distance is 48 tiles.
+ `POWER_TRICKLE`         | Generates this amount of millijoules each second. Default value is zero, so better to use `add`
+ `RANGE`                 | Modifies your characters range with firearms
+ `RANGED_DAMAGE`         | Adds damage to ranged attacks.
+diff --git a/src/avatar_action.cpp b/src/avatar_action.cpp
+index 2179b279de..cb5fe22a79 100644
+--- a/src/avatar_action.cpp
++++ b/src/avatar_action.cpp
+@@ -509,6 +509,10 @@ bool avatar_action::move( avatar &you, map &m, const tripoint &d )
+     if( g->walk_move( dest_loc, via_ramp ) ) {
+         return true;
+     }
++    if( g->phasing_move_enchant( dest_loc.raw(), you.calculate_by_enchantment( 0,
++                                 enchant_vals::mod::PHASE_DISTANCE ) ) ) {
++        return true;
++    }
+     if( g->phasing_move( dest_loc.raw() ) ) {
+         return true;
+     }
+diff --git a/src/game.cpp b/src/game.cpp
+index 840a546f29..3f484e3b01 100644
+--- a/src/game.cpp
++++ b/src/game.cpp
+@@ -11140,6 +11140,66 @@ bool game::phasing_move( const tripoint &dest_loc, const bool via_ramp )
+     return false;
+ }
+ 
++bool game::phasing_move_enchant( const tripoint &dest_loc, const int phase_distance )
++{
++
++    if( phase_distance < 1 ) {
++        return false;
++    }
++
++    // phasing only applies to impassible tiles such as walls
++
++    int tunneldist = 0;
++    tripoint dest = dest_loc;
++    const tripoint d( sgn( dest.x - u.posx() ), sgn( dest.y - u.posy() ), sgn( dest.z - u.posz() ) );
++    creature_tracker &creatures = get_creature_tracker();
++
++    while( m.impassable( dest ) ||
++           ( creatures.creature_at( dest ) != nullptr && tunneldist > 0 ) ) {
++        // add 1 to tunnel distance for each impassable tile in the line
++        tunneldist += 1;
++        if( tunneldist > phase_distance ) {
++            return false;
++        }
++        if( tunneldist > 48 ) {
++            return false;
++        }
++
++        dest.x += d.x;
++        dest.y += d.y;
++        dest.z += d.z;
++    }
++
++    // vertical handling for adjacent tiles
++    if( d.z != 0 && !m.impassable( dest_loc ) && tunneldist == 0 ) {
++        tunneldist += 1;
++    }
++
++    if( tunneldist != 0 ) {
++        if( u.in_vehicle ) {
++            m.unboard_vehicle( u.pos_bub() );
++        }
++
++        if( dest.z != u.posz() ) {
++            // calling vertical_shift here doesn't actually move the character for some reason, but it does perform other necessary tasks for vertical movement
++            vertical_shift( dest.z );
++        }
++
++        u.setpos( dest );
++
++        if( m.veh_at( u.pos_bub() ).part_with_feature( "BOARDABLE", true ) ) {
++            m.board_vehicle( u.pos_bub(), &u );
++        }
++
++        u.grab( object_type::NONE );
++        on_move_effects();
++        m.creature_on_trap( u );
++        return true;
++    }
++
++    return false;
++}
++
+ bool game::can_move_furniture( tripoint fdest, const tripoint &dp )
+ {
+     // TODO: Fix when unary operation available
+@@ -11789,8 +11849,15 @@ void game::vertical_move( int movez, bool force, bool peeking )
+             }
+         }
+         if( here.has_floor_or_support( stairs.raw() ) ) {
+-            add_msg( m_info, _( "You can't climb here - there's a ceiling above your head." ) );
+-            return;
++            tripoint dest_phase = u.pos();
++            dest_phase.z += 1;
++            if( phasing_move_enchant( dest_phase, u.calculate_by_enchantment( 0,
++                                      enchant_vals::mod::PHASE_DISTANCE ) ) ) {
++                return;
++            } else {
++                add_msg( m_info, _( "You can't climb here - there's a ceiling above your head." ) );
++                return;
++            }
+         }
+ 
+         if( u.get_working_arm_count() < 1 && !here.has_flag( ter_furn_flag::TFLAG_LADDER, u.pos_bub() ) ) {
+@@ -11865,12 +11932,18 @@ void game::vertical_move( int movez, bool force, bool peeking )
+     if( !force && movez == -1 && !here.has_flag( ter_furn_flag::TFLAG_GOES_DOWN, u.pos_bub() ) &&
+         !u.is_underwater() && !here.has_flag( ter_furn_flag::TFLAG_NO_FLOOR_WATER, u.pos_bub() ) &&
+         !u.has_effect( effect_gliding ) ) {
++        tripoint dest_phase = u.pos();
++        dest_phase.z -= 1;
++
+         if( wall_cling && !here.has_floor_or_support( u.pos() ) ) {
+             climbing = true;
+             climbing_aid = climbing_aid_ability_WALL_CLING;
+             u.set_activity_level( EXTRA_EXERCISE );
+             u.burn_energy_all( -750 );
+             move_cost += 500;
++        } else if( phasing_move_enchant( dest_phase, u.calculate_by_enchantment( 0,
++                                         enchant_vals::mod::PHASE_DISTANCE ) ) ) {
++            return;
+         } else {
+             add_msg( m_info, _( "You can't go down here!" ) );
+             return;
+diff --git a/src/game.h b/src/game.h
+index df4b485a60..2b72c3675a 100644
+--- a/src/game.h
++++ b/src/game.h
+@@ -852,6 +852,8 @@ class game
+ 
+         // Handle phasing through walls, returns true if it handled the move
+         bool phasing_move( const tripoint &dest, bool via_ramp = false );
++        // Handle shifting through terrain and walls, with distance defined by enchantment.
++        bool phasing_move_enchant( const tripoint &dest, const int phase_distance = 0 );
+         bool can_move_furniture( tripoint fdest, const tripoint &dp );
+         // Regular movement. Returns false if it failed for any reason
+         // TODO: Get rid of untyped overload
+diff --git a/src/magic_enchantment.cpp b/src/magic_enchantment.cpp
+index 5baf8e186c..db27e6e1ef 100644
+--- a/src/magic_enchantment.cpp
++++ b/src/magic_enchantment.cpp
+@@ -185,6 +185,7 @@ namespace io
+             case enchant_vals::mod::MOVECOST_SWIM_MOD: return "MOVECOST_SWIM_MOD";
+             case enchant_vals::mod::MOVECOST_OBSTACLE_MOD: return "MOVECOST_OBSTACLE_MOD";
+             case enchant_vals::mod::MOVECOST_FLATGROUND_MOD: return "MOVECOST_FLATGROUND_MOD";
++            case enchant_vals::mod::PHASE_DISTANCE: return "PHASE_DISTANCE";
+             case enchant_vals::mod::SHOUT_NOISE_STR_MULT: return "SHOUT_NOISE_STR_MULT";
+             case enchant_vals::mod::NIGHT_VIS: return "NIGHT_VIS";
+             case enchant_vals::mod::HEARING_MULT: return "HEARING_MULT";
+diff --git a/src/magic_enchantment.h b/src/magic_enchantment.h
+index bf6bd747e3..5f569bad61 100644
+--- a/src/magic_enchantment.h
++++ b/src/magic_enchantment.h
+@@ -162,6 +162,7 @@ enum class mod : int {
+     MOVECOST_SWIM_MOD,
+     MOVECOST_OBSTACLE_MOD,
+     MOVECOST_FLATGROUND_MOD,
++    PHASE_DISTANCE,
+     SHOUT_NOISE_STR_MULT,
+     NIGHT_VIS,
+     HEARING_MULT,
+-- 
+2.45.2
+

@@ -1,0 +1,65 @@
+From fb18e16bf6c34440cc0933b1a4d258e409421cc7 Mon Sep 17 00:00:00 2001
+From: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+Date: Fri, 16 Aug 2024 22:28:25 +0200
+Subject: [PATCH 035/125] capitalize the thingies
+
+---
+ data/json/items/newspaper.json             | 6 +++---
+ data/mods/Sky_Island/upgrade_missions.json | 4 ++--
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/data/json/items/newspaper.json b/data/json/items/newspaper.json
+index bebe92bcc1..a3d54e70dd 100644
+--- a/data/json/items/newspaper.json
++++ b/data/json/items/newspaper.json
+@@ -616,7 +616,7 @@
+     "category": "other",
+     "symbol": "*",
+     "color": "white",
+-    "name": { "str": "Picture" },
++    "name": { "str": "picture" },
+     "description": "A medium picture of something that the owner wished to decorate their house with.",
+     "weight": "600 g",
+     "volume": "650 ml",
+@@ -627,14 +627,14 @@
+     "variants": [
+       {
+         "id": "hp_original",
+-        "name": { "str": "Picture" },
++        "name": { "str": "picture" },
+         "description": "<home_pictures>",
+         "expand_snippets": true,
+         "weight": 200
+       },
+       {
+         "id": "hp_snippet_nested",
+-        "name": { "str": "Picture" },
++        "name": { "str": "picture" },
+         "description": "<hp_nested>",
+         "expand_snippets": true,
+         "weight": 40
+diff --git a/data/mods/Sky_Island/upgrade_missions.json b/data/mods/Sky_Island/upgrade_missions.json
+index f3fd30189a..239c463def 100644
+--- a/data/mods/Sky_Island/upgrade_missions.json
++++ b/data/mods/Sky_Island/upgrade_missions.json
+@@ -3081,7 +3081,7 @@
+     "id": "SKYISLAND_BUILD_northroom1",
+     "type": "mission_definition",
+     "name": "Construct: North Room 1",
+-    "description": "Completing this mission will instantly build a new structure on your home island.\n\nCraft a Miner's Cameo from simple tools and common building materials.  The Heart of the Island has already placed the recipe inside your mind.\n\nNew Structure: north Room 1.  A hollow chamber north of the island's center to serve as a multipurpose space, with tons of room to expand.",
++    "description": "Completing this mission will instantly build a new structure on your home island.\n\nCraft a Miner's Cameo from simple tools and common building materials.  The Heart of the Island has already placed the recipe inside your mind.\n\nNew Structure: North Room 1.  A hollow chamber north of the island's center to serve as a multipurpose space, with tons of room to expand.",
+     "goal": "MGOAL_FIND_ITEM",
+     "item": "buildkey_northroom1",
+     "count": 1,
+@@ -3114,7 +3114,7 @@
+     "type": "GENERIC",
+     "category": "spare_parts",
+     "name": { "str_sp": "Miner's Cameo (North)" },
+-    "description": "This strange metaphysical artifact is used to build a structure on the island.  Will be used automatically upon crafting, and can only be used once.\n\nASSOCIATED BUILD: north Room 1",
++    "description": "This strange metaphysical artifact is used to build a structure on the island.  Will be used automatically upon crafting, and can only be used once.\n\nASSOCIATED BUILD: North Room 1",
+     "volume": "25000 ml",
+     "weight": "15000 g",
+     "longest_side": "90 cm",
+-- 
+2.45.2
+

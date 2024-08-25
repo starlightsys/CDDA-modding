@@ -1,0 +1,236 @@
+From 1b06eb808df1970ba2b1cf9a694dc154a95dd4fd Mon Sep 17 00:00:00 2001
+From: Standing-Storm <120433252+Standing-Storm@users.noreply.github.com>
+Date: Fri, 16 Aug 2024 15:23:00 -0500
+Subject: [PATCH 031/125] [Sky Island] Add Warped Pond craft (#75713)
+
+* Initial commit
+
+* Add recipe EoC
+
+* Require selecting nearby tile
+
+* Increase cost
+
+* Revert XE changes
+---
+ data/mods/Sky_Island/EOCs.json             | 98 ++++++++++++++++++++++
+ data/mods/Sky_Island/island_upgrades.json  | 48 +++++++++++
+ data/mods/Sky_Island/recipes.json          | 17 ++++
+ data/mods/Sky_Island/upgrade_missions.json |  1 +
+ 4 files changed, 164 insertions(+)
+
+diff --git a/data/mods/Sky_Island/EOCs.json b/data/mods/Sky_Island/EOCs.json
+index 071988661a..006c809a68 100644
+--- a/data/mods/Sky_Island/EOCs.json
++++ b/data/mods/Sky_Island/EOCs.json
+@@ -806,6 +806,15 @@
+       { "u_message": "Your save should be up to date now.", "popup": true }
+     ]
+   },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_SKY_ISLAND_GAME_LOAD_WARPED_POND_GRANTER",
++    "eoc_type": "EVENT",
++    "//": "Delete after 0.I",
++    "required_event": "game_load",
++    "condition": { "math": [ "islandrank", ">=", "2" ] },
++    "effect": [ { "u_learn_recipe": "sky_island_warped_pond" } ]
++  },
+   {
+     "id": "warp_home",
+     "type": "SPELL",
+@@ -915,5 +924,94 @@
+       { "u_message": "You feel somehow lighter.", "type": "good" },
+       { "u_add_effect": "effect_warped_waterwalking", "duration": 180 }
+     ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_WARPED_POND_CREATION",
++    "effect": [
++      {
++        "if": {
++          "u_query_tile": "around",
++          "target_var": { "context_val": "warped_pond_location" },
++          "message": "Select nearby water source"
++        },
++        "then": {
++          "if": { "map_terrain_with_flag": "LIQUID", "loc": { "context_val": "warped_pond_location" } },
++          "then": {
++            "run_eoc_selector": [
++              "EOC_WARPED_POND_CREATION_NW",
++              "EOC_WARPED_POND_CREATION_NE",
++              "EOC_WARPED_POND_CREATION_SW",
++              "EOC_WARPED_POND_CREATION_SE"
++            ],
++            "names": [ "Northwest", "Northeast", "Southwest", "Southeast" ],
++            "title": "Choose the location for a pond",
++            "descriptions": [
++              "Place a pond in the northwest.",
++              "Place a pond in the northeast.",
++              "Place a pond in the southwest.",
++              "Place a pond in the southeast."
++            ]
++          },
++          "else": [
++            { "u_spawn_item": "warptoken", "count": 30, "suppress_message": true },
++            { "u_message": "You must be near a water source to created a warped pond.", "type": "neutral" }
++          ]
++        },
++        "else": { "u_message": "Canceled" }
++      }
++    ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_WARPED_POND_CREATION_NW",
++    "effect": [
++      {
++        "mapgen_update": "mx_skyisland_pond",
++        "om_terrain": "sky_island_core",
++        "search_range": 4,
++        "offset_x": -1,
++        "offset_y": -1
++      }
++    ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_WARPED_POND_CREATION_NE",
++    "effect": [
++      {
++        "mapgen_update": "mx_skyisland_pond",
++        "om_terrain": "sky_island_core",
++        "search_range": 4,
++        "offset_x": 1,
++        "offset_y": -1
++      }
++    ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_WARPED_POND_CREATION_SW",
++    "effect": [
++      {
++        "mapgen_update": "mx_skyisland_pond",
++        "om_terrain": "sky_island_core",
++        "search_range": 4,
++        "offset_x": -1,
++        "offset_y": 1
++      }
++    ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_WARPED_POND_CREATION_SE",
++    "effect": [
++      {
++        "mapgen_update": "mx_skyisland_pond",
++        "om_terrain": "sky_island_core",
++        "search_range": 4,
++        "offset_x": 1,
++        "offset_y": 1
++      }
++    ]
+   }
+ ]
+diff --git a/data/mods/Sky_Island/island_upgrades.json b/data/mods/Sky_Island/island_upgrades.json
+index 3cae08a4b8..96e884f29b 100644
+--- a/data/mods/Sky_Island/island_upgrades.json
++++ b/data/mods/Sky_Island/island_upgrades.json
+@@ -1009,5 +1009,53 @@
+       "flags": [ "NO_UNDERLYING_ROTATE", "ALLOW_TERRAIN_UNDER_OTHER_DATA" ],
+       "palettes": [ "skyisland_bunker" ]
+     }
++  },
++  {
++    "type": "mapgen",
++    "method": "json",
++    "update_mapgen_id": "mx_skyisland_pond",
++    "object": {
++      "rows": [
++        "                        ",
++        "                        ",
++        "                        ",
++        "                        ",
++        "                        ",
++        "        ]]]**]]]]?      ",
++        "       ?]]*****]]]?     ",
++        "       ]***[******]     ",
++        "      ]]***[[[[****]    ",
++        "     ]]***[[[[*****]    ",
++        "     ?**[[~~~~[****]    ",
++        "    ?]**[[~~~~[****]    ",
++        "    ]]***[~~~~[***]]    ",
++        "    ]]***[~~~~[[]]]     ",
++        "    ]]****[[[[**]???    ",
++        "    ?]]***[[***]]???    ",
++        "     ]]]]*****]]? ?     ",
++        "       ??]]****]        ",
++        "           **           ",
++        "                        ",
++        "                        ",
++        "                        ",
++        "                        ",
++        "                        "
++      ],
++      "flags": [ "ERASE_ALL_BEFORE_PLACING_TERRAIN" ],
++      "nested": {
++        "*": { "chunks": [ [ "pond_water_furniture", 8 ], [ "null", 92 ] ] },
++        "[": { "chunks": [ [ "pond_water_furniture", 8 ], [ "null", 92 ] ] },
++        "]": { "chunks": [ [ "pond_water_furniture", 8 ], [ "null", 92 ] ] },
++        "~": { "chunks": [ [ "pond_water_furniture", 8 ], [ "null", 92 ] ] }
++      },
++      "furniture": { "~": "f_clear", "*": "f_clear", "[": "f_clear", "]": "f_clear" },
++      "terrain": {
++        "*": "t_water_sh",
++        "?": [ [ "t_water_sh", 3 ], [ "t_dirt", 5 ], [ "t_grass", 6 ], [ "t_shrub", 2 ], [ "t_tree", 2 ] ],
++        "[": [ [ "t_water_dp", 2 ], [ "t_water_sh", 3 ] ],
++        "]": [ [ "t_water_sh", 8 ], "t_dirt", "t_grass" ],
++        "~": "t_water_dp"
++      }
++    }
+   }
+ ]
+diff --git a/data/mods/Sky_Island/recipes.json b/data/mods/Sky_Island/recipes.json
+index dc4c343e36..cbef685571 100644
+--- a/data/mods/Sky_Island/recipes.json
++++ b/data/mods/Sky_Island/recipes.json
+@@ -242,5 +242,22 @@
+       [ [ "nuts_bolts", 4 ], [ "pipe_fittings", 4 ], [ "sheet_metal_small", 10 ] ],
+       [ [ "nail", 40 ] ]
+     ]
++  },
++  {
++    "id": "sky_island_warped_pond",
++    "name": "Warped Pond",
++    "description": "Create a pond on your island.  You must be standing next to a water source to successfully create the pond.",
++    "type": "recipe",
++    "activity_level": "NO_EXERCISE",
++    "category": "CC_WARP",
++    "subcategory": "CSC_WARP_UPGRADES",
++    "skill_used": "survival",
++    "time": "0 m",
++    "autolearn": false,
++    "reversible": false,
++    "tools": [ [ [ "fakeitem_statue", -1 ] ] ],
++    "components": [ [ [ "warptoken", 30 ] ] ],
++    "flags": [ "BLIND_EASY" ],
++    "result_eocs": [ "EOC_WARPED_POND_CREATION" ]
+   }
+ ]
+diff --git a/data/mods/Sky_Island/upgrade_missions.json b/data/mods/Sky_Island/upgrade_missions.json
+index 9d25c13efb..f3fd30189a 100644
+--- a/data/mods/Sky_Island/upgrade_missions.json
++++ b/data/mods/Sky_Island/upgrade_missions.json
+@@ -1507,6 +1507,7 @@
+         { "u_learn_recipe": "recipe_craft_random_artifact" },
+         { "u_learn_recipe": "warp_vortex_token" },
+         { "u_learn_recipe": "warphaulbag" },
++        { "u_learn_recipe": "sky_island_warped_pond" },
+         {
+           "u_message": "You have proved your ability to survive to the island, to the warpstream, and to yourself.\nMore unlockable upgrades will be available as you progress, and you may experience exits and targets in new locations.",
+           "type": "mixed"
+-- 
+2.45.2
+

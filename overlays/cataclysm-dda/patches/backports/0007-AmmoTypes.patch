@@ -1,0 +1,120 @@
+From 4db5a30bdeccd78d7955c4cec1d68f980492ac77 Mon Sep 17 00:00:00 2001
+From: klorpa <30924131+klorpa@users.noreply.github.com>
+Date: Tue, 16 Jun 2020 10:44:57 -0500
+Subject: [PATCH 007/125] AmmoTypes
+
+---
+ data/json/items/generic.json             | 4 ++--
+ data/json/items/resources/fasteners.json | 8 ++++----
+ data/json/items/resources/misc.json      | 6 +++---
+ data/mods/Aftershock/items/items.json    | 2 +-
+ 4 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/data/json/items/generic.json b/data/json/items/generic.json
+index fba168a7e5..10ab28540d 100644
+--- a/data/json/items/generic.json
++++ b/data/json/items/generic.json
+@@ -3094,7 +3094,7 @@
+   {
+     "id": "pouch_autoclave",
+     "type": "AMMO",
+-    "ammo_type": "NULL",
++    "ammo_type": [ "NULL" ],
+     "category": "other",
+     "name": { "str": "autoclave pouch", "str_pl": "autoclave pouches" },
+     "description": "A medical device that bears the approval of the FDA (Food and Drug Administration).  If used properly, this pouch can keep things sterile indefinitely.",
+@@ -3404,7 +3404,7 @@
+     "symbol": ".",
+     "flags": [ "HURT_WHEN_WIELDED" ],
+     "color": "white",
+-    "ammo_type": "components"
++    "ammo_type": [ "components" ]
+   },
+   {
+     "id": "clay_pot_flower",
+diff --git a/data/json/items/resources/fasteners.json b/data/json/items/resources/fasteners.json
+index ca96a860a2..29ccfa35d2 100644
+--- a/data/json/items/resources/fasteners.json
++++ b/data/json/items/resources/fasteners.json
+@@ -12,7 +12,7 @@
+     "material": [ "steel" ],
+     "symbol": "=",
+     "color": "dark_gray",
+-    "ammo_type": "components"
++    "ammo_type": [ "components" ]
+   },
+   {
+     "id": "button_plastic",
+@@ -28,7 +28,7 @@
+     "symbol": "=",
+     "color": "dark_gray",
+     "count": 20,
+-    "ammo_type": "components"
++    "ammo_type": [ "components" ]
+   },
+   {
+     "id": "button_steel",
+@@ -80,7 +80,7 @@
+     "material": [ "cotton" ],
+     "symbol": "=",
+     "color": "dark_gray",
+-    "ammo_type": "components"
++    "ammo_type": [ "components" ]
+   },
+   {
+     "id": "zipper_long_plastic",
+@@ -103,6 +103,6 @@
+     "material": [ "plastic", "cotton" ],
+     "symbol": "=",
+     "color": "dark_gray",
+-    "ammo_type": "components"
++    "ammo_type": [ "components" ]
+   }
+ ]
+diff --git a/data/json/items/resources/misc.json b/data/json/items/resources/misc.json
+index 14a83c9fcd..7a0f79df92 100644
+--- a/data/json/items/resources/misc.json
++++ b/data/json/items/resources/misc.json
+@@ -83,7 +83,7 @@
+     "symbol": "=",
+     "color": "dark_gray",
+     "count": 200,
+-    "ammo_type": "components",
++    "ammo_type": [ "components" ],
+     "effects": [ "COOKOFF" ]
+   },
+   {
+@@ -149,7 +149,7 @@
+     "symbol": ",",
+     "color": "dark_gray",
+     "count": 50,
+-    "ammo_type": "components",
++    "ammo_type": [ "components" ],
+     "effects": [ "COOKOFF" ]
+   },
+   {
+@@ -182,7 +182,7 @@
+     "material": [ "rubber" ],
+     "symbol": "=",
+     "color": "dark_gray",
+-    "ammo_type": "components"
++    "ammo_type": [ "components" ]
+   },
+   {
+     "id": "rubber_tire_chunk",
+diff --git a/data/mods/Aftershock/items/items.json b/data/mods/Aftershock/items/items.json
+index 46f9953123..3beca11600 100644
+--- a/data/mods/Aftershock/items/items.json
++++ b/data/mods/Aftershock/items/items.json
+@@ -162,7 +162,7 @@
+     "looks_like": "silver_small",
+     "symbol": "/",
+     "color": "light_gray",
+-    "ammo_type": "components"
++    "ammo_type": [ "components" ]
+   },
+   {
+     "id": "afs_titanium_implant",
+-- 
+2.45.2
+

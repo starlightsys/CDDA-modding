@@ -1,0 +1,185 @@
+From a685bda911c4bc41c994f430ae0ba76e2e418c52 Mon Sep 17 00:00:00 2001
+From: Fris0uman <41293484+Fris0uman@users.noreply.github.com>
+Date: Mon, 19 Aug 2024 01:08:46 +0200
+Subject: [PATCH 071/125] Fix fatigue sfx id (#75539)
+
+Co-authored-by: Fris0uman <fris0uman@users.noreply.github.com>
+---
+ doc/SOUNDPACKS.md |  2 +-
+ src/do_turn.cpp   |  4 ++--
+ src/game.cpp      |  2 +-
+ src/sdlsound.cpp  |  2 +-
+ src/sounds.cpp    | 30 +++++++++++++++---------------
+ src/sounds.h      |  4 ++--
+ 6 files changed, 22 insertions(+), 22 deletions(-)
+
+diff --git a/doc/SOUNDPACKS.md b/doc/SOUNDPACKS.md
+index 7556c4a6b6..cc61d457a7 100644
+--- a/doc/SOUNDPACKS.md
++++ b/doc/SOUNDPACKS.md
+@@ -225,7 +225,7 @@ Example: if `plmove|t_grass_long` is defined it will be played before default `p
+ 
+ ### Fatigue
+ 
+-* `plmove sleepiness_m_low|sleepiness_m_med|sleepiness_m_high|sleepiness_f_low|sleepiness_f_med|sleepiness_f_high`
++* `plmove fatigue_m_low|fatigue_m_med|fatigue_m_high|fatigue_f_low|fatigue_f_med|fatigue_f_high`
+ 
+ ### Player hurt
+ 
+diff --git a/src/do_turn.cpp b/src/do_turn.cpp
+index 1d728a1b44..418b66b175 100644
+--- a/src/do_turn.cpp
++++ b/src/do_turn.cpp
+@@ -207,7 +207,7 @@ bool cleanup_at_end()
+     sfx::fade_audio_group( sfx::group::weather, 300 );
+     sfx::fade_audio_group( sfx::group::time_of_day, 300 );
+     sfx::fade_audio_group( sfx::group::context_themes, 300 );
+-    sfx::fade_audio_group( sfx::group::sleepiness, 300 );
++    sfx::fade_audio_group( sfx::group::low_stamina, 300 );
+ 
+     zone_manager::get_manager().clear();
+ 
+@@ -750,7 +750,7 @@ bool do_turn()
+     sfx::do_danger_music();
+     sfx::do_vehicle_engine_sfx();
+     sfx::do_vehicle_exterior_engine_sfx();
+-    sfx::do_sleepiness();
++    sfx::do_low_stamina_sfx();
+ 
+     // reset player noise
+     u.volume = 0;
+diff --git a/src/game.cpp b/src/game.cpp
+index 9c143a2c12..ff4bd46732 100644
+--- a/src/game.cpp
++++ b/src/game.cpp
+@@ -2910,7 +2910,7 @@ void game::bury_screen() const
+     sfx::fade_audio_group( sfx::group::weather, 2000 );
+     sfx::fade_audio_group( sfx::group::time_of_day, 2000 );
+     sfx::fade_audio_group( sfx::group::context_themes, 2000 );
+-    sfx::fade_audio_group( sfx::group::sleepiness, 2000 );
++    sfx::fade_audio_group( sfx::group::low_stamina, 2000 );
+ }
+ 
+ void game::death_screen()
+diff --git a/src/sdlsound.cpp b/src/sdlsound.cpp
+index 7e9ab6cb51..1b2bf8bbdc 100644
+--- a/src/sdlsound.cpp
++++ b/src/sdlsound.cpp
+@@ -329,7 +329,7 @@ bool init_sound()
+                                static_cast<int>( sfx::group::context_themes ) );
+             Mix_GroupChannels( static_cast<int>( sfx::channel::stamina_75 ),
+                                static_cast<int>( sfx::channel::stamina_35 ),
+-                               static_cast<int>( sfx::group::sleepiness ) );
++                               static_cast<int>( sfx::group::low_stamina ) );
+ 
+             sound_init_success = true;
+         } else {
+diff --git a/src/sounds.cpp b/src/sounds.cpp
+index 10170d07ba..a9b5f3bc1b 100644
+--- a/src/sounds.cpp
++++ b/src/sounds.cpp
+@@ -1633,7 +1633,7 @@ void sfx::do_danger_music()
+     prev_hostiles = hostiles;
+ }
+ 
+-void sfx::do_sleepiness()
++void sfx::do_low_stamina_sfx()
+ {
+     if( test_mode ) {
+         return;
+@@ -1648,48 +1648,48 @@ void sfx::do_sleepiness()
+     16: Stamina 50%
+     17: Stamina 25%*/
+     if( player_character.get_stamina() >= player_character.get_stamina_max() * .75 ) {
+-        fade_audio_group( group::sleepiness, 2000 );
++        fade_audio_group( group::low_stamina, 2000 );
+         return;
+     } else if( player_character.get_stamina() <= player_character.get_stamina_max() * .74 &&
+                player_character.get_stamina() >= player_character.get_stamina_max() * .5 &&
+                player_character.male && !is_channel_playing( channel::stamina_75 ) ) {
+-        fade_audio_group( group::sleepiness, 1000 );
+-        play_ambient_variant_sound( "plmove", "sleepiness_m_low", seas_str, indoors,
++        fade_audio_group( group::low_stamina, 1000 );
++        play_ambient_variant_sound( "plmove", "fatigue_m_low", seas_str, indoors,
+                                     night, 100, channel::stamina_75, 1000 );
+         return;
+     } else if( player_character.get_stamina() <= player_character.get_stamina_max() * .49 &&
+                player_character.get_stamina() >= player_character.get_stamina_max() * .25 &&
+                player_character.male && !is_channel_playing( channel::stamina_50 ) ) {
+-        fade_audio_group( group::sleepiness, 1000 );
+-        play_ambient_variant_sound( "plmove", "sleepiness_m_med", seas_str, indoors,
++        fade_audio_group( group::low_stamina, 1000 );
++        play_ambient_variant_sound( "plmove", "fatigue_m_med", seas_str, indoors,
+                                     night, 100, channel::stamina_50, 1000 );
+         return;
+     } else if( player_character.get_stamina() <= player_character.get_stamina_max() * .24 &&
+                player_character.get_stamina() >= 0 && player_character.male &&
+                !is_channel_playing( channel::stamina_35 ) ) {
+-        fade_audio_group( group::sleepiness, 1000 );
+-        play_ambient_variant_sound( "plmove", "sleepiness_m_high", seas_str, indoors,
++        fade_audio_group( group::low_stamina, 1000 );
++        play_ambient_variant_sound( "plmove", "fatigue_m_high", seas_str, indoors,
+                                     night, 100, channel::stamina_35, 1000 );
+         return;
+     } else if( player_character.get_stamina() <= player_character.get_stamina_max() * .74 &&
+                player_character.get_stamina() >= player_character.get_stamina_max() * .5 &&
+                !player_character.male && !is_channel_playing( channel::stamina_75 ) ) {
+-        fade_audio_group( group::sleepiness, 1000 );
+-        play_ambient_variant_sound( "plmove", "sleepiness_f_low", seas_str, indoors,
++        fade_audio_group( group::low_stamina, 1000 );
++        play_ambient_variant_sound( "plmove", "fatigue_f_low", seas_str, indoors,
+                                     night, 100, channel::stamina_75, 1000 );
+         return;
+     } else if( player_character.get_stamina() <= player_character.get_stamina_max() * .49 &&
+                player_character.get_stamina() >= player_character.get_stamina_max() * .25 &&
+                !player_character.male && !is_channel_playing( channel::stamina_50 ) ) {
+-        fade_audio_group( group::sleepiness, 1000 );
+-        play_ambient_variant_sound( "plmove", "sleepiness_f_med", seas_str, indoors,
++        fade_audio_group( group::low_stamina, 1000 );
++        play_ambient_variant_sound( "plmove", "fatigue_f_med", seas_str, indoors,
+                                     night, 100, channel::stamina_50, 1000 );
+         return;
+     } else if( player_character.get_stamina() <= player_character.get_stamina_max() * .24 &&
+                player_character.get_stamina() >= 0 && !player_character.male &&
+                !is_channel_playing( channel::stamina_35 ) ) {
+-        fade_audio_group( group::sleepiness, 1000 );
+-        play_ambient_variant_sound( "plmove", "sleepiness_f_high", seas_str, indoors,
++        fade_audio_group( group::low_stamina, 1000 );
++        play_ambient_variant_sound( "plmove", "fatigue_f_high", seas_str, indoors,
+                                     night, 100, channel::stamina_35, 1000 );
+         return;
+     }
+@@ -2037,7 +2037,7 @@ bool sfx::has_variant_sound( const std::string &, const std::string & )
+ void sfx::stop_sound_effect_fade( channel, int ) { }
+ void sfx::stop_sound_effect_timed( channel, int ) { }
+ void sfx::do_player_death_hurt( const Character &, bool ) { }
+-void sfx::do_sleepiness() { }
++void sfx::do_low_stamina_sfx() { }
+ void sfx::do_obstacle( const std::string & ) { }
+ void sfx::play_variant_sound( const std::string &, const std::string &, const std::string &,
+                               const std::optional<bool> &, const std::optional<bool> &, int ) { }
+diff --git a/src/sounds.h b/src/sounds.h
+index 0fcb53d91e..b34b6ea4a7 100644
+--- a/src/sounds.h
++++ b/src/sounds.h
+@@ -144,7 +144,7 @@ enum class group : int {
+     weather = 1,    //SFX related to weather
+     time_of_day,    //SFX related to time of day
+     context_themes, //SFX related to context themes
+-    sleepiness         //SFX related to sleepiness
++    low_stamina         //SFX related to low_stamina
+ };
+ 
+ void load_sound_effects( const JsonObject &jsobj );
+@@ -196,7 +196,7 @@ void stop_sound_effect_fade( channel channel, int duration );
+ void stop_sound_effect_timed( channel channel, int time );
+ int set_channel_volume( channel channel, int volume );
+ void do_player_death_hurt( const Character &target, bool death );
+-void do_sleepiness();
++void do_low_stamina_sfx();
+ // @param obst should be string id of obstacle terrain or vehicle part
+ void do_obstacle( const std::string &obst = "" );
+ } // namespace sfx
+-- 
+2.45.2
+

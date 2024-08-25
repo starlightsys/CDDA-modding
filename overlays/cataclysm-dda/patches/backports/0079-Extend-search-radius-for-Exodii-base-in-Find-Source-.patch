@@ -1,0 +1,33 @@
+From 08b29d8b64bab955f550e22dba4550d36daa81ae Mon Sep 17 00:00:00 2001
+From: MikasaTanikawa <128552044+MikasaTanikawa@users.noreply.github.com>
+Date: Mon, 19 Aug 2024 08:14:58 +0300
+Subject: [PATCH 079/125] Extend search radius for Exodii base in 'Find Source
+ of Robots' mission (#75466)
+
+* Extend search radius for Exodii base
+
+* Update data/json/npcs/refugee_center/surface_visitors/NPC_old_guard_representative.json
+
+---------
+
+Co-authored-by: Maleclypse <54345792+Maleclypse@users.noreply.github.com>
+---
+ .../surface_visitors/NPC_old_guard_representative.json          | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/json/npcs/refugee_center/surface_visitors/NPC_old_guard_representative.json b/data/json/npcs/refugee_center/surface_visitors/NPC_old_guard_representative.json
+index 773a9649a5..822a322f55 100644
+--- a/data/json/npcs/refugee_center/surface_visitors/NPC_old_guard_representative.json
++++ b/data/json/npcs/refugee_center/surface_visitors/NPC_old_guard_representative.json
+@@ -244,7 +244,7 @@
+     "difficulty": 2,
+     "value": 10000,
+     "start": {
+-      "assign_mission_target": { "om_terrain": "exodii_base_x0y3z0", "om_special": "exodii_base", "reveal_radius": 5, "search_range": 400 },
++      "assign_mission_target": { "om_terrain": "exodii_base_x0y3z0", "om_special": "exodii_base", "reveal_radius": 5, "search_range": 800 },
+       "effect": [ { "math": [ "old_guard_rep_scouting", "=", "1" ] } ]
+     },
+     "origins": [ "ORIGIN_SECONDARY" ],
+-- 
+2.45.2
+

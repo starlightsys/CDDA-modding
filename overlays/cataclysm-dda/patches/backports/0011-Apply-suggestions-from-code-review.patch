@@ -1,0 +1,389 @@
+From d88385e056a63b59b643f902283eb84fbfa0c59b Mon Sep 17 00:00:00 2001
+From: ZhilkinSerg <ZhilkinSerg@users.noreply.github.com>
+Date: Wed, 17 Jun 2020 21:11:48 +0300
+Subject: [PATCH 011/125] Apply suggestions from code review
+
+---
+ data/json/items/ammo/10mm.json    | 2 +-
+ data/json/items/ammo/12mm.json    | 2 +-
+ data/json/items/ammo/22.json      | 2 +-
+ data/json/items/ammo/223.json     | 2 +-
+ data/json/items/ammo/270win.json  | 2 +-
+ data/json/items/ammo/3006.json    | 2 +-
+ data/json/items/ammo/300blk.json  | 2 +-
+ data/json/items/ammo/32.json      | 2 +-
+ data/json/items/ammo/357mag.json  | 2 +-
+ data/json/items/ammo/357sig.json  | 2 +-
+ data/json/items/ammo/36paper.json | 2 +-
+ data/json/items/ammo/38.json      | 2 +-
+ data/json/items/ammo/380.json     | 2 +-
+ data/json/items/ammo/38super.json | 2 +-
+ data/json/items/ammo/40.json      | 2 +-
+ data/json/items/ammo/40x46mm.json | 2 +-
+ data/json/items/ammo/410shot.json | 2 +-
+ data/json/items/ammo/44.json      | 2 +-
+ data/json/items/ammo/44paper.json | 2 +-
+ data/json/items/ammo/45.json      | 2 +-
+ data/json/items/ammo/454.json     | 2 +-
+ data/json/items/ammo/4570.json    | 2 +-
+ data/json/items/ammo/45colt.json  | 2 +-
+ data/json/items/ammo/46.json      | 2 +-
+ data/json/items/ammo/50.json      | 2 +-
+ data/json/items/ammo/500.json     | 2 +-
+ data/json/items/ammo/545x39.json  | 2 +-
+ 27 files changed, 27 insertions(+), 27 deletions(-)
+
+diff --git a/data/json/items/ammo/10mm.json b/data/json/items/ammo/10mm.json
+index 727678e830..40ef241716 100644
+--- a/data/json/items/ammo/10mm.json
++++ b/data/json/items/ammo/10mm.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 40,
+     "stack_size": 40,
+-    "ammo_type": [ "10mm" ],
++    "ammo_type": "10mm",
+     "casing": "10mm_casing",
+     "range": 14,
+     "//": ".400in 165gr Speer TMJ 4410, 10.4gr Hodgdon HS-6",
+diff --git a/data/json/items/ammo/12mm.json b/data/json/items/ammo/12mm.json
+index 609b7057ed..10a2a34897 100644
+--- a/data/json/items/ammo/12mm.json
++++ b/data/json/items/ammo/12mm.json
+@@ -15,7 +15,7 @@
+     "color": "blue",
+     "count": 20,
+     "stack_size": 40,
+-    "ammo_type": [ "12mm" ],
++    "ammo_type": "12mm",
+     "damage": { "damage_type": "bullet", "amount": 50, "armor_penetration": 40 },
+     "dispersion": 45,
+     "recoil": 100
+diff --git a/data/json/items/ammo/22.json b/data/json/items/ammo/22.json
+index 3437d66687..f72466f8bd 100644
+--- a/data/json/items/ammo/22.json
++++ b/data/json/items/ammo/22.json
+@@ -41,7 +41,7 @@
+     "color": "yellow",
+     "count": 80,
+     "stack_size": 100,
+-    "ammo_type": [ "22" ],
++    "ammo_type": "22",
+     "casing": "22_casing",
+     "range": 13,
+     "damage": { "damage_type": "bullet", "amount": 12 },
+diff --git a/data/json/items/ammo/223.json b/data/json/items/ammo/223.json
+index cf845227f8..313fec3e79 100644
+--- a/data/json/items/ammo/223.json
++++ b/data/json/items/ammo/223.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 30,
+     "stack_size": 47,
+-    "ammo_type": [ "223" ],
++    "ammo_type": "223",
+     "casing": "223_casing",
+     "range": 36,
+     "damage": {
+diff --git a/data/json/items/ammo/270win.json b/data/json/items/ammo/270win.json
+index 2b86b671db..d911fb83a9 100644
+--- a/data/json/items/ammo/270win.json
++++ b/data/json/items/ammo/270win.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 20,
+     "stack_size": 20,
+-    "ammo_type": [ "270win" ],
++    "ammo_type": "270win",
+     "casing": "270win_casing",
+     "range": 65,
+     "//2": ".270 Win. (CIP) .277 100gr Nosler AccuBond 57845, 54.0 gr Alliant Reloder-15 *C ",
+diff --git a/data/json/items/ammo/3006.json b/data/json/items/ammo/3006.json
+index f03f164531..59b375cc62 100644
+--- a/data/json/items/ammo/3006.json
++++ b/data/json/items/ammo/3006.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 20,
+     "stack_size": 20,
+-    "ammo_type": [ "3006" ],
++    "ammo_type": "3006",
+     "casing": "3006_casing",
+     "range": 61,
+     "//": ".308in, 150gr, Berger FBHP 30407, 49.0gr IMR 4895",
+diff --git a/data/json/items/ammo/300blk.json b/data/json/items/ammo/300blk.json
+index 2af34058be..afd1fe53a3 100644
+--- a/data/json/items/ammo/300blk.json
++++ b/data/json/items/ammo/300blk.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 30,
+     "stack_size": 47,
+-    "ammo_type": [ "300blk" ],
++    "ammo_type": "300blk",
+     "casing": "300blk_casing",
+     "range": 45,
+     "damage": {
+diff --git a/data/json/items/ammo/32.json b/data/json/items/ammo/32.json
+index 45ab6e8c74..43245cf1ba 100644
+--- a/data/json/items/ammo/32.json
++++ b/data/json/items/ammo/32.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 80,
+     "stack_size": 80,
+-    "ammo_type": [ "32" ],
++    "ammo_type": "32",
+     "casing": "32_casing",
+     "range": 12,
+     "//": ".311in 71gr PrviPartizan JHP-RN B-075, 3.1gr Nitrochemie P2636 Ws",
+diff --git a/data/json/items/ammo/357mag.json b/data/json/items/ammo/357mag.json
+index 44cf93296e..5ba110e614 100644
+--- a/data/json/items/ammo/357mag.json
++++ b/data/json/items/ammo/357mag.json
+@@ -17,7 +17,7 @@
+     "color": "light_gray",
+     "count": 50,
+     "stack_size": 50,
+-    "ammo_type": [ "357mag" ],
++    "ammo_type": "357mag",
+     "casing": "357mag_casing",
+     "range": 16,
+     "damage": {
+diff --git a/data/json/items/ammo/357sig.json b/data/json/items/ammo/357sig.json
+index da5145ef5a..2a84ffa390 100644
+--- a/data/json/items/ammo/357sig.json
++++ b/data/json/items/ammo/357sig.json
+@@ -16,7 +16,7 @@
+     "color": "light_gray",
+     "count": 50,
+     "stack_size": 50,
+-    "ammo_type": [ "357sig" ],
++    "ammo_type": "357sig",
+     "casing": "357sig_casing",
+     "range": 16,
+     "//": ".355in, 124gr, Speer HP GD 3998, 7.3gr Alliant UNIQUE",
+diff --git a/data/json/items/ammo/36paper.json b/data/json/items/ammo/36paper.json
+index 34db7b26ce..e247cd1654 100644
+--- a/data/json/items/ammo/36paper.json
++++ b/data/json/items/ammo/36paper.json
+@@ -13,7 +13,7 @@
+     "symbol": "=",
+     "color": "white",
+     "count": 25,
+-    "ammo_type": [ "36paper" ],
++    "ammo_type": "36paper",
+     "range": 15,
+     "damage": { "damage_type": "bullet", "amount": 19 },
+     "dispersion": 80,
+diff --git a/data/json/items/ammo/38.json b/data/json/items/ammo/38.json
+index 0aa196c09f..b4c03199cd 100644
+--- a/data/json/items/ammo/38.json
++++ b/data/json/items/ammo/38.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 40,
+     "stack_size": 40,
+-    "ammo_type": [ "38" ],
++    "ammo_type": "38",
+     "casing": "38_casing",
+     "range": 14,
+     "//": ".357in 140gr, Speer JHP 4203, 6.1gr Hodgdon HS-6",
+diff --git a/data/json/items/ammo/380.json b/data/json/items/ammo/380.json
+index af198fe4ef..93bf3aa1da 100644
+--- a/data/json/items/ammo/380.json
++++ b/data/json/items/ammo/380.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 50,
+     "stack_size": 50,
+-    "ammo_type": [ "380" ],
++    "ammo_type": "380",
+     "casing": "380_casing",
+     "range": 13,
+     "//": " .355in, 95gr, Sierra FMJ FN TM 8105, 4.0gr Alliant UNIQUE",
+diff --git a/data/json/items/ammo/38super.json b/data/json/items/ammo/38super.json
+index 0f41449af9..1d2f56ad20 100644
+--- a/data/json/items/ammo/38super.json
++++ b/data/json/items/ammo/38super.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 40,
+     "stack_size": 40,
+-    "ammo_type": [ "38super" ],
++    "ammo_type": "38super",
+     "casing": "38super_casing",
+     "range": 14,
+     "//": ".38 Super Auto .355, 124grain FMJ, 5.8 gr Alliant UNIQUE",
+diff --git a/data/json/items/ammo/40.json b/data/json/items/ammo/40.json
+index 4b31f381a3..d9c46c3a47 100644
+--- a/data/json/items/ammo/40.json
++++ b/data/json/items/ammo/40.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 40,
+     "stack_size": 40,
+-    "ammo_type": [ "40" ],
++    "ammo_type": "40",
+     "casing": "40_casing",
+     "range": 14,
+     "//": ".400in 165gr Speer TMJ 4410, 8.59gr Hodgdon HS-6",
+diff --git a/data/json/items/ammo/40x46mm.json b/data/json/items/ammo/40x46mm.json
+index 05dc8583b0..3873705ccd 100644
+--- a/data/json/items/ammo/40x46mm.json
++++ b/data/json/items/ammo/40x46mm.json
+@@ -14,7 +14,7 @@
+     "color": "yellow",
+     "count": 6,
+     "stack_size": 1,
+-    "ammo_type": [ "40x46mm" ],
++    "ammo_type": "40x46mm",
+     "range": 60,
+     "dispersion": 30,
+     "recoil": 1400,
+diff --git a/data/json/items/ammo/410shot.json b/data/json/items/ammo/410shot.json
+index 1b8a4b9ca3..2294cc070c 100644
+--- a/data/json/items/ammo/410shot.json
++++ b/data/json/items/ammo/410shot.json
+@@ -16,7 +16,7 @@
+     "color": "red",
+     "count": 20,
+     "stack_size": 20,
+-    "ammo_type": [ "410shot" ],
++    "ammo_type": "410shot",
+     "casing": "410shot_hull",
+     "range": 12,
+     "//": ".408in, 110gr, Thug Slug(yes it's called that, ugh), 20.5gr Alliant 2400",
+diff --git a/data/json/items/ammo/44.json b/data/json/items/ammo/44.json
+index 4176a91345..942aa0ab6c 100644
+--- a/data/json/items/ammo/44.json
++++ b/data/json/items/ammo/44.json
+@@ -16,7 +16,7 @@
+     "color": "light_gray",
+     "count": 20,
+     "stack_size": 20,
+-    "ammo_type": [ "44" ],
++    "ammo_type": "44",
+     "casing": "44_casing",
+     "range": 16,
+     "//": ".429in, 240gr, Speer HP GD 4455, 15.1gr ADI AP 90",
+diff --git a/data/json/items/ammo/44paper.json b/data/json/items/ammo/44paper.json
+index 11f5042dfa..fe0ca81506 100644
+--- a/data/json/items/ammo/44paper.json
++++ b/data/json/items/ammo/44paper.json
+@@ -13,7 +13,7 @@
+     "symbol": "=",
+     "color": "white",
+     "count": 25,
+-    "ammo_type": [ "44paper" ],
++    "ammo_type": "44paper",
+     "range": 18,
+     "damage": { "damage_type": "bullet", "amount": 27 },
+     "dispersion": 70,
+diff --git a/data/json/items/ammo/45.json b/data/json/items/ammo/45.json
+index c1d59cf504..7f452f358b 100644
+--- a/data/json/items/ammo/45.json
++++ b/data/json/items/ammo/45.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 30,
+     "stack_size": 30,
+-    "ammo_type": [ "45" ],
++    "ammo_type": "45",
+     "casing": "45_casing",
+     "range": 16,
+     "//": ".451in, 230gr, Speer TMJ 4480, 5.5gr Alliant UNIQUE",
+diff --git a/data/json/items/ammo/454.json b/data/json/items/ammo/454.json
+index aabf2c4ca0..b1d79af707 100644
+--- a/data/json/items/ammo/454.json
++++ b/data/json/items/ammo/454.json
+@@ -16,7 +16,7 @@
+     "color": "light_gray",
+     "count": 20,
+     "stack_size": 15,
+-    "ammo_type": [ "454" ],
++    "ammo_type": "454",
+     "casing": "454_casing",
+     "range": 16,
+     "damage": { "damage_type": "bullet", "amount": 48, "armor_penetration": 8 },
+diff --git a/data/json/items/ammo/4570.json b/data/json/items/ammo/4570.json
+index 0ef633f733..2df5269423 100644
+--- a/data/json/items/ammo/4570.json
++++ b/data/json/items/ammo/4570.json
+@@ -16,7 +16,7 @@
+     "color": "green",
+     "count": 20,
+     "stack_size": 20,
+-    "ammo_type": [ "4570" ],
++    "ammo_type": "4570",
+     "casing": "4570_casing",
+     "range": 48,
+     "damage": { "damage_type": "bullet", "amount": 57, "armor_penetration": 3 },
+diff --git a/data/json/items/ammo/45colt.json b/data/json/items/ammo/45colt.json
+index 1a6a0d253b..293dc190c9 100644
+--- a/data/json/items/ammo/45colt.json
++++ b/data/json/items/ammo/45colt.json
+@@ -14,7 +14,7 @@
+     "color": "yellow",
+     "count": 40,
+     "stack_size": 40,
+-    "ammo_type": [ "45colt" ],
++    "ammo_type": "45colt",
+     "casing": "45colt_casing",
+     "range": 16,
+     "//": ".452in, 225gr, 5.6 grains Lovex D013.  It's hard to find non-expanding .45 LC loaded at +P pressures, so this is just an abstract for the +P JHP loadings.",
+diff --git a/data/json/items/ammo/46.json b/data/json/items/ammo/46.json
+index 1875d2f64d..c5219371fa 100644
+--- a/data/json/items/ammo/46.json
++++ b/data/json/items/ammo/46.json
+@@ -16,7 +16,7 @@
+     "color": "dark_gray",
+     "count": 40,
+     "stack_size": 80,
+-    "ammo_type": [ "46" ],
++    "ammo_type": "46",
+     "casing": "46mm_casing",
+     "range": 14,
+     "damage": { "damage_type": "bullet", "amount": 18, "armor_penetration": 20 },
+diff --git a/data/json/items/ammo/50.json b/data/json/items/ammo/50.json
+index 69eed69d2d..52686c41de 100644
+--- a/data/json/items/ammo/50.json
++++ b/data/json/items/ammo/50.json
+@@ -27,7 +27,7 @@
+     "color": "dark_gray",
+     "count": 25,
+     "stack_size": 10,
+-    "ammo_type": [ "50" ],
++    "ammo_type": "50",
+     "casing": "50_casing",
+     "range": 110,
+     "damage": { "damage_type": "bullet", "amount": 131, "armor_penetration": 28 },
+diff --git a/data/json/items/ammo/500.json b/data/json/items/ammo/500.json
+index ff421b65d7..a3fd3f93eb 100644
+--- a/data/json/items/ammo/500.json
++++ b/data/json/items/ammo/500.json
+@@ -16,7 +16,7 @@
+     "color": "light_gray",
+     "count": 20,
+     "stack_size": 10,
+-    "ammo_type": [ "500" ],
++    "ammo_type": "500",
+     "casing": "500_casing",
+     "range": 16,
+     "damage": { "damage_type": "bullet", "amount": 55, "armor_penetration": 8 },
+diff --git a/data/json/items/ammo/545x39.json b/data/json/items/ammo/545x39.json
+index e1b4b1438d..bbfffbc325 100644
+--- a/data/json/items/ammo/545x39.json
++++ b/data/json/items/ammo/545x39.json
+@@ -16,7 +16,7 @@
+     "color": "yellow",
+     "count": 30,
+     "stack_size": 30,
+-    "ammo_type": [ "545x39" ],
++    "ammo_type": "545x39",
+     "casing": "545_casing",
+     "range": 37,
+     "//": ".222 52.8gr Mil FMJ, 21.3gr SF033 fl.",
+-- 
+2.45.2
+

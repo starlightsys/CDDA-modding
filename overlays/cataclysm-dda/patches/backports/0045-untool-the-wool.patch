@@ -1,0 +1,65 @@
+From d07b23294dc702d5b31fe53ef943b5d514c7a69e Mon Sep 17 00:00:00 2001
+From: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+Date: Thu, 15 Aug 2024 20:35:45 +0200
+Subject: [PATCH 045/125] untool the wool
+
+---
+ data/json/items/resources/tailoring.json | 15 +++++++++++++++
+ data/json/items/tool/workshop.json       | 15 ---------------
+ 2 files changed, 15 insertions(+), 15 deletions(-)
+
+diff --git a/data/json/items/resources/tailoring.json b/data/json/items/resources/tailoring.json
+index e5cf8371ac..2621412a5c 100644
+--- a/data/json/items/resources/tailoring.json
++++ b/data/json/items/resources/tailoring.json
+@@ -160,6 +160,21 @@
+     "symbol": "=",
+     "color": "dark_gray"
+   },
++  {
++    "id": "wool_staple",
++    "type": "GENERIC",
++    "category": "spare_parts",
++    "name": { "str": "wool staple" },
++    "description": "A natural cluster of wool fibers.  Could be processed into felt patches or yarn.",
++    "weight": "200 g",
++    "volume": "500 ml",
++    "price": "0 cent",
++    "price_postapoc": "10 cent",
++    "material": [ "wool" ],
++    "symbol": ",",
++    "color": "white",
++    "flags": [ "NO_SALVAGE" ]
++  },
+   {
+     "type": "GENERIC",
+     "id": "fur",
+diff --git a/data/json/items/tool/workshop.json b/data/json/items/tool/workshop.json
+index b5a844ffe5..d5d05b4078 100644
+--- a/data/json/items/tool/workshop.json
++++ b/data/json/items/tool/workshop.json
+@@ -1514,21 +1514,6 @@
+     "qualities": [ [ "SMOOTH", 1 ] ],
+     "melee_damage": { "bash": 12 }
+   },
+-  {
+-    "id": "wool_staple",
+-    "type": "TOOL",
+-    "category": "spare_parts",
+-    "name": { "str": "wool staple" },
+-    "description": "A natural cluster of wool fibers.  Could be processed into felt patches or yarn.",
+-    "weight": "200 g",
+-    "volume": "500 ml",
+-    "price": "0 cent",
+-    "price_postapoc": "10 cent",
+-    "material": [ "wool" ],
+-    "symbol": ",",
+-    "color": "white",
+-    "flags": [ "NO_SALVAGE" ]
+-  },
+   {
+     "id": "xacto",
+     "type": "TOOL",
+-- 
+2.45.2
+

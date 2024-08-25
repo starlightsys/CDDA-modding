@@ -1,0 +1,180 @@
+From 1555a5e753fa0f7e2cfdde2f03ba302c7d9a4dde Mon Sep 17 00:00:00 2001
+From: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+Date: Thu, 22 Aug 2024 05:32:09 +0200
+Subject: [PATCH 092/125] Neverending problems with disassembly (#75722)
+
+* copper hatchet
+
+* scrap garbage
+
+* portable soldering iron
+
+* no mass loss for quilts
+---
+ data/json/recipes/armor/arms.json            |  3 +-
+ data/json/recipes/armor/feet.json            |  2 +-
+ data/json/recipes/tools/tools_primitive.json |  1 +
+ data/json/uncraft/armor/scrap_armor.json     | 40 --------------------
+ data/json/uncraft/generic.json               |  4 +-
+ data/json/uncraft/tool/woodworking.json      |  9 +++++
+ data/json/uncraft/tool/workshop.json         | 10 +++++
+ 7 files changed, 25 insertions(+), 44 deletions(-)
+ create mode 100644 data/json/uncraft/tool/woodworking.json
+
+diff --git a/data/json/recipes/armor/arms.json b/data/json/recipes/armor/arms.json
+index e6210fce87..857d6bbf93 100644
+--- a/data/json/recipes/armor/arms.json
++++ b/data/json/recipes/armor/arms.json
+@@ -447,6 +447,7 @@
+     "difficulty": 3,
+     "time": "30 m",
+     "autolearn": true,
++    "reversible": { "time": "10 m" },
+     "book_learn": [ [ "recipe_melee", 2 ] ],
+     "using": [ [ "cordage", 1 ], [ "mixed_steel", 1 ] ],
+     "components": [ [ [ "cotton_patchwork", 6 ] ] ],
+@@ -480,7 +481,7 @@
+     "skill_used": "fabrication",
+     "difficulty": 3,
+     "time": "45 m",
+-    "reversible": true,
++    "reversible": { "time": "10 m" },
+     "autolearn": true,
+     "book_learn": [ [ "dieselpunk_tailor", 2 ] ],
+     "using": [ [ "cordage", 3 ] ],
+diff --git a/data/json/recipes/armor/feet.json b/data/json/recipes/armor/feet.json
+index a482bdba67..49151c4a2f 100644
+--- a/data/json/recipes/armor/feet.json
++++ b/data/json/recipes/armor/feet.json
+@@ -737,7 +737,7 @@
+     "skill_used": "fabrication",
+     "difficulty": 3,
+     "time": "30 m",
+-    "reversible": true,
++    "reversible": { "time": "10 m" },
+     "autolearn": true,
+     "book_learn": [ [ "recipe_melee", 2 ] ],
+     "using": [ [ "cordage", 1 ], [ "mixed_steel", 1 ] ],
+diff --git a/data/json/recipes/tools/tools_primitive.json b/data/json/recipes/tools/tools_primitive.json
+index e9dbe8b1ad..7f95c3f8f1 100644
+--- a/data/json/recipes/tools/tools_primitive.json
++++ b/data/json/recipes/tools/tools_primitive.json
+@@ -120,6 +120,7 @@
+     "difficulty": 4,
+     "time": "1 h",
+     "reversible": true,
++    "//": "Item disassembly based on reversible craft and manually defined uncraft integration. Read ITEM_DISASSEMBLY.mb for more info.",
+     "autolearn": true,
+     "book_learn": [ [ "mag_survival", 1 ], [ "atomic_survival", 1 ], [ "textbook_carpentry", 2 ] ],
+     "qualities": [ { "id": "HAMMER", "level": 1 } ],
+diff --git a/data/json/uncraft/armor/scrap_armor.json b/data/json/uncraft/armor/scrap_armor.json
+index 5af833ca00..6aa2ef9a1a 100644
+--- a/data/json/uncraft/armor/scrap_armor.json
++++ b/data/json/uncraft/armor/scrap_armor.json
+@@ -19,46 +19,6 @@
+     "qualities": [ { "id": "CUT", "level": 1 } ],
+     "components": [ [ [ "scrap", 45 ] ] ]
+   },
+-  {
+-    "result": "boots_scrap",
+-    "type": "uncraft",
+-    "activity_level": "LIGHT_EXERCISE",
+-    "skill_used": "fabrication",
+-    "difficulty": 2,
+-    "time": "5 m",
+-    "qualities": [ { "id": "CUT", "level": 1 } ],
+-    "components": [ [ [ "scrap", 50 ] ] ]
+-  },
+-  {
+-    "result": "xl_boots_scrap",
+-    "type": "uncraft",
+-    "activity_level": "LIGHT_EXERCISE",
+-    "skill_used": "fabrication",
+-    "difficulty": 2,
+-    "time": "5 m",
+-    "qualities": [ { "id": "CUT", "level": 1 } ],
+-    "components": [ [ [ "scrap", 60 ] ] ]
+-  },
+-  {
+-    "result": "armguard_scrap",
+-    "type": "uncraft",
+-    "activity_level": "LIGHT_EXERCISE",
+-    "skill_used": "fabrication",
+-    "difficulty": 2,
+-    "time": "5 m",
+-    "qualities": [ { "id": "CUT", "level": 1 } ],
+-    "components": [ [ [ "scrap", 60 ] ] ]
+-  },
+-  {
+-    "result": "xl_armguard_scrap",
+-    "type": "uncraft",
+-    "activity_level": "LIGHT_EXERCISE",
+-    "skill_used": "fabrication",
+-    "difficulty": 2,
+-    "time": "5 m",
+-    "qualities": [ { "id": "CUT", "level": 1 } ],
+-    "components": [ [ [ "scrap", 80 ] ] ]
+-  },
+   {
+     "result": "armor_xl_scrapsuit",
+     "type": "uncraft",
+diff --git a/data/json/uncraft/generic.json b/data/json/uncraft/generic.json
+index 4093936c34..468fbc240b 100644
+--- a/data/json/uncraft/generic.json
++++ b/data/json/uncraft/generic.json
+@@ -654,7 +654,7 @@
+     "activity_level": "LIGHT_EXERCISE",
+     "time": "15 m",
+     "qualities": [ { "id": "FABRIC_CUT", "level": 1 }, { "id": "CUT", "level": 2 } ],
+-    "components": [ [ [ "sheet_felt", 20 ] ], [ [ "thread", 150 ] ], [ [ "cotton_ball", 100 ] ] ]
++    "components": [ [ [ "sheet_felt", 32 ] ], [ [ "thread", 175 ] ], [ [ "cotton_ball", 135 ] ] ]
+   },
+   {
+     "result": "quilt_patchwork",
+@@ -662,7 +662,7 @@
+     "activity_level": "LIGHT_EXERCISE",
+     "time": "15 m",
+     "qualities": [ { "id": "FABRIC_CUT", "level": 1 }, { "id": "CUT", "level": 2 } ],
+-    "components": [ [ [ "sheet_felt_patchwork", 20 ] ], [ [ "thread", 100 ] ], [ [ "gambeson_batting", 50 ] ] ]
++    "components": [ [ [ "sheet_felt_patchwork", 32 ] ], [ [ "thread", 145 ] ], [ [ "cotton_ball", 135 ] ] ]
+   },
+   {
+     "result": "crackpipe",
+diff --git a/data/json/uncraft/tool/woodworking.json b/data/json/uncraft/tool/woodworking.json
+new file mode 100644
+index 0000000000..aeaa0557aa
+--- /dev/null
++++ b/data/json/uncraft/tool/woodworking.json
+@@ -0,0 +1,9 @@
++[
++  {
++    "result": "copper_ax",
++    "type": "uncraft",
++    "activity_level": "MODERATE_EXERCISE",
++    "time": "3 m",
++    "components": [ [ [ "stick", 1 ] ], [ [ "scrap_copper", 1 ] ], [ [ "string_6", 2 ] ] ]
++  }
++]
+diff --git a/data/json/uncraft/tool/workshop.json b/data/json/uncraft/tool/workshop.json
+index 3601bb45da..4606e8adb3 100644
+--- a/data/json/uncraft/tool/workshop.json
++++ b/data/json/uncraft/tool/workshop.json
+@@ -54,5 +54,15 @@
+     "time": "15 m",
+     "qualities": [ { "id": "HAMMER", "level": 2 }, { "id": "SAW_M", "level": 2 } ],
+     "components": [ [ [ "pipe", 4 ] ], [ [ "scrap", 2 ] ] ]
++  },
++  {
++    "result": "soldering_iron_portable",
++    "type": "uncraft",
++    "activity_level": "MODERATE_EXERCISE",
++    "skill_used": "electronics",
++    "difficulty": 1,
++    "time": "20 m",
++    "qualities": [ { "id": "CUT", "level": 2 }, { "id": "SCREW", "level": 1 } ],
++    "components": [ [ [ "e_scrap", 3 ] ], [ [ "copper", 1 ] ], [ [ "scrap", 2 ] ], [ [ "cable", 10 ] ] ]
+   }
+ ]
+-- 
+2.45.2
+

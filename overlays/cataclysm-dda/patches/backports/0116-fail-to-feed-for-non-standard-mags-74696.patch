@@ -1,0 +1,609 @@
+From a27c8a1639ae8dbb3da7191d0857f7b10debf112 Mon Sep 17 00:00:00 2001
+From: Anton Simakov <67688115+GuardianDll@users.noreply.github.com>
+Date: Sat, 24 Aug 2024 15:54:44 +0200
+Subject: [PATCH 116/125] fail to feed for non-standard mags (#74696)
+
+* fail to feed, initial commit
+
+* refine calculations, add field for guns also, add debug tool to damage items
+
+* add jams, apply not a single jam, but random from group
+
+* move quick fixing to aim activity actor
+
+* better calculations for jam chance
+
+* swap fault functions because github do not show them correctly
+
+* mics changes
+
+* Prevent loop of "fixed fail to feed - found the gun failed to feed"
+
+* mics changes
+
+* mics changes
+
+* finishing bits
+
+* document thing
+
+* add manual fault fixes
+
+* Astyle
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+* Apply suggestions from code review
+
+---------
+
+Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+---
+ data/json/faults/faults_guns.json     | 46 ++++++++++++---
+ data/json/faults/fixes_gun.json       | 32 ++++++++++-
+ data/json/items/tool/debug_tools.json | 65 +++++++++++++++++++++
+ doc/JSON_INFO.md                      |  2 +
+ src/activity_actor.cpp                | 53 ++++++++++++++++-
+ src/activity_actor_definitions.h      |  1 +
+ src/fault.cpp                         | 35 ++++++++++++
+ src/fault.h                           |  3 +
+ src/item_factory.cpp                  |  2 +
+ src/itype.h                           |  8 +++
+ src/ranged.cpp                        | 82 ++++++++++++++++++++++-----
+ 11 files changed, 304 insertions(+), 25 deletions(-)
+
+diff --git a/data/json/faults/faults_guns.json b/data/json/faults/faults_guns.json
+index 4c7eb3cf42..8b95c292eb 100644
+--- a/data/json/faults/faults_guns.json
++++ b/data/json/faults/faults_guns.json
+@@ -7,14 +7,6 @@
+     "item_prefix": "rusting",
+     "flags": [ "BLACKPOWDER_FOULING_DAMAGE", "NO_DIRTYING" ]
+   },
+-  {
+-    "id": "fault_gun_chamber_spent",
+-    "type": "fault",
+-    "name": { "str": "Spent casing in chamber" },
+-    "description": "This gun currently has an empty casing chambered.  It will have to be removed before firing.",
+-    "item_prefix": "jammed",
+-    "flags": [ "JAMMED_GUN" ]
+-  },
+   {
+     "id": "fault_gun_unlubricated",
+     "type": "fault",
+@@ -54,6 +46,42 @@
+     "type": "fault",
+     "name": { "str": "Overheat safety" },
+     "description": "This weapon will attempt to enter a cooling cycle when overheated.",
+-    "flags": [ "JAMMED_GUN" ]
++    "flags": [ "OVERHEATED_GUN" ]
++  },
++  {
++    "id": "fault_fail_to_feed",
++    "type": "fault",
++    "//": "gun_mechanical_simple can be fixed on the fly",
++    "fault_type": "gun_mechanical_simple",
++    "name": { "str": "Fail to feed" },
++    "description": "This gun did not load the round in the chamber properly.",
++    "item_prefix": "jammed"
++  },
++  {
++    "id": "fault_gun_chamber_spent",
++    "//": "aka fail to extract",
++    "type": "fault",
++    "fault_type": "gun_mechanical_simple",
++    "name": { "str": "Spent casing in chamber" },
++    "description": "This gun currently has an empty casing in the chamber.",
++    "item_prefix": "jammed"
++  },
++  {
++    "id": "fault_stovepipe",
++    "//": "only closed bolt",
++    "type": "fault",
++    "fault_type": "gun_mechanical_simple",
++    "name": { "str": "Stovepipe" },
++    "description": "Casing of the bullet stuck without being properly ejected.",
++    "item_prefix": "jammed"
++  },
++  {
++    "id": "fault_double_feed",
++    "//": "only magazine-fed firearms",
++    "type": "fault",
++    "fault_type": "gun_mechanical_simple",
++    "name": { "str": "Double feed" },
++    "description": "Magazine of the gun tried to put two rounds in the chamber at once.",
++    "item_prefix": "jammed"
+   }
+ ]
+diff --git a/data/json/faults/fixes_gun.json b/data/json/faults/fixes_gun.json
+index 6665665e0a..c64585066e 100644
+--- a/data/json/faults/fixes_gun.json
++++ b/data/json/faults/fixes_gun.json
+@@ -66,14 +66,42 @@
+     "time_save_profs": { "prof_gun_cleaning": 0.5 },
+     "time_save_flags": { "EASY_CLEAN": 0.5 }
+   },
++  {
++    "type": "fault_fix",
++    "id": "mend_fault_fail_to_feed_manual_feed",
++    "name": "Manual cycle",
++    "success_msg": "You manually cycle your %s to put round in the chamber.",
++    "time": "10 s",
++    "set_variables": { "u_know_round_in_chamber": "true" },
++    "faults_removed": [ "fault_fail_to_feed" ]
++  },
+   {
+     "type": "fault_fix",
+     "id": "mend_fault_gun_chamber_spent_eject",
+     "name": "Eject spent casing",
+-    "success_msg": "You eject the spent casing from the %s.",
+-    "time": "1 s",
++    "success_msg": "You eject the spent casing from the %s's chamber.",
++    "time": "10 s",
++    "set_variables": { "u_know_round_in_chamber": "true" },
+     "faults_removed": [ "fault_gun_chamber_spent" ]
+   },
++  {
++    "type": "fault_fix",
++    "id": "mend_fault_stovepipe_eject",
++    "name": "Eject spent casing",
++    "success_msg": "You eject the spent casing, stuck in %s's slide.",
++    "time": "10 s",
++    "set_variables": { "u_know_round_in_chamber": "true" },
++    "faults_removed": [ "fault_stovepipe" ]
++  },
++  {
++    "type": "fault_fix",
++    "id": "mend_fault_double_feed_clean",
++    "name": "Clean double feed",
++    "success_msg": "You eject the second round stuck in %s's chamber.",
++    "time": "10 s",
++    "set_variables": { "u_know_round_in_chamber": "true" },
++    "faults_removed": [ "fault_double_feed" ]
++  },
+   {
+     "type": "fault_fix",
+     "id": "mend_fault_gun_unlubricated",
+diff --git a/data/json/items/tool/debug_tools.json b/data/json/items/tool/debug_tools.json
+index f45d84ad27..755608eb9f 100644
+--- a/data/json/items/tool/debug_tools.json
++++ b/data/json/items/tool/debug_tools.json
+@@ -11,5 +11,70 @@
+     "symbol": ";",
+     "color": "light_gray",
+     "use_action": [ "DBG_LUX_METER" ]
++  },
++  {
++    "id": "debug_item_damager",
++    "type": "TOOL",
++    "category": "tools",
++    "name": { "str_sp": "debug item damager (simple)" },
++    "description": "Deals 1 full bar of damage to an item you wield.",
++    "weight": "1 g",
++    "volume": "1 ml",
++    "material": [ "plastic" ],
++    "symbol": ";",
++    "color": "light_gray",
++    "use_action": {
++      "type": "effect_on_conditions",
++      "menu_text": "Damage item",
++      "effect_on_conditions": [
++        {
++          "id": "EOC_FIND_ITEM_simple",
++          "effect": {
++            "u_run_inv_eocs": "all",
++            "search_data": [ { "wielded_only": true } ],
++            "true_eocs": {
++              "id": "EOC_DAMAGE_ITEM_simple",
++              "effect": [
++                { "math": [ "_hp_before", "=", "n_hp('ALL')" ] },
++                { "math": [ "n_hp('ALL')", "-=", "1000" ] },
++                { "math": [ "_hp_after", "=", "n_hp('ALL')" ] },
++                { "u_message": "<npc_name> have had <context_val:hp_before> hp, now has <context_val:hp_after> hp." }
++              ]
++            }
++          }
++        }
++      ]
++    }
++  },
++  {
++    "id": "debug_item_damager_adv",
++    "type": "TOOL",
++    "category": "tools",
++    "name": { "str_sp": "debug item damager (advanced)" },
++    "description": "Deals damage to items you pick.",
++    "weight": "1 g",
++    "volume": "1 ml",
++    "material": [ "plastic" ],
++    "symbol": ";",
++    "color": "light_gray",
++    "use_action": {
++      "type": "effect_on_conditions",
++      "menu_text": "Damage item",
++      "effect_on_conditions": [
++        {
++          "id": "EOC_FIND_ITEM",
++          "effect": {
++            "u_run_inv_eocs": "manual_mult",
++            "true_eocs": {
++              "id": "EOC_DAMAGE_ITEM",
++              "effect": [
++                { "math": [ "n_hp('ALL')", "-=", "num_input('Amount of damage, 1000 is one bar of damage.', 1000)" ] },
++                { "u_message": "Dealt damage to all items." }
++              ]
++            }
++          }
++        }
++      ]
++    }
+   }
+ ]
+diff --git a/doc/JSON_INFO.md b/doc/JSON_INFO.md
+index c4223fa230..030e1fdc27 100644
+--- a/doc/JSON_INFO.md
++++ b/doc/JSON_INFO.md
+@@ -3608,6 +3608,7 @@ ammo_effects define what effect the projectile, that you shoot, would have. List
+ "count" : 0,                     // Default amount of ammo contained by a magazine (set this for ammo belts)
+ "default_ammo": "556",           // If specified override the default ammo (optionally set this for ammo belts)
+ "reload_time" : 100,             // How long it takes to load each unit of ammo into the magazine
++"mag_jam_mult": 1.25             // Multiplier for gun mechanincal malfunctioning from magazine, mostly when it's damaged; Values lesser than 1 reflect better quality of the magazine, that jam less; bigger than 1 result in gun being more prone to malfunction and jam at lesser damage level; zero mag_jam_mult (and zero gun_jam_mult in a gun) would remove any chance for a gun to malfunction. Only works if gun has any fault from gun_mechanical_simple group presented; Jam chances are described in Character::handle_gun_damage(); at this moment it is roughly: 0.000288% for undamaged magazine, 5% for 1 damage (|\), 24% for 2 damage (|.), 96% for 3 damage (\.), and 250% for 4 damage (XX), then this and gun values are summed up and multiplied by 1.8. 
+ "linkage" : "ammolink"           // If set one linkage (of given type) is dropped for each unit of ammo consumed (set for disintegrating ammo belts)
+ ```
+ 
+@@ -4155,6 +4156,7 @@ Guns can be defined like this:
+ "sight_dispersion": 10,    // Inaccuracy of gun derived from the sight mechanism, measured in 100ths of Minutes Of Angle (MOA)
+ "recoil": 0,               // Recoil caused when firing, measured in 100ths of Minutes Of Angle (MOA)
+ "durability": 8,           // Resistance to damage/rusting, also determines misfire chance
++"gun_jam_mult": 1.25       // Multiplier for gun mechanincal malfunctioning, mostly when it's damaged; Values lesser than 1 reflect better quality of the gun, that jam less; bigger than 1 result in gun being more prone to malfunction and jam at lesser damage level; zero gun_jam_mult (and zero mag_jam_mult if magazine is presented) would remove any chance for a gun to malfunction. Only apply if gun has any fault from gun_mechanical_simple group presented; Jam chances are described in Character::handle_gun_damage(); at this moment it is roughly: 0.00018% for undamaged gun, 3% for 1 damage (|\), 15% for 2 damage (|.), 45% for 3 damage (\.), and 80% for 4 damage (XX), then this and magazine values are summed up and multiplied by 1.8
+ "blackpowder_tolerance": 8,// One in X chance to get clogged up (per shot) when firing blackpowder ammunition (higher is better). Optional, default is 8.
+ "min_cycle_recoil": 0,     // Minimum ammo recoil for gun to be able to fire more than once per attack.
+ "clip_size": 100,          // Maximum amount of ammo that can be loaded
+diff --git a/src/activity_actor.cpp b/src/activity_actor.cpp
+index 4f00739a03..3a17adce7a 100644
+--- a/src/activity_actor.cpp
++++ b/src/activity_actor.cpp
+@@ -46,6 +46,7 @@
+ #include "event_bus.h"
+ #include "faction.h"
+ #include "field_type.h"
++#include "fault.h"
+ #include "flag.h"
+ #include "flexbuffer_json-inl.h"
+ #include "flexbuffer_json.h"
+@@ -252,6 +253,7 @@ static const quality_id qual_SHEAR( "SHEAR" );
+ static const skill_id skill_computer( "computer" );
+ static const skill_id skill_electronics( "electronics" );
+ static const skill_id skill_fabrication( "fabrication" );
++static const skill_id skill_gun( "gun" );
+ static const skill_id skill_mechanics( "mechanics" );
+ static const skill_id skill_survival( "survival" );
+ static const skill_id skill_traps( "traps" );
+@@ -283,6 +285,8 @@ static const zone_type_id zone_type_LOOT_IGNORE_FAVORITES( "LOOT_IGNORE_FAVORITE
+ static const zone_type_id zone_type_STRIP_CORPSES( "STRIP_CORPSES" );
+ static const zone_type_id zone_type_UNLOAD_ALL( "UNLOAD_ALL" );
+ 
++static const std::string gun_mechanical_simple( "gun_mechanical_simple" );
++
+ std::string activity_actor::get_progress_message( const player_activity &act ) const
+ {
+     if( act.moves_total > 0 ) {
+@@ -317,13 +321,60 @@ aim_activity_actor aim_activity_actor::use_mutation( const item &fake_gun )
+     return act;
+ }
+ 
+-void aim_activity_actor::start( player_activity &act, Character &/*who*/ )
++void aim_activity_actor::start( player_activity &act, Character &who )
+ {
++    item_location weapon = get_weapon();
++    item &it = *weapon.get_item();
++
++    if( !check_gun_ability_to_shoot( who, it ) ) {
++        aborted = true; // why doesn't interrupt?
++        act.set_to_null();
++    }
++
+     // Time spent on aiming is determined on the go by the player
+     act.moves_total = 1;
+     act.moves_left = 1;
+ }
+ 
++bool aim_activity_actor::check_gun_ability_to_shoot( Character &who, item &it )
++{
++
++    if( it.has_fault_flag( "RUINED_GUN" ) ) {
++        who.add_msg_if_player( m_bad, _( "Your %s is little more than an awkward club now." ), it.tname() );
++        return false;
++    }
++
++    // if it's a simple fault, character can try to fix it on the fly
++    if( faults::random_of_type_item_has( it, gun_mechanical_simple ) != fault_id::NULL_ID() ) {
++        // fixing fault should cost more than 1 second
++        // but until game running the next activity actor without ever verifying
++        // was the previous one successful or not will be resolved,
++        // it would be safer to limit it somewhat
++        who.mod_moves( -who.get_speed() );
++        who.recoil = MAX_RECOIL;
++        if( one_in( std::max( 7.0f, ( 15.0f - ( 4.0f * who.get_skill_level( skill_gun ) ) ) ) ) ) {
++            who.add_msg_if_player( m_good,
++                                   _( "Your %s has some mechanical malfunction.  You tried to quickly fix it, and it works now!" ),
++                                   it.tname() );
++            it.faults.erase( faults::random_of_type_item_has( it, gun_mechanical_simple ) );
++            it.set_var( "u_know_round_in_chamber", true );
++        } else {
++            who.add_msg_if_player( m_bad,
++                                   _( "Your %s has some mechanical malfunction.  You tried to quickly fix it, but failed!" ),
++                                   it.tname() );
++            return false;
++        }
++    }
++
++    if( it.has_fault_flag( "OVERHEATED_GUN" ) ) {
++        who.add_msg_if_player( m_warning,
++                               _( "Your %s is too hot, and little screen signalizes the gun is inoperable." ), it.tname() );
++        return false;
++    }
++
++    return true;
++}
++
+ void aim_activity_actor::do_turn( player_activity &act, Character &who )
+ {
+     if( !who.is_avatar() ) {
+diff --git a/src/activity_actor_definitions.h b/src/activity_actor_definitions.h
+index 56397e22db..936158c5a0 100644
+--- a/src/activity_actor_definitions.h
++++ b/src/activity_actor_definitions.h
+@@ -90,6 +90,7 @@ class aim_activity_actor : public activity_actor
+         }
+ 
+         void start( player_activity &act, Character &who ) override;
++        bool check_gun_ability_to_shoot( Character &who, item &it );
+         void do_turn( player_activity &act, Character &who ) override;
+         void finish( player_activity &act, Character &who ) override;
+         void canceled( player_activity &act, Character &who ) override;
+diff --git a/src/fault.cpp b/src/fault.cpp
+index 8653874314..ce89c757ce 100644
+--- a/src/fault.cpp
++++ b/src/fault.cpp
+@@ -32,6 +32,41 @@ const fault_id &faults::random_of_type( const std::string &type )
+     return random_entry_ref( typed->second );
+ }
+ 
++const fault_id &faults::random_of_type_item_has( const item &it, const std::string &type )
++{
++    const auto &typed = faults_by_type.find( type );
++    if( typed == faults_by_type.end() ) {
++        debugmsg( "there are no faults with type '%s'", type );
++        return fault_id::NULL_ID();
++    }
++
++    // not actually random
++    for( const fault_id &fid : typed->second ) {
++        if( it.has_fault( fid ) ) {
++            return fid;
++        }
++    }
++
++    return fault_id::NULL_ID();
++}
++
++const fault_id &faults::get_random_of_type_item_can_have( const item &it, const std::string &type )
++{
++    const auto &typed = faults_by_type.find( type );
++    if( typed == faults_by_type.end() ) {
++        debugmsg( "there are no faults with type '%s'", type );
++        return fault_id::NULL_ID();
++    }
++
++    for( const fault_id &fid : typed->second ) {
++        if( it.faults_potential().count( fid ) ) {
++            return fid;
++        }
++    }
++
++    return fault_id::NULL_ID();
++}
++
+ void faults::load_fault( const JsonObject &jo, const std::string &src )
+ {
+     fault_factory.load( jo, src );
+diff --git a/src/fault.h b/src/fault.h
+index 2abb3ab847..dd0ccacacc 100644
+--- a/src/fault.h
++++ b/src/fault.h
+@@ -29,7 +29,10 @@ void reset();
+ void finalize();
+ void check_consistency();
+ 
++const fault_id &get_random_of_type_item_can_have( const item &it, const std::string &type );
++
+ const fault_id &random_of_type( const std::string &type );
++const fault_id &random_of_type_item_has( const item &it, const std::string &type );
+ } // namespace faults
+ 
+ class fault_fix
+diff --git a/src/item_factory.cpp b/src/item_factory.cpp
+index a3843dc760..a74fe1c096 100644
+--- a/src/item_factory.cpp
++++ b/src/item_factory.cpp
+@@ -2839,6 +2839,7 @@ void Item_factory::load( islot_gun &slot, const JsonObject &jo, const std::strin
+     assign( jo, "heat_per_shot", slot.heat_per_shot, strict, 0.0 );
+     assign( jo, "cooling_value", slot.cooling_value, strict, 0.0 );
+     assign( jo, "overheat_threshold", slot.overheat_threshold, strict, -1.0 );
++    optional( jo, false, "gun_jam_mult", slot.gun_jam_mult, 1 );
+ 
+     if( jo.has_array( "valid_mod_locations" ) ) {
+         slot.valid_mod_locations.clear();
+@@ -3571,6 +3572,7 @@ void Item_factory::load( islot_magazine &slot, const JsonObject &jo, const std::
+     assign( jo, "count", slot.count, strict, 0 );
+     assign( jo, "default_ammo", slot.default_ammo, strict );
+     assign( jo, "reload_time", slot.reload_time, strict, 0 );
++    optional( jo, false, "mag_jam_mult", slot.mag_jam_mult, 1 );
+     assign( jo, "linkage", slot.linkage, strict );
+ }
+ 
+diff --git a/src/itype.h b/src/itype.h
+index 7577e289e2..ca118bc793 100644
+--- a/src/itype.h
++++ b/src/itype.h
+@@ -787,6 +787,11 @@ struct islot_gun : common_ranged_data {
+     */
+     double overheat_threshold = -1.0;
+ 
++    /**
++    *  Multiplier of the chance for the gun to jam.
++    */
++    double gun_jam_mult = 1;
++
+     std::map<ammotype, std::set<itype_id>> cached_ammos;
+ 
+     /**
+@@ -945,6 +950,9 @@ struct islot_magazine {
+     /** How long it takes to load each unit of ammo into the magazine */
+     int reload_time = 100;
+ 
++    /** Multiplier for the gun jamming from physical damage */
++    double mag_jam_mult = 1 ;
++
+     /** For ammo belts one linkage (of given type) is dropped for each unit of ammo consumed */
+     std::optional<itype_id> linkage;
+ 
+diff --git a/src/ranged.cpp b/src/ranged.cpp
+index 99e7f3a6b6..7c7a49f4af 100644
+--- a/src/ranged.cpp
++++ b/src/ranged.cpp
+@@ -33,6 +33,7 @@
+ #include "enums.h"
+ #include "event.h"
+ #include "event_bus.h"
++#include "fault.h"
+ #include "flag.h"
+ #include "game.h"
+ #include "game_constants.h"
+@@ -174,6 +175,8 @@ static const trait_id trait_PYROMANIA( "PYROMANIA" );
+ 
+ static const trap_str_id tr_practice_target( "tr_practice_target" );
+ 
++static const std::string gun_mechanical_simple( "gun_mechanical_simple" );
++
+ static const std::set<material_id> ferric = { material_iron, material_steel, material_budget_steel, material_case_hardened_steel, material_high_steel, material_low_steel, material_med_steel, material_tempered_steel };
+ 
+ // Maximum duration of aim-and-fire loop, in turns
+@@ -654,14 +657,6 @@ bool Character::handle_gun_damage( item &it )
+     int dirt = it.get_var( "dirt", 0 );
+     int dirtadder = 0;
+     double dirt_dbl = static_cast<double>( dirt );
+-    if( it.has_fault_flag( "JAMMED_GUN" ) ) {
+-        add_msg_if_player( m_warning, _( "Your %s can't fire." ), it.tname() );
+-        return false;
+-    }
+-    if( it.has_fault_flag( "RUINED_GUN" ) ) {
+-        add_msg_if_player( m_bad, _( "Your %s is little more than an awkward club now." ), it.tname() );
+-        return false;
+-    }
+ 
+     const auto &curammo_effects = it.ammo_effects();
+     const islot_gun &firing = *it.type->gun;
+@@ -684,6 +679,57 @@ bool Character::handle_gun_damage( item &it )
+         return false;
+     }
+ 
++
++    // i am bad at math, so we will use vibes instead
++    double gun_jam_chance;
++    int gun_damage = it.damage() / 1000.0;
++    switch( gun_damage ) {
++        case 0:
++            gun_jam_chance = 0.0000018 * firing.gun_jam_mult;
++            break;
++        case 1:
++            gun_jam_chance = 0.03 * firing.gun_jam_mult;
++            break;
++        case 2:
++            gun_jam_chance = 0.15 * firing.gun_jam_mult;
++            break;
++        case 3:
++            gun_jam_chance = 0.45 * firing.gun_jam_mult;
++            break;
++        case 4:
++            gun_jam_chance = 0.8 * firing.gun_jam_mult;
++            break;
++    }
++
++    int mag_damage;
++    double mag_jam_chance = 0;
++    if( it.magazine_current() ) {
++        mag_damage = it.magazine_current()->damage() / 1000.0;
++        switch( mag_damage ) {
++            case 0:
++                mag_jam_chance = 0.00000288 * it.magazine_current()->type->magazine->mag_jam_mult;
++                break;
++            case 1:
++                mag_jam_chance = 0.05 * it.magazine_current()->type->magazine->mag_jam_mult;
++                break;
++            case 2:
++                mag_jam_chance = 0.24 * it.magazine_current()->type->magazine->mag_jam_mult;
++                break;
++            case 3:
++                mag_jam_chance = 0.96 * it.magazine_current()->type->magazine->mag_jam_mult;
++                break;
++            case 4:
++                mag_jam_chance = 2.5 * it.magazine_current()->type->magazine->mag_jam_mult;
++                break;
++        }
++    }
++
++    const double jam_chance = ( gun_jam_chance + mag_jam_chance ) * 1.8;
++
++    add_msg_debug( debugmode::DF_RANGED,
++                   "Gun jam chance: %s\nMagazine jam chance: %s\nGun damage level: %d\nMagazine damage level: %d\nFail to feed chance: %s",
++                   gun_jam_chance, mag_jam_chance, gun_damage, mag_damage, jam_chance );
++
+     // Here we check if we're underwater and whether we should misfire.
+     // As a result this causes no damage to the firearm, note that some guns are waterproof
+     // and so are immune to this effect, note also that WATERPROOF_GUN status does not
+@@ -704,6 +750,16 @@ bool Character::handle_gun_damage( item &it )
+                                _( "<npcname>'s %s malfunctions!" ),
+                                it.tname() );
+         return false;
++
++        // Chance for the weapon to suffer a failure, caused by the magazine size, quality, or condition
++    } else if( x_in_y( jam_chance, 1 ) && !it.has_var( "u_know_round_in_chamber" ) &&
++               faults::get_random_of_type_item_can_have( it, gun_mechanical_simple ) != fault_id::NULL_ID() ) {
++        add_msg_player_or_npc( m_bad, _( "Your %s malfunctions!" ),
++                               _( "<npcname>'s %s malfunctions!" ),
++                               it.tname() );
++        it.faults.insert( faults::get_random_of_type_item_can_have( it, gun_mechanical_simple ) );
++        return false;
++
+         // Here we check for a chance for attached mods to get damaged if they are flagged as 'CONSUMABLE'.
+         // This is mostly for crappy handmade expedient stuff  or things that rarely receive damage during normal usage.
+         // Default chance is 1/10000 unless set via json, damage is proportional to caliber(see below).
+@@ -797,6 +853,11 @@ bool Character::handle_gun_damage( item &it )
+         // Don't increment until after the message
+         it.inc_damage();
+     }
++
++    if( it.has_var( "u_know_round_in_chamber" ) ) {
++        it.erase_var( "u_know_round_in_chamber" );
++    }
++
+     return true;
+ }
+ 
+@@ -965,11 +1026,6 @@ int Character::fire_gun( const tripoint &target, int shots, item &gun, item_loca
+             you.burn_energy_arms( - gun.get_min_str() * static_cast<int>( 0.006f *
+                                   get_option<int>( "PLAYER_MAX_STAMINA_BASE" ) ) );
+         }
+-        if( gun.faults.count( fault_gun_chamber_spent ) && curshot == 0 ) {
+-            mod_moves( -get_speed() * 0.5 );
+-            gun.faults.erase( fault_gun_chamber_spent );
+-            add_msg_if_player( _( "You cycle your %s manually." ), gun.tname() );
+-        }
+ 
+         if( !handle_gun_damage( gun ) ) {
+             break;
+-- 
+2.45.2
+

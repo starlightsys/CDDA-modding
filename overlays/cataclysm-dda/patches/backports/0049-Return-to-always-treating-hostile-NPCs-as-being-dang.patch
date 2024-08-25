@@ -1,0 +1,27 @@
+From d68c2e665dc3957330ea91c829011ce6bbef2a76 Mon Sep 17 00:00:00 2001
+From: Kevin Granade <kevin.granade@gmail.com>
+Date: Sat, 17 Aug 2024 13:47:37 -0700
+Subject: [PATCH 049/125] Return to always treating hostile NPCs as being
+ dangerous
+
+---
+ src/game.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/game.cpp b/src/game.cpp
+index 50988d5086..9c143a2c12 100644
+--- a/src/game.cpp
++++ b/src/game.cpp
+@@ -4506,7 +4506,8 @@ void game::mon_info_update( )
+                                       p->attitude_to( u ),
+                                       npc_dist,
+                                       u.controlling_vehicle ) == rule_state::BLACKLISTED ;
+-            } else {
++            }
++            if( !need_processing ) {
+                 need_processing = npc_dist <= iProxyDist &&
+                                   p->get_attitude() == NPCATT_KILL;
+             }
+-- 
+2.45.2
+

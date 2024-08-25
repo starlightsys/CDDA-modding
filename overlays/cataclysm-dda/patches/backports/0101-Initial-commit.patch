@@ -1,0 +1,45 @@
+From 8475de9bca8cd006d2ac0231562e1749424bb17b Mon Sep 17 00:00:00 2001
+From: "Standing-StormStanding-Storm git config --global user.name
+ Standing-Storm git config --global user.name Standing-Storm"
+ <dorchadas@gmail.com>
+Date: Wed, 21 Aug 2024 15:39:45 -0500
+Subject: [PATCH 101/125] Initial commit
+
+---
+ data/mods/Xedra_Evolved/scenario.json | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/data/mods/Xedra_Evolved/scenario.json b/data/mods/Xedra_Evolved/scenario.json
+index 39af72ccf8..90499e365f 100644
+--- a/data/mods/Xedra_Evolved/scenario.json
++++ b/data/mods/Xedra_Evolved/scenario.json
+@@ -46,6 +46,26 @@
+     "traits": [ "ELEMENTAL_MANA1", "ELEMENTAL_MANA2" ],
+     "reveal_locale": false
+   },
++  {
++    "type": "scenario",
++    "id": "werewolf_native_born",
++    "name": "Werewolf, Native-born",
++    "flags": [ "LONE_START" ],
++    "points": 0,
++    "description": "You had no idea what was going on the first time it happened, when you woke up with mud on your bare feet and a sour taste in your mouth, but you were soon found.  The People of the Moon, they called themselves, and they said you were one of them.  A werewolf.  You lived out in the wilderness for a while but didn't entirely abandon human civilization, and when the Cataclysm yet you ignored the evacuation warnings and struck it out on their own.  Maybe some of the People are still out there.",
++    "start_name": "Alone",
++    "allowed_locs": [
++      "sloc_shelter_vandalized_a",
++      "sloc_shelter_vandalized_b",
++      "sloc_shelter_vandalized_c",
++      "sloc_hermit_shack",
++      "sloc_cabin",
++      "sloc_house_boarded",
++      "sloc_forest",
++      "sloc_field"
++    ],
++    "forced_traits": [ "NATIVE_SHAPESHIFTER", "WEREWOLF_ANIMAL_FORM", "WEREWOLF_WAR_FORM" ]
++  },
+   {
+     "type": "scenario",
+     "id": "once_bitten",
+-- 
+2.45.2
+

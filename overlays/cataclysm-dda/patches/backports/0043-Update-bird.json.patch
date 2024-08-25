@@ -1,0 +1,258 @@
+From d409cf202c478c7e7cd84a17c22870e615ea3a36 Mon Sep 17 00:00:00 2001
+From: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+Date: Sat, 17 Aug 2024 09:42:09 +0200
+Subject: [PATCH 043/125] Update bird.json
+
+---
+ data/mods/Tamable_Wildlife/bird.json | 144 ++++++++++++++++++++++++---
+ 1 file changed, 128 insertions(+), 16 deletions(-)
+
+diff --git a/data/mods/Tamable_Wildlife/bird.json b/data/mods/Tamable_Wildlife/bird.json
+index 7d9810289b..7541d44e31 100644
+--- a/data/mods/Tamable_Wildlife/bird.json
++++ b/data/mods/Tamable_Wildlife/bird.json
+@@ -7,8 +7,7 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
+   },
+   {
+     "id": "mon_raven",
+@@ -18,8 +17,17 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
++  },
++  {
++    "id": "mon_bluejay_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_bluejay_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
+   },
+   {
+     "id": "mon_bluejay",
+@@ -29,8 +37,17 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
++  },
++  {
++    "id": "mon_cardinal_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_cardinal_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
+   },
+   {
+     "id": "mon_cardinal",
+@@ -40,8 +57,17 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
++  },
++  {
++    "id": "mon_robin_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_robin_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
+   },
+   {
+     "id": "mon_robin",
+@@ -51,8 +77,17 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
++  },
++  {
++    "id": "mon_sparrow_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_sparrow_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
+   },
+   {
+     "id": "mon_sparrow",
+@@ -62,8 +97,17 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
++  },
++  {
++    "id": "mon_chickadee_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_chickadee_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
+   },
+   {
+     "id": "mon_chickadee",
+@@ -73,8 +117,17 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
++  },
++  {
++    "id": "mon_waxwing_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_waxwing_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
+   },
+   {
+     "id": "mon_waxwing",
+@@ -84,8 +137,7 @@
+       "food": [ "BIRDFOOD" ],
+       "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
+       "pet": "The %s runs around your leg."
+-    },
+-    "extend": { "flags": [ "CANPLAY" ] }
++    }
+   },
+   {
+     "id": "mon_duck",
+@@ -131,6 +183,16 @@
+     },
+     "extend": { "flags": [ "CANPLAY" ] }
+   },
++  {
++    "id": "mon_hummingbird_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_hummingbird_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
++  },
+   {
+     "id": "mon_hummingbird",
+     "type": "MONSTER",
+@@ -142,6 +204,16 @@
+     },
+     "extend": { "flags": [ "CANPLAY" ] }
+   },
++  {
++    "id": "mon_woodpecker_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_woodpecker_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
++  },
+   {
+     "id": "mon_woodpecker",
+     "type": "MONSTER",
+@@ -153,6 +225,16 @@
+     },
+     "extend": { "flags": [ "CANPLAY" ] }
+   },
++  {
++    "id": "mon_coot_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_coot_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
++  },
+   {
+     "id": "mon_coot",
+     "type": "MONSTER",
+@@ -164,6 +246,16 @@
+     },
+     "extend": { "flags": [ "CANPLAY" ] }
+   },
++  {
++    "id": "mon_cormorant_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_cormorant_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
++  },
+   {
+     "id": "mon_cormorant",
+     "type": "MONSTER",
+@@ -175,6 +267,16 @@
+     },
+     "extend": { "flags": [ "CANPLAY" ] }
+   },
++  {
++    "id": "mon_moorhen_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_moorhen_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
++  },
+   {
+     "id": "mon_moorhen",
+     "type": "MONSTER",
+@@ -186,6 +288,16 @@
+     },
+     "extend": { "flags": [ "CANPLAY" ] }
+   },
++  {
++    "id": "mon_grebe_chick",
++    "type": "MONSTER",
++    "copy-from": "mon_grebe_chick",
++    "petfood": {
++      "food": [ "BIRDFOOD" ],
++      "feed": "The %s seems to like you!  It runs around your legs and seems friendly.",
++      "pet": "The %s runs around your leg."
++    }
++  },
+   {
+     "id": "mon_grebe",
+     "type": "MONSTER",
+-- 
+2.45.2
+

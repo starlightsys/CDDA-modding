@@ -1,0 +1,28 @@
+From bc175feec10b477344395c07b7042a9a055746b6 Mon Sep 17 00:00:00 2001
+From: "Standing-StormStanding-Storm git config --global user.name
+ Standing-Storm git config --global user.name Standing-Storm"
+ <dorchadas@gmail.com>
+Date: Wed, 21 Aug 2024 22:06:11 -0500
+Subject: [PATCH 106/125] Add massive Visibility and Ugliness to War Form so
+ NPCs react appropriately to a nine-foot-tall wolfman
+
+---
+ data/mods/Xedra_Evolved/mutations/shapeshifters.json | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/data/mods/Xedra_Evolved/mutations/shapeshifters.json b/data/mods/Xedra_Evolved/mutations/shapeshifters.json
+index 400ad568d5..b7b50692bc 100644
+--- a/data/mods/Xedra_Evolved/mutations/shapeshifters.json
++++ b/data/mods/Xedra_Evolved/mutations/shapeshifters.json
+@@ -75,6 +75,8 @@
+     "name": { "str": "Werewolf Hybrid Form" },
+     "points": 99,
+     "description": "You are a hybrid of wolf and human.  This provides the actual effects of werewolf hybrid form.  Should not be player-visible",
++    "visibility": 30,
++    "ugliness": 30,
+     "valid": false,
+     "starting_trait": false,
+     "purifiable": false,
+-- 
+2.45.2
+

@@ -1,0 +1,398 @@
+From d3721a9dc7daf78e2332e7dfecaaf8b999d3a38e Mon Sep 17 00:00:00 2001
+From: "Standing-StormStanding-Storm git config --global user.name
+ Standing-Storm git config --global user.name Standing-Storm"
+ <dorchadas@gmail.com>
+Date: Wed, 21 Aug 2024 17:01:11 -0500
+Subject: [PATCH 102/125] Add forms
+
+---
+ .../Xedra_Evolved/eocs/shapeshifter_eocs.json | 133 ++++++++++++++++++
+ .../Xedra_Evolved/items/armor/integrated.json |  54 +++++++
+ .../mutations/shapeshifters.json              | 124 ++++++++++++++++
+ data/mods/Xedra_Evolved/scenario.json         |   4 +-
+ .../Xedra_Evolved/spells/shapeshifter.json    |  16 +++
+ 5 files changed, 329 insertions(+), 2 deletions(-)
+ create mode 100644 data/mods/Xedra_Evolved/eocs/shapeshifter_eocs.json
+ create mode 100644 data/mods/Xedra_Evolved/mutations/shapeshifters.json
+ create mode 100644 data/mods/Xedra_Evolved/spells/shapeshifter.json
+
+diff --git a/data/mods/Xedra_Evolved/eocs/shapeshifter_eocs.json b/data/mods/Xedra_Evolved/eocs/shapeshifter_eocs.json
+new file mode 100644
+index 0000000000..19bf78aa4f
+--- /dev/null
++++ b/data/mods/Xedra_Evolved/eocs/shapeshifter_eocs.json
+@@ -0,0 +1,133 @@
++[
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_WEREWOLF_WOLF_FORM_activated",
++    "condition": { "not": { "u_has_trait": "WEREWOLF_HYBRID_FORM_TRAITS" } },
++    "effect": [
++      {
++        "run_eocs": [
++          {
++            "id": "EOC_WEREWOLF_WOLF_FORM_activated_2",
++            "//": "Reusing VAMPIRE_WOLF_FORM_TRAITS because it works fine for being a wolf.",
++            "condition": { "not": { "u_has_trait": "VAMPIRE_WOLF_FORM_TRAITS" } },
++            "effect": [
++              {
++                "run_eocs": [
++                  {
++                    "id": "EOC_WEREWOLF_WOLF_FORM_activated_3",
++                    "condition": { "math": [ "u_val('mana')", ">=", "50" ] },
++                    "effect": [
++                      { "u_assign_activity": "ACT_GENERIC_EOC", "duration": 2.5 },
++                      { "math": [ "u_transformed_mana", "=", "u_val('mana') - 50" ] },
++                      { "u_add_trait": "VAMPIRE_WOLF_FORM_TRAITS" },
++                      {
++                        "u_message": "Your body shifts and you fall on all fours as fur sprouts from your skin and your mouth and teeth lengthen.",
++                        "type": "good"
++                      }
++                    ],
++                    "false_effect": [
++                      { "u_message": "You don't have enough mana to transform into a wolf.", "type": "bad" },
++                      { "queue_eocs": "EOC_WEREWOLF_WOLF_FORM_deactivated_future", "time_in_future": 0 }
++                    ]
++                  }
++                ]
++              }
++            ],
++            "false_effect": [
++              {
++                "run_eocs": [
++                  {
++                    "id": "EOC_WEREWOLF_WOLF_FORM_deactivated",
++                    "condition": { "u_has_trait": "VAMPIRE_WOLF_FORM_TRAITS" },
++                    "effect": [
++                      { "u_assign_activity": "ACT_GENERIC_EOC", "duration": 2.5 },
++                      {
++                        "u_message": "Your body shifts and contracts and you return to your humanoid form.",
++                        "type": "neutral"
++                      },
++                      { "u_lose_trait": "VAMPIRE_WOLF_FORM_TRAITS" },
++                      { "math": [ "u_val('mana')", "=", "u_transformed_mana" ] }
++                    ]
++                  }
++                ]
++              }
++            ]
++          }
++        ]
++      }
++    ],
++    "false_effect": [ { "run_eocs": "EOC_WEREWOLF_WOLF_FORM_activated_2" }, { "u_deactivate_trait": "WEREWOLF_HYBRID_FORM" } ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_WEREWOLF_WOLF_FORM_deactivated_future",
++    "//": "This is necessary because calling u_deactivate_trait from within the trait EoC to deactivate that trait does not work",
++    "effect": { "u_deactivate_trait": "WEREWOLF_ANIMAL_FORM" }
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_WEREWOLF_HYBRID_FORM_activated",
++    "condition": { "not": { "u_has_trait": "VAMPIRE_WOLF_FORM_TRAITS" } },
++    "effect": [
++      {
++        "run_eocs": [
++          {
++            "id": "EOC_WEREWOLF_HYBRID_FORM_activated_2",
++            "condition": { "not": { "u_has_trait": "WEREWOLF_HYBRID_FORM_TRAITS" } },
++            "effect": [
++              {
++                "run_eocs": [
++                  {
++                    "id": "EOC_WEREWOLF_HYBRID_FORM_activated_3",
++                    "condition": { "math": [ "u_val('mana')", ">=", "50" ] },
++                    "effect": [
++                      { "u_assign_activity": "ACT_GENERIC_EOC", "duration": 2.5 },
++                      { "math": [ "u_transformed_mana", "=", "u_val('mana') - 50" ] },
++                      { "math": [ "u_calories()", "*=", "3" ] },
++                      { "u_add_trait": "WEREWOLF_HYBRID_FORM_TRAITS" },
++                      {
++                        "u_message": "Your body shifts and grows as enormous fangs and claws erupt from your skin and your mouth lengthens into a muzzle.",
++                        "type": "good"
++                      }
++                    ],
++                    "false_effect": [
++                      { "u_message": "You don't have enough mana to transform into your war form.", "type": "bad" },
++                      { "queue_eocs": "EOC_WEREWOLF_HYBRID_FORM_deactivated_future", "time_in_future": 0 }
++                    ]
++                  }
++                ]
++              }
++            ],
++            "false_effect": [
++              {
++                "run_eocs": [
++                  {
++                    "id": "EOC_WEREWOLF_HYBRID_FORM_deactivated",
++                    "condition": { "u_has_trait": "WEREWOLF_HYBRID_FORM_TRAITS" },
++                    "effect": [
++                      { "u_assign_activity": "ACT_GENERIC_EOC", "duration": 2.5 },
++                      {
++                        "u_message": "Your body shifts and contracts and you return to your humanoid form.",
++                        "type": "neutral"
++                      },
++                      { "u_lose_trait": "WEREWOLF_HYBRID_FORM_TRAITS" },
++                      { "math": [ "u_val('mana')", "=", "u_transformed_mana" ] },
++                      { "math": [ "u_calories()", "/=", "3" ] }
++                    ]
++                  }
++                ]
++              }
++            ]
++          }
++        ]
++      }
++    ],
++    "false_effect": [ { "run_eocs": "EOC_WEREWOLF_HYBRID_FORM_activated_2" }, { "u_deactivate_trait": "WEREWOLF_ANIMAL_FORM" } ]
++  },
++  {
++    "type": "effect_on_condition",
++    "id": "EOC_WEREWOLF_HYBRID_FORM_deactivated_future",
++    "//": "This is necessary because calling u_deactivate_trait from within the trait EoC to deactivate that trait does not work",
++    "effect": { "u_deactivate_trait": "WEREWOLF_ANIMAL_FORM" }
++  }
++]
+diff --git a/data/mods/Xedra_Evolved/items/armor/integrated.json b/data/mods/Xedra_Evolved/items/armor/integrated.json
+index 62cf695c22..8698c34cf9 100644
+--- a/data/mods/Xedra_Evolved/items/armor/integrated.json
++++ b/data/mods/Xedra_Evolved/items/armor/integrated.json
+@@ -802,5 +802,59 @@
+     "flags": [ "INTEGRATED", "REBREATHER", "UNBREAKABLE", "PERSONAL", "NO_SALVAGE", "TRADER_AVOID" ],
+     "environmental_protection": 15,
+     "armor": [ { "encumbrance": 0, "coverage": 100, "covers": [ "mouth" ] } ]
++  },
++  {
++    "id": "integrated_claws_werewolf",
++    "type": "ARMOR",
++    "category": "armor",
++    "name": { "str_sp": "werewolf claws" },
++    "description": "You have massive claws on your end of your furry fingers.",
++    "weight": "100 g",
++    "volume": "250 ml",
++    "qualities": [ [ "CUT", 1 ], [ "BUTCHER", 6 ] ],
++    "price": "0 cent",
++    "price_postapoc": "0 cent",
++    "material": [ "chitin" ],
++    "symbol": ";",
++    "color": "dark_gray",
++    "flags": [ "INTEGRATED", "ALLOWS_NATURAL_ATTACKS", "UNBREAKABLE", "OUTER", "PADDED", "NO_SALVAGE" ],
++    "armor": [
++      {
++        "material": [ { "type": "chitin", "covered_by_mat": 100, "thickness": 3 } ],
++        "covers": [ "hand_l", "hand_r" ],
++        "specifically_covers": [ "hand_fingers_l", "hand_fingers_r" ],
++        "coverage": 20,
++        "encumbrance": 3
++      }
++    ],
++    "melee_damage": { "cut": 20 }
++  },
++  {
++    "id": "integrated_werewolf_teeth",
++    "type": "ARMOR",
++    "category": "armor",
++    "name": { "str_sp": "werewolf teeth" },
++    "description": "A mouth full of vicious sharp teeth, almost twice as large as a wolf's.",
++    "weight": "50 g",
++    "volume": "100 ml",
++    "price": "0 cent",
++    "price_postapoc": "0 cent",
++    "material": [ "bone" ],
++    "symbol": ",",
++    "color": "white",
++    "warmth": 5,
++    "qualities": [ [ "CUT", 2 ], [ "BUTCHER", 4 ] ],
++    "techniques": [ "FANGS_BITE", "FANGS_BITE_NATURAL", "FANGS_BITE_CRIT" ],
++    "flags": [ "INTEGRATED", "ALLOWS_NATURAL_ATTACKS", "UNBREAKABLE", "PERSONAL", "PADDED", "PROVIDES_TECHNIQUES" ],
++    "armor": [
++      {
++        "material": [ { "type": "bone", "covered_by_mat": 100, "thickness": 3.2 } ],
++        "covers": [ "mouth" ],
++        "specifically_covers": [ "mouth_lips" ],
++        "coverage": 100,
++        "encumbrance": 0
++      }
++    ],
++    "melee_damage": { "stab": 18 }
+   }
+ ]
+diff --git a/data/mods/Xedra_Evolved/mutations/shapeshifters.json b/data/mods/Xedra_Evolved/mutations/shapeshifters.json
+new file mode 100644
+index 0000000000..2e3f9ea857
+--- /dev/null
++++ b/data/mods/Xedra_Evolved/mutations/shapeshifters.json
+@@ -0,0 +1,124 @@
++[
++  {
++    "type": "mutation",
++    "id": "NATIVE_SHAPESHIFTER",
++    "name": { "str": "Natural Shapeshifter" },
++    "points": 0,
++    "description": "You were born a shapeshifter, and after your gifts manifested themselves, you gained other benefits as well.  Even in human form, you heal a little faster than normal and your broken bones heal straight and true.",
++    "starting_trait": false,
++    "purifiable": false,
++    "valid": false,
++    "vitamin_rates": [
++      [ "mutagen", 1 ],
++      [ "mutagen_alpha", 1 ],
++      [ "mutagen_batrachian", 1 ],
++      [ "mutagen_beast", 1 ],
++      [ "mutagen_bird", 1 ],
++      [ "mutagen_cattle", 1 ],
++      [ "mutagen_cephalopod", 1 ],
++      [ "mutagen_chimera", 1 ],
++      [ "mutagen_crustacean", 1 ],
++      [ "mutagen_elfa", 1 ],
++      [ "mutagen_feline", 1 ],
++      [ "mutagen_fish", 1 ],
++      [ "mutagen_gastropod", 1 ],
++      [ "mutagen_human", 1 ],
++      [ "mutagen_insect", 1 ],
++      [ "mutagen_lizard", 1 ],
++      [ "mutagen_lupine", 1 ],
++      [ "mutagen_medical", 1 ],
++      [ "mutagen_mouse", 1 ],
++      [ "mutagen_plant", 1 ],
++      [ "mutagen_raptor", 1 ],
++      [ "mutagen_rabbit", 1 ],
++      [ "mutagen_rat", 1 ],
++      [ "mutagen_slime", 1 ],
++      [ "mutagen_spider", 1 ],
++      [ "mutagen_troglobite", 1 ],
++      [ "mutagen_ursine", 1 ]
++    ],
++    "no_cbm_on_bp": [ "torso", "head", "eyes", "mouth", "arm_l", "arm_r", "hand_l", "hand_r", "leg_l", "leg_r", "foot_l", "foot_r" ],
++    "flags": [ "MEND_ALL" ],
++    "enchantments": [ { "values": [ { "value": "REGEN_HP", "multiply": 0.25 }, { "value": "REGEN_HP_AWAKE", "multiply": 0.1 } ] } ]
++  },
++  {
++    "type": "mutation",
++    "id": "WEREWOLF_ANIMAL_FORM",
++    "name": { "str": "Lupine Form" },
++    "points": 0,
++    "description": "You can transform yourself into a wolf and run through the forests.",
++    "starting_trait": false,
++    "purifiable": false,
++    "valid": false,
++    "active": true,
++    "activated_is_setup": true,
++    "activated_eocs": [ "EOC_WEREWOLF_WOLF_FORM_activated" ],
++    "deactivated_eocs": [ "EOC_WEREWOLF_WOLF_FORM_deactivated" ]
++  },
++  {
++    "type": "mutation",
++    "id": "WEREWOLF_HYBRID_FORM",
++    "name": { "str": "War Form" },
++    "points": 0,
++    "description": "You can transform yourself into a wolf-human hybrid and rip your enemies to shreds.",
++    "starting_trait": false,
++    "purifiable": false,
++    "valid": false,
++    "active": true,
++    "activated_is_setup": true,
++    "activated_eocs": [ "EOC_WEREWOLF_HYBRID_FORM_activated" ],
++    "deactivated_eocs": [ "EOC_WEREWOLF_HYBRID_FORM_deactivated" ]
++  },
++  {
++    "type": "mutation",
++    "id": "WEREWOLF_HYBRID_FORM_TRAITS",
++    "name": { "str": "Werewolf Hybrid Form" },
++    "points": 99,
++    "description": "You are a hybrid of wolf and human.  This provides the actual effects of werewolf hybrid form.  Should not be player-visible",
++    "valid": false,
++    "starting_trait": false,
++    "purifiable": false,
++    "player_display": false,
++    "//": "The second enchantment takes into account the effects of the mutations added by the first enchantment, whose own enchantments do not transfer over due to bug #74994.  If that bug is fixed, it can be deleted.",
++    "enchantments": [
++      {
++        "condition": "ALWAYS",
++        "values": [
++          { "value": "SPEED", "multiply": 0.2 },
++          { "value": "RANGE", "multiply": -1 },
++          { "value": "DEXTERITY", "add": 2 },
++          { "value": "STRENGTH", "add": 6 },
++          { "value": "NIGHT_VIS", "add": 8 },
++          { "value": "MELEE_DAMAGE", "multiply": 0.33 },
++          { "value": "CRAFTING_SPEED_MULTIPLIER", "multiply": -1000 },
++          { "value": "STAMINA_REGEN_MOD", "add": 0.2 }
++        ],
++        "mutations": [ "MUZZLE", "TAIL_FLUFFY", "PAWS", "LUPINE_FUR", "LUPINE_EARS", "PERSISTENCE_HUNTER2", "PRED3" ],
++        "skills": [ { "value": "unarmed", "add": 4 } ]
++      },
++      {
++        "condition": "ALWAYS",
++        "values": [
++          { "value": "STAMINA_REGEN_MOD", "add": 0.2 },
++          { "value": "HEARING_MULT", "multiply": 0.75 },
++          { "value": "COMBAT_CATCHUP", "multiply": 2 },
++          { "value": "DODGE_CHANCE", "add": 4 }
++        ]
++      },
++      { "condition": "ALWAYS", "values": [ { "value": "HEARING_MULT", "multiply": 0.25 } ] },
++      {
++        "intermittent_activation": {
++          "effects": [
++            {
++              "frequency": "10 seconds",
++              "spell_effects": [ { "id": "goblin_fruit_regeneration_spell" }, { "id": "shapeshifter_remove_pain_spell" } ]
++            }
++          ]
++        }
++      }
++    ],
++    "flags": [ "NO_SPELLCASTING", "PRED3", "TOUGH_FEET", "TEMPORARY_SHAPESHIFT", "SHAPESHIFT_SIZE_HUGE" ],
++    "override_look": { "id": "mon_loup_garou", "tile_category": "monster" },
++    "integrated_armor": [ "integrated_claws_werewolf", "integrated_werewolf_teeth", "integrated_lupine_fur" ]
++  }
++]
+diff --git a/data/mods/Xedra_Evolved/scenario.json b/data/mods/Xedra_Evolved/scenario.json
+index 90499e365f..f02fcee319 100644
+--- a/data/mods/Xedra_Evolved/scenario.json
++++ b/data/mods/Xedra_Evolved/scenario.json
+@@ -49,7 +49,7 @@
+   {
+     "type": "scenario",
+     "id": "werewolf_native_born",
+-    "name": "Werewolf, Native-born",
++    "name": "Werewolf, Natural-born",
+     "flags": [ "LONE_START" ],
+     "points": 0,
+     "description": "You had no idea what was going on the first time it happened, when you woke up with mud on your bare feet and a sour taste in your mouth, but you were soon found.  The People of the Moon, they called themselves, and they said you were one of them.  A werewolf.  You lived out in the wilderness for a while but didn't entirely abandon human civilization, and when the Cataclysm yet you ignored the evacuation warnings and struck it out on their own.  Maybe some of the People are still out there.",
+@@ -64,7 +64,7 @@
+       "sloc_forest",
+       "sloc_field"
+     ],
+-    "forced_traits": [ "NATIVE_SHAPESHIFTER", "WEREWOLF_ANIMAL_FORM", "WEREWOLF_WAR_FORM" ]
++    "forced_traits": [ "NATIVE_SHAPESHIFTER", "WEREWOLF_ANIMAL_FORM", "WEREWOLF_HYBRID_FORM" ]
+   },
+   {
+     "type": "scenario",
+diff --git a/data/mods/Xedra_Evolved/spells/shapeshifter.json b/data/mods/Xedra_Evolved/spells/shapeshifter.json
+new file mode 100644
+index 0000000000..d01070cf1d
+--- /dev/null
++++ b/data/mods/Xedra_Evolved/spells/shapeshifter.json
+@@ -0,0 +1,16 @@
++[
++  {
++    "id": "shapeshifter_remove_pain_spell",
++    "type": "SPELL",
++    "name": "Shapeshifter reduce pain spell",
++    "description": "This reduces pain for shapeshifters as their wounds regenerate.  You should never see it.",
++    "valid_targets": [ "self" ],
++    "min_damage": 1,
++    "max_damage": 1,
++    "effect": "recover_energy",
++    "effect_str": "PAIN",
++    "shape": "blast",
++    "energy_source": "STAMINA",
++    "flags": [ "SILENT", "PAIN_NORESIST" ]
++  }
++]
+-- 
+2.45.2
+

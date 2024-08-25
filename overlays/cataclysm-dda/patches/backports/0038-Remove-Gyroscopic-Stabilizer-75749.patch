@@ -1,0 +1,147 @@
+From d6e26b8cc06004cace2fa5ef474183ef970e02fa Mon Sep 17 00:00:00 2001
+From: Holli <78005870+Holli-Git@users.noreply.github.com>
+Date: Sat, 17 Aug 2024 17:44:16 -0600
+Subject: [PATCH 038/125] Remove Gyroscopic Stabilizer (#75749)
+
+* Remove it
+
+* Lint
+---
+ .../itemgroups/Weapons_Mods_Ammo/gunmod.json  |  1 -
+ data/json/items/gunmod/rail.json              | 28 -------------------
+ data/json/npcs/items_generic.json             |  1 -
+ .../migration_items.json                      | 10 +++++++
+ data/json/recipes/nested.json                 |  9 +-----
+ data/json/recipes/weapon/mods.json            | 14 ----------
+ 6 files changed, 11 insertions(+), 52 deletions(-)
+
+diff --git a/data/json/itemgroups/Weapons_Mods_Ammo/gunmod.json b/data/json/itemgroups/Weapons_Mods_Ammo/gunmod.json
+index 77262c9c0d..888272c95d 100644
+--- a/data/json/itemgroups/Weapons_Mods_Ammo/gunmod.json
++++ b/data/json/itemgroups/Weapons_Mods_Ammo/gunmod.json
+@@ -37,7 +37,6 @@
+       [ "wooden_grip", 5 ],
+       [ "waterproof_gunmod", 40 ],
+       [ "gun_crossbow", 20 ],
+-      [ "stabilizer", 10 ],
+       [ "laser_sight", 40 ],
+       [ "light_grip", 50 ],
+       [ "pistol_bayonet", 10 ],
+diff --git a/data/json/items/gunmod/rail.json b/data/json/items/gunmod/rail.json
+index cd439285f9..3f9f34c6f4 100644
+--- a/data/json/items/gunmod/rail.json
++++ b/data/json/items/gunmod/rail.json
+@@ -95,33 +95,5 @@
+     "mod_targets": [ "smg", "rifle", "pistol", "shotgun", "crossbow", "launcher" ],
+     "flags": [ "LASER_SIGHT" ],
+     "min_skills": [ [ "weapon", 2 ], [ "gun", 1 ] ]
+-  },
+-  {
+-    "id": "stabilizer",
+-    "type": "GUNMOD",
+-    "name": { "str": "gyroscopic stabilizer" },
+-    "description": "An advanced unit that straps onto the side of your firearm and reduces vibration, greatly reducing recoil and slightly increasing accuracy.",
+-    "weight": "286 g",
+-    "volume": "750 ml",
+-    "integral_volume": "500 ml",
+-    "price": "680 USD",
+-    "price_postapoc": "7 USD 50 cent",
+-    "install_time": "10 m",
+-    "material": [ "aluminum", "plastic" ],
+-    "symbol": ":",
+-    "color": "blue",
+-    "location": "rail",
+-    "mod_targets": [ "smg", "rifle", "crossbow" ],
+-    "dispersion_modifier": -1,
+-    "handling_modifier": 6,
+-    "min_skills": [ [ "weapon", 6 ] ]
+-  },
+-  {
+-    "id": "stabilizer_mod",
+-    "copy-from": "stabilizer",
+-    "type": "GUNMOD",
+-    "name": { "str": "modified gyroscopic stabilizer" },
+-    "description": "An advanced unit that straps onto the side of your firearm and reduces vibration, greatly reducing recoil and slightly increasing accuracy.  This one was modified and customized to mount on pretty much any weapon other than pistols, if you so want.",
+-    "mod_targets": [ "smg", "rifle", "shotgun", "launcher", "crossbow" ]
+   }
+ ]
+diff --git a/data/json/npcs/items_generic.json b/data/json/npcs/items_generic.json
+index c73037c828..f64552942c 100644
+--- a/data/json/npcs/items_generic.json
++++ b/data/json/npcs/items_generic.json
+@@ -1027,7 +1027,6 @@
+       [ "spork", 3 ],
+       [ "sports_drink", 4 ],
+       [ "spray_can", 3 ],
+-      [ "stabilizer", 1 ],
+       [ "stethoscope", 2 ],
+       [ "stick", 5 ],
+       [ "story_book", 1 ],
+diff --git a/data/json/obsoletion_and_migration_0.I/migration_items.json b/data/json/obsoletion_and_migration_0.I/migration_items.json
+index 1cf8670de9..2c77356bbf 100644
+--- a/data/json/obsoletion_and_migration_0.I/migration_items.json
++++ b/data/json/obsoletion_and_migration_0.I/migration_items.json
+@@ -1825,5 +1825,15 @@
+     "type": "MIGRATION",
+     "replace": "small_squeeze_tube",
+     "contents": [ { "id": "super_glue", "count": 40 } ]
++  },
++  {
++    "id": "stabilizer",
++    "type": "MIGRATION",
++    "replace": "rail_laser_sight"
++  },
++  {
++    "id": "stabilizer_mod",
++    "type": "MIGRATION",
++    "replace": "rail_laser_sight"
+   }
+ ]
+diff --git a/data/json/recipes/nested.json b/data/json/recipes/nested.json
+index 5554594dec..ef251c3d51 100644
+--- a/data/json/recipes/nested.json
++++ b/data/json/recipes/nested.json
+@@ -4138,14 +4138,7 @@
+     "name": "modified attachments",
+     "description": "Recipes related to modifying weapon accessories to attach to a wider variety of guns and crossbows.",
+     "skill_used": "fabrication",
+-    "nested_category_data": [
+-      "bipod_mod",
+-      "grip_mod",
+-      "stabilizer_mod",
+-      "muzzle_brake_mod",
+-      "nested_modified_gunmods_weapons",
+-      "nested_modified_gunmods_sights"
+-    ]
++    "nested_category_data": [ "bipod_mod", "grip_mod", "muzzle_brake_mod", "nested_modified_gunmods_weapons", "nested_modified_gunmods_sights" ]
+   },
+   {
+     "id": "nested_modified_gunmods_weapons",
+diff --git a/data/json/recipes/weapon/mods.json b/data/json/recipes/weapon/mods.json
+index cbfabee3b8..5542839238 100644
+--- a/data/json/recipes/weapon/mods.json
++++ b/data/json/recipes/weapon/mods.json
+@@ -300,20 +300,6 @@
+     "tools": [ [ [ "large_repairkit", 25 ], [ "small_repairkit", 45 ] ] ],
+     "components": [ [ [ "offset_sight_rail", 1 ] ], [ [ "scrap", 1 ] ], [ [ "plastic_chunk", 1 ] ] ]
+   },
+-  {
+-    "result": "stabilizer_mod",
+-    "type": "recipe",
+-    "activity_level": "MODERATE_EXERCISE",
+-    "category": "CC_*",
+-    "subcategory": "CSC_*_NESTED",
+-    "skill_used": "fabrication",
+-    "difficulty": 4,
+-    "skills_required": [ [ "gun", 6 ] ],
+-    "time": "30 m",
+-    "autolearn": true,
+-    "tools": [ [ [ "large_repairkit", 25 ], [ "small_repairkit", 45 ] ] ],
+-    "components": [ [ [ "stabilizer", 1 ] ], [ [ "scrap", 1 ] ], [ [ "plastic_chunk", 1 ] ] ]
+-  },
+   {
+     "result": "muzzle_brake_mod",
+     "type": "recipe",
+-- 
+2.45.2
+

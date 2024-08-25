@@ -1,0 +1,22 @@
+From 7322d8e5802247f36b19278326a08b9a1216ccfb Mon Sep 17 00:00:00 2001
+From: Zhilkin Serg <ZhilkinSerg@users.noreply.github.com>
+Date: Thu, 18 Feb 2021 10:59:30 +0300
+Subject: [PATCH 014/125] Update talk_tags.json
+
+---
+ data/json/npcs/talk_tags.json | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/data/json/npcs/talk_tags.json b/data/json/npcs/talk_tags.json
+index d97ffb91cc..e3f8b94922 100644
+--- a/data/json/npcs/talk_tags.json
++++ b/data/json/npcs/talk_tags.json
+@@ -2410,4 +2410,5 @@
+     "category": "<ally_rule_forbid_engage_false_text>",
+     "text": "<mypronoun> will follow normal engagement rules."
+   }
++  
+ ]
+-- 
+2.45.2
+

@@ -1,0 +1,38 @@
+From 30ef36d79794a2bab3a2ab4005c3e9fb625eb288 Mon Sep 17 00:00:00 2001
+From: Holli <78005870+Holli-Git@users.noreply.github.com>
+Date: Sun, 18 Aug 2024 09:10:26 -0600
+Subject: [PATCH 052/125] Redo superglue description (#75745)
+
+* Redo description
+
+* Karol is a nerd
+
+Co-authored-by: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+
+* Update generic.json
+
+---------
+
+Co-authored-by: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+---
+ data/json/items/generic.json | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/data/json/items/generic.json b/data/json/items/generic.json
+index f3907cda5e..ab27e6f66c 100644
+--- a/data/json/items/generic.json
++++ b/data/json/items/generic.json
+@@ -318,8 +318,8 @@
+     "phase": "liquid",
+     "color": "white",
+     "name": { "str_sp": "superglue" },
+-    "description": "A tube of strong glue.  Used in many crafting recipes.",
+-    "price": "18 USD",
++    "description": "Cyanoacrylate, more commonly known as superglue, is a strong, quick curing glue with many applications.  It was a favourite of many post-Cataclysm hobbyists, but has become a sought-after trade good due to its wide applications, and the fact it has become essentially impossible to manufacture.",
++    "price": "1 USD",
+     "price_postapoc": "1 USD",
+     "material": [ "plastic" ],
+     "weight": "1 g",
+-- 
+2.45.2
+

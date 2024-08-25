@@ -1,0 +1,34 @@
+From d6e95ae9c41f648d6e2646c3f53aa42a484651bb Mon Sep 17 00:00:00 2001
+From: PatrikLundell <j.patrik.r.lundell@gmail.com>
+Date: Mon, 19 Aug 2024 00:31:19 +0200
+Subject: [PATCH 062/125] Added validation of mapgen weight (#75770)
+
+* Added validation of mapgen weight
+
+* Using defined constant rather than magic number
+---
+ src/mapgen.cpp | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/mapgen.cpp b/src/mapgen.cpp
+index 0c99ae296b..b8fa823af8 100644
+--- a/src/mapgen.cpp
++++ b/src/mapgen.cpp
+@@ -761,6 +761,14 @@ load_mapgen_function( const JsonObject &jio, const std::string &id_base, const p
+                       const point &total )
+ {
+     dbl_or_var weight = get_dbl_or_var( jio, "weight", false,  1000 );
++    if( weight.min.is_constant() && ( weight.min.constant() < 0 ||
++                                      weight.min.constant() >= INT_MAX ) ) {
++        jio.throw_error_at( "weight", "min value out of bounds (0 - max int)" );
++    }
++    if( weight.pair && weight.max.is_constant() && ( weight.max.constant() < 0 ||
++            weight.max.constant() >= INT_MAX ) ) {
++        jio.throw_error_at( "weight", "max value out of bounds (0 - max int)" );
++    }
+ 
+     if( jio.get_bool( "disabled", false ) ) {
+         jio.allow_omitted_members();
+-- 
+2.45.2
+

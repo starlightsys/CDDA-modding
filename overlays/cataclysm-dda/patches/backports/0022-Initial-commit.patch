@@ -1,0 +1,211 @@
+From c77063954ad80c0da8bae11a7eb8944dfcb0381d Mon Sep 17 00:00:00 2001
+From: "Standing-StormStanding-Storm git config --global user.name
+ Standing-Storm git config --global user.name Standing-Storm"
+ <dorchadas@gmail.com>
+Date: Wed, 14 Aug 2024 10:57:41 -0500
+Subject: [PATCH 022/125] Initial commit
+
+---
+ data/mods/MindOverMatter/powers/biokinesis.json   | 2 ++
+ data/mods/MindOverMatter/powers/photokinesis.json | 1 +
+ data/mods/MindOverMatter/powers/pyrokinesis.json  | 5 +++++
+ data/mods/MindOverMatter/powers/telekinesis.json  | 3 +++
+ data/mods/MindOverMatter/powers/telepathy.json    | 2 ++
+ data/mods/MindOverMatter/powers/vitakinesis.json  | 8 ++++++++
+ 6 files changed, 21 insertions(+)
+
+diff --git a/data/mods/MindOverMatter/powers/biokinesis.json b/data/mods/MindOverMatter/powers/biokinesis.json
+index 239d63ef8a..c4e76be9df 100644
+--- a/data/mods/MindOverMatter/powers/biokinesis.json
++++ b/data/mods/MindOverMatter/powers/biokinesis.json
+@@ -43,6 +43,7 @@
+     "name": "[Ψ]Overcome Pain (C)",
+     "description": "You can lessen the impact of pain on your performance, though this has no effect on the underlying injuries.\n\nThis power <color_yellow>is maintained by concentration</color> and <color_red>may fail</color> if <color_yellow>concentration is interrupted</color>.",
+     "message": "",
++    "teachable": false,
+     "valid_targets": [ "self" ],
+     "spell_class": "BIOKINETIC",
+     "skill": "metaphysics",
+@@ -80,6 +81,7 @@
+     "name": "[Ψ]Oxygen Absorption (C)",
+     "description": "You can make the entire surface of your skin selectively permeable, allowing you to 'breathe' through it.  You can breathe in low-oxygen environments or underwater, but are more vulnerable to toxic gas.\n\nThis power <color_yellow>is maintained by concentration</color> and <color_red>may fail</color> if <color_yellow>concentration is interrupted</color>.  Oxygen Absorption <color_red>cannot be active</color> with Sealed System.",
+     "message": "",
++    "teachable": false,
+     "valid_targets": [ "self" ],
+     "spell_class": "BIOKINETIC",
+     "skill": "metaphysics",
+diff --git a/data/mods/MindOverMatter/powers/photokinesis.json b/data/mods/MindOverMatter/powers/photokinesis.json
+index 7589345ffe..38758e2178 100644
+--- a/data/mods/MindOverMatter/powers/photokinesis.json
++++ b/data/mods/MindOverMatter/powers/photokinesis.json
+@@ -432,6 +432,7 @@
+     "name": "[Ψ]Lucid Shadows",
+     "description": "Form images of yourself to confuse and distract enemies.",
+     "message": "Identical copies of you suddenly appear!",
++    "teachable": false,
+     "valid_targets": [ "ground", "hostile", "self", "ally" ],
+     "spell_class": "PHOTOKINETIC",
+     "skill": "metaphysics",
+diff --git a/data/mods/MindOverMatter/powers/pyrokinesis.json b/data/mods/MindOverMatter/powers/pyrokinesis.json
+index 790c24ec7d..b71e670e8d 100644
+--- a/data/mods/MindOverMatter/powers/pyrokinesis.json
++++ b/data/mods/MindOverMatter/powers/pyrokinesis.json
+@@ -390,6 +390,7 @@
+     "name": "[Ψ]Thermogenesis #1",
+     "description": "The spell to summon a thermogenesis node.  It's a bug if you have it directly.",
+     "valid_targets": [ "ground" ],
++    "teachable": false,
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "RANDOM_DURATION", "NO_EXPLOSION_SFX" ],
+     "effect": "summon",
+     "effect_str": "mon_pyrokin_hotair_1",
+@@ -414,6 +415,7 @@
+     "name": "[Ψ]Thermogenesis #2",
+     "description": "The spell to summon a thermogenesis node.  It's a bug if you have it directly.",
+     "valid_targets": [ "ground" ],
++    "teachable": false,
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "RANDOM_DURATION", "NO_EXPLOSION_SFX" ],
+     "effect": "summon",
+     "effect_str": "mon_pyrokin_hotair_2",
+@@ -438,6 +440,7 @@
+     "name": "[Ψ]Thermogenesis #1",
+     "description": "The spell to summon a thermogenesis node.  It's a bug if you have it directly.",
+     "valid_targets": [ "ground" ],
++    "teachable": false,
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "RANDOM_DURATION", "NO_EXPLOSION_SFX" ],
+     "effect": "summon",
+     "effect_str": "mon_pyrokin_hotair_3",
+@@ -462,6 +465,7 @@
+     "name": "[Ψ]Thermogenesis #1",
+     "description": "The spell to summon a thermogenesis node.  It's a bug if you have it directly.",
+     "valid_targets": [ "ground" ],
++    "teachable": false,
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "RANDOM_DURATION", "NO_EXPLOSION_SFX" ],
+     "effect": "summon",
+     "effect_str": "mon_pyrokin_hotair_4",
+@@ -485,6 +489,7 @@
+     "type": "SPELL",
+     "name": "[Ψ]Banish Thermogenesis",
+     "description": "The spell to banish existing thermogenesis nodes.  It's a bug if you have it directly.",
++    "teachable": false,
+     "valid_targets": [ "ally" ],
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "NO_EXPLOSION_SFX", "NO_PROJECTILE", "IGNORE_WALLS" ],
+     "effect": "attack",
+diff --git a/data/mods/MindOverMatter/powers/telekinesis.json b/data/mods/MindOverMatter/powers/telekinesis.json
+index 3cecf354d0..a8ad7797b0 100644
+--- a/data/mods/MindOverMatter/powers/telekinesis.json
++++ b/data/mods/MindOverMatter/powers/telekinesis.json
+@@ -530,6 +530,7 @@
+     "type": "SPELL",
+     "name": "Mindhammer Ground damage",
+     "description": "Damages ground when you use Mindhammer.  If you have this you debugged it in.",
++    "teachable": false,
+     "valid_targets": [ "ground" ],
+     "spell_class": "TELEKINETIC",
+     "flags": [ "PSIONIC", "RANDOM_DAMAGE", "IGNORE_WALLS", "NO_PROJECTILE" ],
+@@ -696,6 +697,7 @@
+     "name": "Wrecking Ball Enemy damage",
+     "description": "Damages enemies when you use Wrecking Ball on the ground.  If you have this you debugged it in.",
+     "valid_targets": [ "ally", "hostile", "item", "ground" ],
++    "teachable": false,
+     "spell_class": "TELEKINETIC",
+     "flags": [ "PSIONIC", "LOUD", "RANDOM_DAMAGE", "IGNORE_WALLS" ],
+     "effect": "attack",
+@@ -909,6 +911,7 @@
+     "name": "[Ψ]Earthshaker Bash Terrain",
+     "description": "Destroy furniture and terrain nearby.",
+     "valid_targets": [ "hostile", "ground" ],
++    "teachable": false,
+     "flags": [ "SILENT", "NO_EXPLOSION_SFX", "IGNORE_WALLS", "RANDOM_DAMAGE" ],
+     "effect": "bash",
+     "shape": "blast",
+diff --git a/data/mods/MindOverMatter/powers/telepathy.json b/data/mods/MindOverMatter/powers/telepathy.json
+index 0f7885b28f..1b13895330 100644
+--- a/data/mods/MindOverMatter/powers/telepathy.json
++++ b/data/mods/MindOverMatter/powers/telepathy.json
+@@ -327,6 +327,7 @@
+     "name": "[Ψ]Sensory Deprivation blind Effect",
+     "description": "The is the part of the Sensory Deprivation that blinds the target.  It's a bug if you have it.",
+     "valid_targets": [ "hostile" ],
++    "teachable": false,
+     "skill": "metaphysics",
+     "flags": [ "PSIONIC", "NO_PROJECTILE", "SILENT", "NO_HANDS", "NO_LEGS", "RANDOM_DURATION" ],
+     "max_level": { "math": [ "int_to_level(1)" ] },
+@@ -524,6 +525,7 @@
+     "name": "[Ψ]Psychic Scream Additional Damage",
+     "description": "This exists to allow Psychic Scream to do minimal damage and kill small animals whose extremely low HP would otherwise be below the percentage threshold, as well as making it more likely to stun or daze.  It's a bug if you have it directly.",
+     "message": "",
++    "teachable": false,
+     "valid_targets": [ "hostile", "ally" ],
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_EXPLOSION_SFX", "IGNORE_WALLS" ],
+     "max_level": { "math": [ "int_to_level(1)" ] },
+diff --git a/data/mods/MindOverMatter/powers/vitakinesis.json b/data/mods/MindOverMatter/powers/vitakinesis.json
+index 14e82c309e..34a923d06c 100644
+--- a/data/mods/MindOverMatter/powers/vitakinesis.json
++++ b/data/mods/MindOverMatter/powers/vitakinesis.json
+@@ -107,6 +107,7 @@
+     "valid_targets": [ "self" ],
+     "spell_class": "VITAKINETIC",
+     "skill": "metaphysics",
++    "teachable": false,
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "NO_EXPLOSION_SFX" ],
+     "effect": "spawn_item",
+     "effect_str": "vita_bandage_01",
+@@ -124,6 +125,7 @@
+     "valid_targets": [ "self" ],
+     "spell_class": "VITAKINETIC",
+     "skill": "metaphysics",
++    "teachable": false,
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "NO_EXPLOSION_SFX" ],
+     "effect": "spawn_item",
+     "effect_str": "vita_bandages_02",
+@@ -141,6 +143,7 @@
+     "valid_targets": [ "self" ],
+     "spell_class": "VITAKINETIC",
+     "skill": "metaphysics",
++    "teachable": false,
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "NO_EXPLOSION_SFX" ],
+     "effect": "spawn_item",
+     "effect_str": "vita_bandages_03",
+@@ -370,6 +373,7 @@
+     "name": "[Ψ]SAllay Infection #1",
+     "description": "The first of the Allay Infection spells.  This summons a low-power disinfectant/antibiotic--it's a bug if you have it.",
+     "valid_targets": [ "self" ],
++    "teachable": false,
+     "spell_class": "VITAKINETIC",
+     "skill": "metaphysics",
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "NO_EXPLOSION_SFX" ],
+@@ -387,6 +391,7 @@
+     "name": "[Ψ]SAllay Infection #2",
+     "description": "The second of the Allay Infection spells.  This summons a medium-power disinfectant/antibiotic--it's a bug if you have it.",
+     "valid_targets": [ "self" ],
++    "teachable": false,
+     "spell_class": "VITAKINETIC",
+     "skill": "metaphysics",
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "NO_EXPLOSION_SFX" ],
+@@ -404,6 +409,7 @@
+     "name": "[Ψ]SAllay Infection #3",
+     "description": "The third of the Allay Infection spells.  This summons a high-power disinfectant/antibiotic--it's a bug if you have it.",
+     "valid_targets": [ "self" ],
++    "teachable": false,
+     "spell_class": "VITAKINETIC",
+     "skill": "metaphysics",
+     "flags": [ "PSIONIC", "SILENT", "NO_HANDS", "NO_LEGS", "NO_EXPLOSION_SFX" ],
+@@ -601,6 +607,7 @@
+     "name": "Anabolic Rejuvenation Heal",
+     "description": "The healing part of Anabolic Rejuvenation.",
+     "valid_targets": [ "self" ],
++    "teachable": false,
+     "min_damage": { "math": [ "min((-1 * u_nether_attunement_power_scaling), -1)" ] },
+     "max_damage": { "math": [ "min((-1 * u_nether_attunement_power_scaling), -1)" ] },
+     "effect": "attack",
+@@ -613,6 +620,7 @@
+     "name": "Anabolic Rejuvenation draining",
+     "description": "The draining part of Anabolic Rejuvenation.",
+     "valid_targets": [ "self" ],
++    "teachable": false,
+     "effect": "effect_on_condition",
+     "effect_str": "EOC_VITA_SUPER_HEAL_DRAIN",
+     "shape": "blast",
+-- 
+2.45.2
+

@@ -1,0 +1,25 @@
+From 5480a25ae65d2ba103a62463a853c8cbb0b40467 Mon Sep 17 00:00:00 2001
+From: Karol1223 <68503002+Karol1223@users.noreply.github.com>
+Date: Mon, 19 Aug 2024 00:27:36 +0200
+Subject: [PATCH 060/125] Update monstergenerator.cpp (#75804)
+
+---
+ src/monstergenerator.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/monstergenerator.cpp b/src/monstergenerator.cpp
+index df459d4e6a..c7f926aaa9 100644
+--- a/src/monstergenerator.cpp
++++ b/src/monstergenerator.cpp
+@@ -377,7 +377,7 @@ void MonsterGenerator::finalize_mtypes()
+                 armor_diff += dt.second;
+             }
+         }
+-        std::unordered_set<std::string> blacklisted_specials{"PARROT", "PARROT_AT_DANGER"};
++        std::unordered_set<std::string> blacklisted_specials{"PARROT", "PARROT_AT_DANGER", "GRAZE", "EAT_CROP", "EAT_FOOD", "EAT_CARRION"};
+         int special_attacks_diff = 0;
+         for( const auto &special : mon.special_attacks ) {
+             if( !blacklisted_specials.count( special.first ) ) {
+-- 
+2.45.2
+
