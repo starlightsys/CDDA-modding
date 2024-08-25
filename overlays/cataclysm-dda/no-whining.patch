@@ -1,8 +1,6 @@
-diff --git a/src/debug_menu.cpp b/src/debug_menu.cpp
-index d9aa59fe82..d0e9fd8347 100644
---- a/src/debug_menu.cpp
-+++ b/src/debug_menu.cpp
-@@ -437,12 +437,7 @@ static cata::optional<debug_menu_index> debug_menu_uilist( bool display_all_entr
+--- a/src/debug_menu.cpp	2024-08-13 03:55:02.953021833 +0200
++++ b/src/debug_menu.cpp	2024-08-13 03:58:52.084207623 +0200
+@@ -951,12 +951,7 @@
          menu.insert( menu.begin() + 1, debug_menu.begin(), debug_menu.end() );
      }
  

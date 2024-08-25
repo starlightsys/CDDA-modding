@@ -1,0 +1,16 @@
+--- a/src/translations.cpp	2024-08-13 03:34:36.063792289 +0200
++++ b/src/translations.cpp	2024-08-13 03:40:01.593329832 +0200
+@@ -52,13 +52,11 @@
+ #define CATA_IS_ON_BSD
+ #endif
+ 
+-#if !defined(__ANDROID__) && ((defined(__linux__) || defined(CATA_IS_ON_BSD) || (defined(MACOSX) && !defined(TILES))))
+     if( !PATH_INFO::base_path().empty() ) {
+         loc_dir = PATH_INFO::base_path() + "share/locale";
+     } else {
+         loc_dir = PATH_INFO::langdir();
+     }
+-#endif
+ #endif // LOCALIZE
+     return loc_dir;
+ }
