@@ -30,12 +30,12 @@ let
       };
       mod.TargetedMutagens = pkgs.cataclysmDDA.buildMod {
         modName = "TargetedMutagens";
-        version = "0.1.0";
+        version = "0.1.2";
         src = pkgs.fetchFromGitHub {
-          owner = "Standing-Storm";
+          owner = "starlightsys";
           repo = "TargetedMutagens";
-          rev = "e574bf75f5eab1f1bcacac280f244f791929c2b7";
-          hash = "sha256-21+WC5nJEJ49Xv/EtzEaoZbFCPIs6mGC4dnEtiMaIQw=";
+          rev = "8f978d9b5c63b13bad8b2e0b9b295a7eadcca428";
+          hash = "sha256-WYaGMDhn5p0+C8D6w5zICU87XzjYezS3uup7ayz7NzY=";
         };
       };
     };
